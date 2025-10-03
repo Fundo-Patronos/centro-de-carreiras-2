@@ -3,6 +3,7 @@
 ## Pré-requisitos
 
 - Node.js 18+ instalado
+- Python 3.9+ instalado
 - Conta no Airtable
 - Conta de email (Gmail recomendado para desenvolvimento)
 - Conta no Google Cloud Platform (para deploy)
@@ -20,7 +21,11 @@ npm install
 #### Backend
 ```bash
 cd backend
-npm install
+pip install -r requirements.txt
+# Ou use um ambiente virtual (recomendado):
+python -m venv venv
+source venv/bin/activate  # No Windows: venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ### 2. Configuração do Airtable
@@ -43,6 +48,8 @@ npm install
 - Curso (Single line text)
 - Ano de Graduação (Number)
 - Telefone (Phone number)
+- Senha (Single line text) - Hash da senha
+- Role (Single line text) - "student" ou "mentor"
 
 #### Tabela: Vagas
 - Título (Single line text)
@@ -105,9 +112,10 @@ Acesse: http://localhost:3000
 #### Desenvolvimento (Backend)
 ```bash
 cd backend
-npm run dev
+python run.py
 ```
 API rodando em: http://localhost:5000
+Documentação interativa: http://localhost:5000/api/docs
 
 ## Deploy no Google Cloud Run
 

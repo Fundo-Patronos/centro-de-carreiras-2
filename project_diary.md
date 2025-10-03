@@ -20,7 +20,7 @@ O Centro de Carreiras é uma plataforma que conecta estudantes da Unicamp com me
 
 ### Stack Tecnológico
 - **Frontend:** React + Tailwind CSS
-- **Backend:** Node.js/Express (recomendado) ou Python/FastAPI
+- **Backend:** Python/FastAPI (escolhido pelo usuário)
 - **Database/CMS:** Airtable (para gerenciar dados de mentores, estudantes e vagas)
 - **Deployment:** Google Cloud Platform (Cloud Run)
 - **Idioma:** PT-BR (português brasileiro)
@@ -83,6 +83,15 @@ GitHub: https://github.com/Fundo-Patronos/centro-de-carreiras-2.git
 
 ### Session 1 - 2025-10-03
 - Definição da arquitetura inicial
-- Recomendação de stack tecnológico
-- Criação da estrutura básica do projeto
-- Configuração do repositório Git
+- Recomendação de stack tecnológico (Node.js/Express e Python/FastAPI apresentados)
+- Usuário escolheu Python/FastAPI como backend
+- Criação completa da estrutura do projeto:
+  - Frontend React com Tailwind CSS (Home, Sign-in/up, Mentorias, Vagas)
+  - Backend Python/FastAPI com:
+    - Sistema de autenticação JWT
+    - Integração com Airtable (pyairtable)
+    - Serviço de email (aiosmtplib)
+    - Rotas para auth, mentors, jobs, bookings
+    - Schemas Pydantic para validação
+- Configuração do repositório Git e push inicial
+- Documentação criada (README.md, SETUP.md, project_diary.md)

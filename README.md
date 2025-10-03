@@ -18,7 +18,7 @@ O Centro de Carreiras conecta estudantes da Unicamp com mentores profissionais e
 ## Stack Tecnológico
 
 - **Frontend**: React + Tailwind CSS
-- **Backend**: Node.js/Express
+- **Backend**: Python/FastAPI
 - **Database**: Airtable (CMS para gerenciamento de dados)
 - **Deploy**: Google Cloud Platform (Cloud Run)
 
@@ -26,15 +26,39 @@ O Centro de Carreiras conecta estudantes da Unicamp com mentores profissionais e
 
 ```
 centro-carreiras-v2/
-├── frontend/          # Aplicação React
-├── backend/           # API Node.js/Express
+├── frontend/          # Aplicação React + Tailwind CSS
+├── backend/           # API Python/FastAPI
+│   ├── app/
+│   │   ├── api/routes/    # Rotas da API
+│   │   ├── core/          # Configuração e segurança
+│   │   ├── schemas/       # Modelos Pydantic
+│   │   ├── services/      # Airtable, Email
+│   │   └── main.py        # Aplicação FastAPI
+│   └── requirements.txt
 ├── docs/              # Documentação
 └── project_diary.md   # Diário de desenvolvimento
 ```
 
 ## Desenvolvimento
 
-Em construção...
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Acesse: http://localhost:3000
+
+### Backend
+```bash
+cd backend
+pip install -r requirements.txt
+cp .env.example .env
+# Configure suas variáveis de ambiente no .env
+python run.py
+```
+API rodando em: http://localhost:5000
+Documentação: http://localhost:5000/api/docs
 
 ## Licença
 
