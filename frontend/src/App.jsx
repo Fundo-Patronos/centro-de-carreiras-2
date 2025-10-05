@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Mentorias from './pages/Mentorias'
 import Vagas from './pages/Vagas'
 import AgendarMentoria from './pages/AgendarMentoria'
+import Perfil from './pages/Perfil'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Route path="/mentorias" element={<Mentorias />} />
               <Route path="/mentorias/agendar" element={<AgendarMentoria />} />
               <Route path="/vagas" element={<Vagas />} />
+              <Route path="/perfil" element={<Perfil />} />
             </Routes>
           </div>
         </div>

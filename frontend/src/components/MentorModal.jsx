@@ -13,6 +13,31 @@ export default function MentorModal({ mentor, open, onClose }) {
     navigate('/mentorias/agendar')
   }
 
+  // Utility function to convert text to proper title case
+  const toTitleCase = (text) => {
+    if (!text) return ''
+
+    // Words that should remain lowercase in title case (unless they're the first word)
+    const smallWords = ['e', 'de', 'da', 'do', 'dos', 'das', 'em', 'a', 'o', 'as', 'os', 'para', 'com', 'sem']
+
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map((word, index) => {
+        // Always capitalize the first word
+        if (index === 0) {
+          return word.charAt(0).toUpperCase() + word.slice(1)
+        }
+        // Keep small words lowercase unless they're at the start
+        if (smallWords.includes(word)) {
+          return word
+        }
+        // Capitalize other words
+        return word.charAt(0).toUpperCase() + word.slice(1)
+      })
+      .join(' ')
+  }
+
   // Tag-to-color mapping - each tag always gets the same color
   const tagColorMap = {
     'Consultoria': 'bg-purple-50 text-purple-700 inset-ring-purple-700/10',
@@ -91,11 +116,11 @@ export default function MentorModal({ mentor, open, onClose }) {
                     />
                     <div className="flex-1">
                       <DialogTitle as="h3" className="text-xl font-semibold text-gray-900">
-                        {mentor.nome}
+                        {toTitleCase(mentor.nome)}
                       </DialogTitle>
-                      <p className="mt-1 text-sm text-gray-500">{mentor.titulo}</p>
+                      <p className="mt-1 text-sm text-gray-500">{toTitleCase(mentor.titulo)}</p>
                       {mentor.companhia && (
-                        <p className="mt-0.5 text-sm text-gray-500">{mentor.companhia}</p>
+                        <p className="mt-0.5 text-sm text-gray-500">{toTitleCase(mentor.companhia)}</p>
                       )}
                     </div>
                   </div>
@@ -127,7 +152,7 @@ export default function MentorModal({ mentor, open, onClose }) {
                         {mentor.curso && (
                           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                             <dt className="text-sm font-medium text-gray-900">Formação na Unicamp</dt>
-                            <dd className="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">{mentor.curso}</dd>
+                            <dd className="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">{toTitleCase(mentor.curso)}</dd>
                           </div>
                         )}
 

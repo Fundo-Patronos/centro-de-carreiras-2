@@ -22,3 +22,15 @@ class MentorResponse(MentorBase):
 class MentorFilter(BaseModel):
     area: Optional[str] = None
     expertise: Optional[str] = None
+
+class MentorUpdate(BaseModel):
+    """Schema for updating mentor profile - all fields are optional"""
+    nome: Optional[str] = None
+    email: Optional[EmailStr] = None
+    titulo: Optional[str] = None
+    companhia: Optional[str] = None
+    curso: Optional[str] = None
+    biografia: Optional[str] = None
+    linkedin: Optional[str] = None
+    tags: Optional[List[str]] = None
+    area_expertise: Optional[List[str]] = None

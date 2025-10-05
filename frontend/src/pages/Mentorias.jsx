@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import MentorModal from '../components/MentorModal'
+import FilterBox from '../components/FilterBox'
 
 export default function Mentorias() {
   const navigate = useNavigate()
@@ -9,6 +10,35 @@ export default function Mentorias() {
   const [loading, setLoading] = useState(true)
   const [selectedMentor, setSelectedMentor] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Filter states
+  const [selectedTags, setSelectedTags] = useState([])
+  const [selectedPodeAjudarCom, setSelectedPodeAjudarCom] = useState([])
+
+  // Utility function to convert text to proper title case
+  const toTitleCase = (text) => {
+    if (!text) return ''
+
+    // Words that should remain lowercase in title case (unless they're the first word)
+    const smallWords = ['e', 'de', 'da', 'do', 'dos', 'das', 'em', 'a', 'o', 'as', 'os', 'para', 'com', 'sem']
+
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map((word, index) => {
+        // Always capitalize the first word
+        if (index === 0) {
+          return word.charAt(0).toUpperCase() + word.slice(1)
+        }
+        // Keep small words lowercase unless they're at the start
+        if (smallWords.includes(word)) {
+          return word
+        }
+        // Capitalize other words
+        return word.charAt(0).toUpperCase() + word.slice(1)
+      })
+      .join(' ')
+  }
 
   const handleOpenModal = (mentor) => {
     setSelectedMentor(mentor)
@@ -67,6 +97,62 @@ export default function Mentorias() {
     }
   }
 
+  // Extract unique tags and "Pode Ajudar Com" options from all mentors
+  const allTags = useMemo(() => {
+    const tagsSet = new Set()
+    mentors.forEach(mentor => {
+      mentor.tags?.forEach(tag => tagsSet.add(tag))
+    })
+    return Array.from(tagsSet).sort()
+  }, [mentors])
+
+  const allPodeAjudarCom = useMemo(() => {
+    const podeAjudarComSet = new Set()
+    mentors.forEach(mentor => {
+      mentor.area_expertise?.forEach(item => podeAjudarComSet.add(item))
+    })
+    return Array.from(podeAjudarComSet).sort()
+  }, [mentors])
+
+  // Initialize filter selections when data loads
+  useEffect(() => {
+    if (allTags.length > 0 && selectedTags.length === 0) {
+      setSelectedTags([...allTags])
+    }
+  }, [allTags])
+
+  useEffect(() => {
+    if (allPodeAjudarCom.length > 0 && selectedPodeAjudarCom.length === 0) {
+      setSelectedPodeAjudarCom([...allPodeAjudarCom])
+    }
+  }, [allPodeAjudarCom])
+
+  // Filter mentors based on selections
+  const filteredMentors = useMemo(() => {
+    // If no filters are selected, show no mentors
+    if (selectedTags.length === 0 || selectedPodeAjudarCom.length === 0) {
+      return []
+    }
+
+    return mentors.filter(mentor => {
+      // Check if mentor has at least one selected tag
+      // If mentor has no tags, include them when all tags are selected
+      const mentorTags = mentor.tags || []
+      const hasMatchingTag = mentorTags.length === 0
+        ? selectedTags.length === allTags.length
+        : mentorTags.some(tag => selectedTags.includes(tag))
+
+      // Check if mentor has at least one selected "Pode Ajudar Com"
+      // If mentor has no area_expertise, include them when all items are selected
+      const mentorAreaExpertise = mentor.area_expertise || []
+      const hasMatchingPodeAjudarCom = mentorAreaExpertise.length === 0
+        ? selectedPodeAjudarCom.length === allPodeAjudarCom.length
+        : mentorAreaExpertise.some(item => selectedPodeAjudarCom.includes(item))
+
+      return hasMatchingTag && hasMatchingPodeAjudarCom
+    })
+  }, [mentors, selectedTags, selectedPodeAjudarCom, allTags.length, allPodeAjudarCom.length])
+
   if (loading) {
     return (
       <div className="p-8 max-w-7xl mx-auto">
@@ -88,8 +174,31 @@ export default function Mentorias() {
           </p>
         </div>
 
+        {/* Filter boxes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <FilterBox
+            title="Tags"
+            options={allTags}
+            selectedItems={selectedTags}
+            onSelectionChange={setSelectedTags}
+          />
+          <FilterBox
+            title="Pode Ajudar Com"
+            options={allPodeAjudarCom}
+            selectedItems={selectedPodeAjudarCom}
+            onSelectionChange={setSelectedPodeAjudarCom}
+          />
+        </div>
+
+        {/* Results count */}
+        <div className="mb-4">
+          <p className="text-sm text-gray-600">
+            Mostrando <span className="font-semibold">{filteredMentors.length}</span> de <span className="font-semibold">{mentors.length}</span> mentores
+          </p>
+        </div>
+
         <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {mentors.map((mentor) => {
+          {filteredMentors.map((mentor) => {
             // Calculate visible tags to fit in 2 rows (approximately 6-7 tags)
             const maxVisibleTags = 6
             const visibleTags = mentor.tags?.slice(0, maxVisibleTags) || []
@@ -106,10 +215,10 @@ export default function Mentorias() {
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.nome)}&size=256&background=random`}
                     className="mx-auto size-20 shrink-0 rounded-full bg-gray-300 outline -outline-offset-1 outline-black/5"
                   />
-                  <h3 className="mt-4 text-sm font-semibold text-gray-900">{mentor.nome}</h3>
-                  <p className="text-xs text-gray-600 mt-1">{mentor.titulo || 'Mentor'}</p>
+                  <h3 className="mt-4 text-sm font-semibold text-gray-900">{toTitleCase(mentor.nome)}</h3>
+                  <p className="text-xs text-gray-600 mt-1">{toTitleCase(mentor.titulo || 'Mentor')}</p>
                   {mentor.companhia && (
-                    <p className="text-xs text-gray-500 mt-0.5">{mentor.companhia}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{toTitleCase(mentor.companhia)}</p>
                   )}
 
                   {/* Tags section with fixed height */}

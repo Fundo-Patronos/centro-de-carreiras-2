@@ -93,7 +93,7 @@ A equipe que atualiza informações de mentores, estudantes e vagas não sabe pr
 ## Airtable Integration
 
 ### Credenciais API
-- **Personal Access Token:** `your-airtable-personal-access-token-here`
+- **Personal Access Token:** Stored in backend `.env` file (see `.env.example` for format)
 - **Base ID:** `app4uSEqO2S03EO5X`
 - **Tabela de Mentores:** `Mentores Residentes - Produção`
 
@@ -235,9 +235,96 @@ GitHub: https://github.com/Fundo-Patronos/centro-de-carreiras-2.git
 - `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/backend/routers/mentors.py`
 
 **Pending Items for Next Session:**
-- Consider implementing mentor filtering by tags
+- ~~Consider implementing mentor filtering by tags~~ ✅ DONE in Session 3
 - Add real booking functionality to "Agendar Mentoria" buttons
 - Implement mentor search functionality
 - Add loading states and error handling for API calls
 - Consider pagination or lazy loading if mentor list grows large
 - Test responsive layout on mobile devices
+
+### Session 3 - 2025-10-05
+
+**Mentor Filtering System:**
+- Created `FilterBox` component with dropdown and checkbox functionality
+- Implemented using Headless UI Combobox for clean dropdown behavior
+- Features:
+  - Multi-select with checkboxes for Tags and "Pode Ajudar Com"
+  - "Todos" option to select/deselect all items
+  - Search functionality within dropdown
+  - Smart display: shows count or selected items
+  - Purple accent color (patronos-accent) for consistency
+- Added two filter boxes to Mentorias page (side by side layout)
+- Implemented filtering logic:
+  - Shows mentors matching ANY selected tag AND ANY selected expertise
+  - Handles mentors with empty arrays (shows when all filters selected)
+  - Shows 0 mentors when no filters are selected
+  - Displays "Mostrando X de Y mentores" counter
+
+**Text Formatting:**
+- Created `toTitleCase()` utility function for proper capitalization
+- Applied to mentor cards and modal:
+  - Name, Title, Company fields
+  - Handles Portuguese small words (de, da, do, dos, das, e, etc.)
+  - Converts ALL CAPS to proper Title Case
+  - Examples: "VP DE OPERAÇÕES" → "VP de Operações"
+- Applied in both `Mentorias.jsx` and `MentorModal.jsx`
+
+**Perfil (Profile) Page:**
+- Created complete mentor profile page (`/frontend/src/pages/Perfil.jsx`)
+- Features:
+  - All editable fields: Nome, Email, Título, Companhia, Curso, LinkedIn, Biografia
+  - Profile photo display (with avatar fallback)
+  - FilterBox components for "Áreas de Atuação" and "Pode Ajudar Com"
+  - Save/Cancel buttons with loading states
+  - Fetches current mentor data from API on load
+  - Fetches all mentors to populate filter dropdowns
+- Added `/perfil` route to App.jsx
+- Updated Navbar with dropdown menu:
+  - Click avatar to open menu
+  - "Meu Perfil" → navigates to /perfil
+  - "Sair" → placeholder for logout
+  - Uses react-router-dom Link for navigation
+  - Changed user display to "Mentor"
+
+**Backend - Airtable Update Integration:**
+- Created `MentorUpdate` schema (`app/schemas/mentor.py`)
+  - All fields optional for flexible updates
+  - Includes: nome, email, titulo, companhia, curso, biografia, linkedin, tags, area_expertise
+- Implemented `PUT /api/mentors/{mentor_id}` endpoint
+  - Maps frontend fields to Airtable field names:
+    - `tags` → `Tags`
+    - `area_expertise` → `Pode ajudar com`
+    - `nome` → `Name`
+    - `titulo` → `Título`
+  - Uses existing `AirtableService.update_record()` method
+  - Returns updated mentor data
+  - Error handling with detailed messages
+- Full integration with Airtable credentials from project_diary
+- Updates persist immediately to Airtable "Mentores Residentes - Produção" table
+
+**Technical Implementation:**
+- Backend successfully updates Airtable using pyairtable
+- Frontend form submission connected to PUT endpoint
+- Success/error alerts for user feedback
+- Disabled state during save operations
+- Proper field mapping between app and Airtable schema
+
+**Files Created:**
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/src/components/FilterBox.jsx`
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/src/pages/Perfil.jsx`
+
+**Files Modified:**
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/src/pages/Mentorias.jsx` (added FilterBox, filtering logic, toTitleCase)
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/src/components/MentorModal.jsx` (added toTitleCase)
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/src/App.jsx` (added Perfil route)
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/src/components/Navbar.jsx` (added dropdown menu, Link navigation)
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/backend/app/api/routes/mentors.py` (added PUT endpoint)
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/backend/app/schemas/mentor.py` (added MentorUpdate schema)
+
+**Pending Items for Next Session:**
+- Add real booking functionality to "Agendar Mentoria" buttons
+- Implement authentication system (students vs mentors)
+- Add loading states and error handling for API calls
+- Consider pagination or lazy loading if mentor list grows large
+- Test responsive layout on mobile devices
+- Implement photo upload functionality for profile pictures

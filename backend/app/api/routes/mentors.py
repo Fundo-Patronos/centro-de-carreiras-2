@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
-from app.schemas.mentor import MentorResponse
+from app.schemas.mentor import MentorResponse, MentorUpdate
 from app.services.airtable import AirtableService, Tables
 
 router = APIRouter()
@@ -80,4 +80,55 @@ async def buscar_mentor(mentor_id: str):
         raise HTTPException(
             status_code=404,
             detail="Mentor não encontrado"
+        )
+
+@router.put("/{mentor_id}", response_model=MentorResponse)
+async def atualizar_mentor(mentor_id: str, mentor_update: MentorUpdate):
+    """Atualiza informações de um mentor"""
+    try:
+        # Preparar campos para atualização no Airtable
+        # Mapeando os campos da aplicação para os nomes dos campos do Airtable
+        fields = {}
+
+        if mentor_update.nome is not None:
+            fields["Name"] = mentor_update.nome
+        if mentor_update.email is not None:
+            fields["Email"] = mentor_update.email
+        if mentor_update.titulo is not None:
+            fields["Título"] = mentor_update.titulo
+        if mentor_update.companhia is not None:
+            fields["Companhia"] = mentor_update.companhia
+        if mentor_update.curso is not None:
+            fields["Curso"] = mentor_update.curso
+        if mentor_update.biografia is not None:
+            fields["Bio"] = mentor_update.biografia
+        if mentor_update.linkedin is not None:
+            fields["Linkedin URL"] = mentor_update.linkedin
+        if mentor_update.tags is not None:
+            fields["Tags"] = mentor_update.tags
+        if mentor_update.area_expertise is not None:
+            fields["Pode ajudar com"] = mentor_update.area_expertise
+
+        # Atualizar registro no Airtable
+        updated_mentor = await AirtableService.update_record(Tables.MENTORS, mentor_id, fields)
+
+        # Retornar mentor atualizado
+        return MentorResponse(
+            id=updated_mentor["id"],
+            nome=updated_mentor.get("Name", ""),
+            email=updated_mentor.get("Email", ""),
+            area_expertise=updated_mentor.get("Pode ajudar com", []),
+            biografia=updated_mentor.get("Bio", ""),
+            linkedin=updated_mentor.get("Linkedin URL"),
+            foto_url=updated_mentor.get("Foto", [{}])[0].get("url") if updated_mentor.get("Foto") else None,
+            companhia=updated_mentor.get("Companhia"),
+            titulo=updated_mentor.get("Título"),
+            curso=updated_mentor.get("Curso"),
+            tags=updated_mentor.get("Tags", [])
+        )
+    except Exception as e:
+        print(f"Erro ao atualizar mentor: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao atualizar mentor: {str(e)}"
         )

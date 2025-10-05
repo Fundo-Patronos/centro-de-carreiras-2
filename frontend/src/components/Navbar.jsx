@@ -1,15 +1,15 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { Link } from 'react-router-dom'
 
 const user = {
-  name: 'Estudante',
-  email: 'estudante@dac.unicamp.br',
+  name: 'Mentor',
+  email: 'mentor@unicamp.br',
   imageUrl:
     'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
 }
 
 const userNavigation = [
-  { name: 'Seu perfil', href: '#' },
-  { name: 'Configurações', href: '#' },
+  { name: 'Meu Perfil', href: '/perfil' },
   { name: 'Sair', href: '#' },
 ]
 
@@ -52,12 +52,21 @@ export default function Navbar() {
               >
                 {userNavigation.map((item) => (
                   <MenuItem key={item.name}>
-                    <a
-                      href={item.href}
-                      className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
-                    >
-                      {item.name}
-                    </a>
+                    {item.href === '#' ? (
+                      <a
+                        href={item.href}
+                        className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
+                      >
+                        {item.name}
+                      </a>
+                    ) : (
+                      <Link
+                        to={item.href}
+                        className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
+                      >
+                        {item.name}
+                      </Link>
+                    )}
                   </MenuItem>
                 ))}
               </MenuItems>
