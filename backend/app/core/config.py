@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     # Airtable
     AIRTABLE_API_KEY: str
     AIRTABLE_BASE_ID: str
+    AIRTABLE_TABLE_MENTORES: str = "Mentores Residentes - Produção"
 
     # Email
     SMTP_HOST: str

@@ -24,6 +24,35 @@ O Centro de Carreiras é uma plataforma que conecta estudantes da Unicamp com me
 - **Database/CMS:** Airtable (para gerenciar dados de mentores, estudantes e vagas)
 - **Deployment:** Google Cloud Platform (Cloud Run)
 - **Idioma:** PT-BR (português brasileiro)
+- **Tipografia:** Inter (Google Fonts)
+
+### Design System - Cores da Marca
+
+**Gradiente Primary (tema ativo):**
+- `linear-gradient(135deg, #ff9700, #ff6253, #fc4696, #c964e2)`
+- Progressão: Laranja → Coral → Rosa → Roxo
+- Uso: Botões primários, títulos importantes, elementos de destaque
+
+**Cores Individuais do Gradiente:**
+- Laranja: `#ff9700`
+- Coral: `#ff6253`
+- Rosa: `#fc4696`
+- Roxo: `#c964e2`
+
+**Cores Adicionais:**
+- **Accent Color (patronos-accent):** `#c964e2` (Purple) - Centralized in tailwind.config.js
+  - CRITICAL: This is the single source of truth for platform accent color
+  - Used for: links ativos, ícones de navegação, bordas de foco, hover states, active states
+  - Changed from red (#C00000) to purple (#c964e2) on 2025-10-04
+- Amarelo: `#ff9700`
+
+**Aplicação das Cores:**
+- Botões primários: Gradiente completo com hover opacity
+- Elementos ativos (sidebar): patronos-accent (purple #c964e2)
+- Texto da marca: Gradiente com text clip
+- Focus states: patronos-accent
+- Hover states: patronos-accent
+- Tags de expertise: Color mapping system (see Session 2 notes)
 
 ### Razão para Airtable
 A equipe que atualiza informações de mentores, estudantes e vagas não sabe programar. Airtable permite que eles gerenciem dados facilmente através de uma interface visual, enquanto a plataforma consome esses dados via API ou embeds.
@@ -63,6 +92,12 @@ A equipe que atualiza informações de mentores, estudantes e vagas não sabe pr
 
 ## Airtable Integration
 
+### Credenciais API
+- **Personal Access Token:** `your-airtable-personal-access-token-here`
+- **Base ID:** `app4uSEqO2S03EO5X`
+- **Tabela de Mentores:** `Mentores Residentes - Produção`
+
+### Embedded View
 Exemplo de embedded view do Airtable:
 ```html
 <iframe
@@ -82,6 +117,8 @@ GitHub: https://github.com/Fundo-Patronos/centro-de-carreiras-2.git
 ## Histórico de Desenvolvimento
 
 ### Session 1 - 2025-10-03
+
+**Setup Inicial:**
 - Definição da arquitetura inicial
 - Recomendação de stack tecnológico (Node.js/Express e Python/FastAPI apresentados)
 - Usuário escolheu Python/FastAPI como backend
@@ -95,3 +132,112 @@ GitHub: https://github.com/Fundo-Patronos/centro-de-carreiras-2.git
     - Schemas Pydantic para validação
 - Configuração do repositório Git e push inicial
 - Documentação criada (README.md, SETUP.md, project_diary.md)
+
+**Refatoração do Frontend:**
+- Removidas todas as páginas antigas e reconstruído do zero
+- Criado componente Sidebar com navegação (Home, Mentorias, Vagas)
+- Criado componente Navbar horizontal com logo e perfil do usuário
+- Instalação de dependências: @heroicons/react, @headlessui/react
+- Layout implementado: Navbar no topo, Sidebar à esquerda, conteúdo principal à direita
+
+**Página de Mentorias:**
+- Título: "Encontre seu Mentor"
+- Subtítulo explicativo sobre a plataforma
+- Integração do Airtable embed para visualização de mentores
+- Layout responsivo e centrado
+
+**Implementação do Design System:**
+- Configuração das cores da marca Fundo Patronos no Tailwind:
+  - Gradiente primary: `linear-gradient(135deg, #ff9700, #ff6253, #fc4696, #c964e2)`
+  - Cores individuais: orange, coral, pink, purple
+  - Vermelho accent (#C00000) para elementos ativos
+- Tipografia: Fonte Inter importada via Google Fonts
+- Aplicação das cores:
+  - Logo "Centro de Carreiras": Gradiente com bg-clip-text
+  - Botões primários: Gradiente completo
+  - Sidebar: Items ativos com vermelho accent e background gradient sutil
+  - Focus states: Vermelho accent
+- Atualização de todos os componentes (Navbar, Sidebar) com as novas cores
+
+### Session 2 - 2025-10-04
+
+**Mentorias Page - Complete Rebuild:**
+- Completely rebuilt Mentorias page with custom mentor cards instead of Airtable embed
+- Created grid layout (3 columns on desktop) for mentor display
+- Each mentor card includes:
+  - Profile photo (placeholder with initials if no photo)
+  - Name and professional title
+  - Brief bio/description
+  - Tags for areas of expertise (Consultoria, Indústria, Tecnologia, etc.)
+  - "Agendar Mentoria" button with gradient styling
+- Improved typography and spacing throughout the page
+
+**Backend Airtable Integration:**
+- Implemented `/api/mentors/` endpoint in FastAPI
+- Fetches mentor data from Airtable "Mentores Residentes - Produção" table
+- Maps Airtable fields to frontend-friendly format:
+  - Name, Title, Bio, Photo URL
+  - Tags array from "Tags (from Área de Expertise)" field
+- CORS configuration updated to allow frontend access
+- Backend port changed from 5000 to 8000 (to avoid macOS AirPlay conflict)
+
+**Mentor Detail Modal:**
+- Created MentorModal component with Headless UI Dialog
+- Fixed modal dimensions: `max-w-6xl` width, 800px height
+- Two-column layout:
+  - Left: Mentor photo (400x400px), name, title, tags
+  - Right: Scrollable content area for bio and additional information
+- Smooth scroll behavior for long bios
+- Consistent tag styling with main page
+
+**Centralized Color System - Critical Protocol:**
+- Created `patronos-accent` color variable in `tailwind.config.js`
+- This is THE SINGLE SOURCE OF TRUTH for the platform's accent color
+- Currently set to purple: `#c964e2`
+- To change platform accent color, ONLY modify this one variable
+- Used throughout the platform for:
+  - Active navigation items
+  - Hover states
+  - Tag backgrounds
+  - Interactive elements
+
+**Tag Color Mapping System - Critical Protocol:**
+- Established consistent color mapping for expertise tags
+- Tag colors are defined in BOTH `Mentorias.jsx` and `MentorModal.jsx`
+- Must remain synchronized across both files
+- Current mapping:
+  - Consultoria: blue-500
+  - Indústria: green-500
+  - Tecnologia: patronos-accent (purple)
+  - Finanças: yellow-500
+  - Empreendedorismo: red-500
+  - Default: gray-500
+- WHY: Ensures users can visually identify expertise areas consistently across the entire platform
+
+**Design Decisions - Rationale:**
+- Modal size (max-w-6xl, 800px height): Provides enough space for detailed mentor information without overwhelming the screen
+- Two-column modal layout: Separates visual identity (photo, name) from content (bio), improving scannability
+- Scrollable content area: Allows mentors to have extensive bios without breaking layout
+- Tag color mapping: Creates visual consistency and helps users quickly identify expertise areas
+- Centralized accent color: Enables easy rebranding - changing one variable updates entire platform
+
+**Technical Configuration:**
+- Backend running on port 8000 (changed from 5000)
+- Frontend fetches from `http://localhost:8000/api/mentors/`
+- Environment: Development mode with hot reload
+- CORS enabled for localhost:5173 (Vite dev server)
+
+**Files Modified:**
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/src/pages/Mentorias.jsx`
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/src/components/MentorModal.jsx` (new)
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/frontend/tailwind.config.js`
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/backend/main.py`
+- `/Users/G.Beltrami/Documents/Projects/8.centro-carreiras-v2/backend/routers/mentors.py`
+
+**Pending Items for Next Session:**
+- Consider implementing mentor filtering by tags
+- Add real booking functionality to "Agendar Mentoria" buttons
+- Implement mentor search functionality
+- Add loading states and error handling for API calls
+- Consider pagination or lazy loading if mentor list grows large
+- Test responsive layout on mobile devices

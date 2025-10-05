@@ -1,112 +1,167 @@
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import MentorModal from '../components/MentorModal'
 
-function Mentorias() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link to="/" className="text-2xl font-bold text-patronos-primary">
-              Centro de Carreiras
-            </Link>
-            <div className="space-x-6">
-              <Link to="/" className="text-gray-700 hover:text-patronos-primary">
-                Início
-              </Link>
-              <Link to="/mentorias" className="text-patronos-primary font-semibold">
-                Mentorias
-              </Link>
-              <Link to="/vagas" className="text-gray-700 hover:text-patronos-primary">
-                Vagas
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+export default function Mentorias() {
+  const navigate = useNavigate()
+  const [mentors, setMentors] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedMentor, setSelectedMentor] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Nossos Mentores
-          </h1>
-          <p className="text-lg text-gray-600 max-w-3xl">
-            Conecte-se com profissionais experientes de diversas áreas de atuação.
-            Agende reuniões ilimitadas para discutir carreiras, processos seletivos
-            e estratégias de networking.
-          </p>
-        </div>
+  const handleOpenModal = (mentor) => {
+    setSelectedMentor(mentor)
+    setIsModalOpen(true)
+  }
 
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card">
-            <h3 className="text-lg font-semibold text-patronos-primary mb-2">
-              🌍 Carreiras Globais
-            </h3>
-            <p className="text-gray-600">
-              Mentores com experiência internacional em empresas multinacionais
-            </p>
-          </div>
-          <div className="card">
-            <h3 className="text-lg font-semibold text-patronos-primary mb-2">
-              🎓 Pós-Graduação
-            </h3>
-            <p className="text-gray-600">
-              Orientação para mestrado, doutorado e programas internacionais
-            </p>
-          </div>
-          <div className="card">
-            <h3 className="text-lg font-semibold text-patronos-primary mb-2">
-              🚀 Empreendedorismo
-            </h3>
-            <p className="text-gray-600">
-              Fundadores e executivos de startups e empresas de tecnologia
-            </p>
-          </div>
-        </div>
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+  }
 
-        {/* Airtable Embed */}
-        <div className="card">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Explore Nossos Mentores
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Navegue pela lista de mentores disponíveis e suas áreas de expertise.
-            Em breve você poderá agendar sessões diretamente pela plataforma.
-          </p>
+  const handleAgendarMentoria = () => {
+    navigate('/mentorias/agendar')
+  }
 
-          <div className="bg-gray-100 rounded-lg p-8 text-center">
-            <p className="text-gray-500 mb-4">
-              {/* Airtable embed será inserido aqui */}
-              📊 Visualização dos Mentores (Airtable Embed)
-            </p>
-            <iframe
-              className="airtable-embed w-full rounded-lg"
-              src="https://airtable.com/embed/app4uSEqO2S03EO5X/shr9ZDEboM5pT8Kpc?viewControls=on"
-              frameBorder="0"
-              width="100%"
-              height="533"
-              style={{ background: 'transparent', border: '1px solid #ccc' }}
-            />
-          </div>
-        </div>
+  // Tag-to-color mapping - each tag always gets the same color
+  const tagColorMap = {
+    'Consultoria': 'bg-purple-50 text-purple-700 inset-ring-purple-700/10',
+    'Indústria': 'bg-yellow-50 text-yellow-800 inset-ring-yellow-600/20',
+    'Tecnologia': 'bg-orange-50 text-orange-700 inset-ring-orange-600/10',
+    'Empreendedorismo e Startups': 'bg-pink-50 text-pink-700 inset-ring-pink-700/10',
+    'Mercado Financeiro': 'bg-green-50 text-green-700 inset-ring-green-600/20',
+    'Carreira Internacional': 'bg-blue-50 text-blue-700 inset-ring-blue-700/10',
+    'Carreira Acadêmica e Pesquisa': 'bg-indigo-50 text-indigo-700 inset-ring-indigo-700/10',
+    'Setor Público e Governo': 'bg-red-50 text-red-700 inset-ring-red-600/10',
+    'Terceiro Setor': 'bg-teal-50 text-teal-700 inset-ring-teal-600/10',
+  }
 
-        {/* CTA Section */}
-        <div className="mt-12 card bg-gradient-to-r from-blue-600 to-amber-500 text-white text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Pronto para Começar?
-          </h2>
-          <p className="text-lg mb-6 opacity-90">
-            Crie sua conta gratuitamente e comece a agendar sessões com nossos mentores
-          </p>
-          <Link to="/cadastro" className="inline-block bg-white text-patronos-primary font-semibold px-8 py-3 rounded-lg hover:bg-gray-100 transition">
-            Cadastre-se Agora
-          </Link>
-        </div>
+  // Default colors for tags not in the map
+  const defaultTagColors = [
+    'bg-purple-50 text-purple-700 inset-ring-purple-700/10',
+    'bg-blue-50 text-blue-700 inset-ring-blue-700/10',
+    'bg-green-50 text-green-700 inset-ring-green-600/20',
+    'bg-pink-50 text-pink-700 inset-ring-pink-700/10',
+    'bg-yellow-50 text-yellow-800 inset-ring-yellow-600/20',
+    'bg-indigo-50 text-indigo-700 inset-ring-indigo-700/10',
+    'bg-orange-50 text-orange-700 inset-ring-orange-600/10',
+  ]
+
+  const getTagColor = (tag, index) => {
+    // Return mapped color if exists, otherwise use rotating default colors
+    return tagColorMap[tag] || defaultTagColors[index % defaultTagColors.length]
+  }
+
+  useEffect(() => {
+    fetchMentors()
+  }, [])
+
+  const fetchMentors = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/mentors/')
+      setMentors(response.data)
+    } catch (error) {
+      console.error('Erro ao buscar mentores:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-8 max-w-7xl mx-auto">
+        <p className="text-gray-600">Carregando mentores...</p>
       </div>
-    </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="px-8 pt-12 pb-8 max-w-7xl mx-auto">
+        <div className="mb-10">
+          <h1 className="text-3xl font-semibold text-gray-900 sm:text-4xl sm:tracking-tight">
+            Encontre seu Mentor
+          </h1>
+          <p className="mt-2 text-base text-gray-600 max-w-3xl">
+            Conecte-se com profissionais experientes que podem ajudá-lo em sua jornada acadêmica e profissional.
+            Escolha um mentor com base em sua área de interesse e agende uma conversa.
+          </p>
+        </div>
+
+        <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {mentors.map((mentor) => {
+            // Calculate visible tags to fit in 2 rows (approximately 6-7 tags)
+            const maxVisibleTags = 6
+            const visibleTags = mentor.tags?.slice(0, maxVisibleTags) || []
+            const remainingTags = (mentor.tags?.length || 0) - maxVisibleTags
+
+            return (
+              <li
+                key={mentor.id}
+                className="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-sm"
+              >
+                <div className="flex flex-1 flex-col p-6">
+                  <img
+                    alt={mentor.nome}
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.nome)}&size=256&background=random`}
+                    className="mx-auto size-20 shrink-0 rounded-full bg-gray-300 outline -outline-offset-1 outline-black/5"
+                  />
+                  <h3 className="mt-4 text-sm font-semibold text-gray-900">{mentor.nome}</h3>
+                  <p className="text-xs text-gray-600 mt-1">{mentor.titulo || 'Mentor'}</p>
+                  {mentor.companhia && (
+                    <p className="text-xs text-gray-500 mt-0.5">{mentor.companhia}</p>
+                  )}
+
+                  {/* Tags section with fixed height */}
+                  <div className="mt-4 h-14 mb-4">
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {visibleTags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium inset-ring ${getTagColor(tag, index)}`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {remainingTags > 0 && (
+                        <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 inset-ring inset-ring-gray-500/10">
+                          +{remainingTags}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div className="-mt-px flex divide-x divide-gray-200">
+                    <div className="flex w-0 flex-1">
+                      <button
+                        onClick={() => handleOpenModal(mentor)}
+                        className="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+                      >
+                        Saiba Mais
+                      </button>
+                    </div>
+                    <div className="-ml-px flex w-0 flex-1">
+                      <button
+                        onClick={handleAgendarMentoria}
+                        className="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-patronos-accent hover:bg-gray-50"
+                      >
+                        Agendar Mentoria
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+
+      <MentorModal
+        mentor={selectedMentor}
+        open={isModalOpen}
+        onClose={handleCloseModal}
+      />
+    </>
   )
 }
-
-export default Mentorias

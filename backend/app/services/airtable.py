@@ -8,7 +8,7 @@ base = api.base(settings.AIRTABLE_BASE_ID)
 
 # Nomes das tabelas
 class Tables:
-    MENTORS = "Mentores"
+    MENTORS = "Mentores Residentes - Produção"
     STUDENTS = "Estudantes"
     JOBS = "Vagas"
     BOOKINGS = "Agendamentos"

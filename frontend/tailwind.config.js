@@ -8,10 +8,21 @@ export default {
     extend: {
       colors: {
         'patronos': {
-          primary: '#1e40af', // Azul
-          secondary: '#f59e0b', // Laranja
-          accent: '#10b981', // Verde
+          orange: '#ff9700',
+          coral: '#ff6253',
+          pink: '#fc4696',
+          purple: '#c964e2',
+          red: '#C00000',
+          yellow: '#ff9700',
+          // Centralized accent color - change this to update entire platform
+          accent: '#c964e2',
         }
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-primary': 'linear-gradient(135deg, #ff9700, #ff6253, #fc4696, #c964e2)',
       }
     },
   },

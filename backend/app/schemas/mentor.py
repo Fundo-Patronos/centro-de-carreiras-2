@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, HttpUrl
+from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 
 class MentorBase(BaseModel):
@@ -6,11 +6,15 @@ class MentorBase(BaseModel):
     email: EmailStr
     area_expertise: List[str]
     biografia: str
-    linkedin: Optional[HttpUrl] = None
+    linkedin: Optional[str] = None
 
 class MentorResponse(MentorBase):
     id: str
     foto_url: Optional[str] = None
+    companhia: Optional[str] = None
+    titulo: Optional[str] = None
+    curso: Optional[str] = None
+    tags: List[str] = []
 
     class Config:
         from_attributes = True

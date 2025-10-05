@@ -5,6 +5,24 @@ from app.services.airtable import AirtableService, Tables
 
 router = APIRouter()
 
+@router.get("/test")
+async def test_airtable_connection():
+    """Endpoint de teste para verificar conexão com Airtable"""
+    try:
+        mentors = await AirtableService.get_all_records(Tables.MENTORS)
+        return {
+            "status": "success",
+            "message": "Conexão com Airtable estabelecida!",
+            "total_mentores": len(mentors),
+            "sample_data": mentors[:2] if mentors else []  # Retorna os 2 primeiros registros
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Erro ao conectar com Airtable: {str(e)}",
+            "error_type": type(e).__name__
+        }
+
 @router.get("/", response_model=List[MentorResponse])
 async def listar_mentores(
     area: Optional[str] = Query(None, description="Filtrar por área"),
@@ -25,12 +43,16 @@ async def listar_mentores(
     return [
         MentorResponse(
             id=mentor["id"],
-            nome=mentor.get("Nome", ""),
+            nome=mentor.get("Name", ""),
             email=mentor.get("Email", ""),
-            area_expertise=mentor.get("Área de Expertise", []),
-            biografia=mentor.get("Biografia", ""),
-            linkedin=mentor.get("LinkedIn"),
-            foto_url=mentor.get("Foto", [{}])[0].get("url") if mentor.get("Foto") else None
+            area_expertise=mentor.get("Pode ajudar com", []),
+            biografia=mentor.get("Bio", ""),
+            linkedin=mentor.get("Linkedin URL"),
+            foto_url=mentor.get("Foto", [{}])[0].get("url") if mentor.get("Foto") else None,
+            companhia=mentor.get("Companhia"),
+            titulo=mentor.get("Título"),
+            curso=mentor.get("Curso"),
+            tags=mentor.get("Tags", [])
         )
         for mentor in mentors
     ]
@@ -43,12 +65,16 @@ async def buscar_mentor(mentor_id: str):
 
         return MentorResponse(
             id=mentor["id"],
-            nome=mentor.get("Nome", ""),
+            nome=mentor.get("Name", ""),
             email=mentor.get("Email", ""),
-            area_expertise=mentor.get("Área de Expertise", []),
-            biografia=mentor.get("Biografia", ""),
-            linkedin=mentor.get("LinkedIn"),
-            foto_url=mentor.get("Foto", [{}])[0].get("url") if mentor.get("Foto") else None
+            area_expertise=mentor.get("Pode ajudar com", []),
+            biografia=mentor.get("Bio", ""),
+            linkedin=mentor.get("Linkedin URL"),
+            foto_url=mentor.get("Foto", [{}])[0].get("url") if mentor.get("Foto") else None,
+            companhia=mentor.get("Companhia"),
+            titulo=mentor.get("Título"),
+            curso=mentor.get("Curso"),
+            tags=mentor.get("Tags", [])
         )
     except Exception:
         raise HTTPException(
