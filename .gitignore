@@ -14,6 +14,9 @@ __pycache__/
 .env.local
 .env.*.local
 *.env
+.env.production
+backend/.env.production
+frontend/.env.production
 
 # Firebase credentials (CRITICAL - never commit!)
 firebase-service-account.json

@@ -35,6 +35,15 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
+  // Check user status - redirect pending/suspended users
+  if (userProfile.status === 'pending') {
+    return <Navigate to="/pending-approval" replace />;
+  }
+
+  if (userProfile.status === 'suspended') {
+    return <Navigate to="/suspended" replace />;
+  }
+
   // Check role-based access
   if (allowedRoles.length > 0 && !allowedRoles.includes(userProfile.role)) {
     // Redirect to appropriate dashboard based on user's role

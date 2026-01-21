@@ -4,6 +4,7 @@ import { authService } from '../../services/authService';
 import { userService } from '../../services/userService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function VerifyEmail() {
   const [status, setStatus] = useState('verifying'); // 'verifying' | 'success' | 'error' | 'need-email'
@@ -61,6 +62,7 @@ export default function VerifyEmail() {
       }
 
       setStatus('success');
+      analytics.track(EVENTS.MAGIC_LINK_VERIFIED, { role });
 
       // Get profile for redirect
       const profile = await userService.getUserProfile(user.uid);

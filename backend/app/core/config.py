@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     AIRTABLE_BASE_ID: str = ""
     AIRTABLE_MENTORS_TABLE: str = "mentores_residentes_prod"
 
+    # Mixpanel Analytics
+    MIXPANEL_TOKEN: str = ""
+
+    # Resend Email Service
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM_ADDRESS: str = "Centro de Carreiras <noreply@patronos.org>"
+    EMAIL_ADMIN_CC: str = "contato@patronos.org"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -6,10 +6,15 @@ import AppLayout from './components/layout/AppLayout';
 // Auth pages
 import AuthPage from './pages/auth/AuthPage';
 import VerifyEmail from './pages/auth/VerifyEmail';
+import PendingApproval from './pages/auth/PendingApproval';
+
+// Admin pages
+import UserApprovals from './pages/admin/UserApprovals';
 
 // Estudante pages
 import EstudanteDashboard from './pages/estudante/Dashboard';
 import MentorList from './pages/estudante/MentorList';
+import MySessions from './pages/estudante/MySessions';
 
 // Mentor pages
 import MentorDashboard from './pages/mentor/Dashboard';
@@ -23,6 +28,21 @@ export default function App() {
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/verify" element={<VerifyEmail />} />
+          <Route path="/pending-approval" element={<PendingApproval />} />
+          <Route path="/suspended" element={<SuspendedPage />} />
+
+          {/* Admin routes - with sidebar layout */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="approvals" replace />} />
+            <Route path="approvals" element={<UserApprovals />} />
+          </Route>
 
           {/* Estudante routes - with sidebar layout */}
           <Route
@@ -36,7 +56,7 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<EstudanteDashboard />} />
             <Route path="mentores" element={<MentorList />} />
-            <Route path="sessoes" element={<PlaceholderPage title="Minhas Sessões" />} />
+            <Route path="sessoes" element={<MySessions />} />
             <Route path="vagas" element={<PlaceholderPage title="Vagas" />} />
           </Route>
 
@@ -69,6 +89,35 @@ function PlaceholderPage({ title }) {
     <div className="p-6 lg:p-8">
       <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
       <p className="mt-2 text-gray-600">Esta página está em construção.</p>
+    </div>
+  );
+}
+
+// Suspended account page
+function SuspendedPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h1 className="text-center text-3xl font-bold">
+          <span className="text-gradient">Centro de Carreiras</span>
+        </h1>
+      </div>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-6 shadow-lg rounded-2xl sm:px-10 text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+            <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="mt-6 text-xl font-semibold text-gray-900">Conta Suspensa</h2>
+          <p className="mt-4 text-gray-600">
+            Sua conta foi suspensa. Entre em contato com o suporte para mais informacoes.
+          </p>
+          <p className="mt-6 text-center text-xs text-gray-500">
+            Fundo Patronos da Unicamp
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

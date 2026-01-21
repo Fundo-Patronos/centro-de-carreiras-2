@@ -8,6 +8,28 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
+// Auto-approved domains by role (must match backend/app/core/approval.py)
+const APPROVED_DOMAINS = {
+  estudante: ['dac.unicamp.br', 'patronos.org'],
+  mentor: ['patronos.org'],
+};
+
+/**
+ * Get initial status for a new user based on email domain
+ * @param {string} email - User's email address
+ * @param {string} role - User's role ('estudante' or 'mentor')
+ * @returns {string} 'active' if auto-approved, 'pending' otherwise
+ */
+function getInitialStatus(email, role) {
+  try {
+    const domain = email.split('@')[1].toLowerCase();
+    const approvedDomains = APPROVED_DOMAINS[role] || [];
+    return approvedDomains.includes(domain) ? 'active' : 'pending';
+  } catch {
+    return 'pending';
+  }
+}
+
 export const userService = {
   /**
    * Create user profile in Firestore
@@ -21,13 +43,14 @@ export const userService = {
    */
   async createUserProfile(uid, userData) {
     const userRef = doc(db, 'users', uid);
+    const status = getInitialStatus(userData.email, userData.role);
     await setDoc(userRef, {
       uid,
       email: userData.email,
       displayName: userData.displayName,
       photoURL: userData.photoURL || null,
       role: userData.role,
-      status: 'active',
+      status,
       authProvider: userData.authProvider,
       profile: {
         phone: null,

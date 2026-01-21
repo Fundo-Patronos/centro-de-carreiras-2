@@ -68,7 +68,38 @@ async def get_current_user(
     # Remove uid from user_data if it exists (we pass it explicitly)
     user_data.pop("uid", None)
 
-    return UserInDB(uid=uid, profile=profile, **user_data)
+    user = UserInDB(uid=uid, profile=profile, **user_data)
+
+    # Check user status - only active users can access protected endpoints
+    if user.status == "pending":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sua conta está pendente de aprovação",
+        )
+    elif user.status == "suspended":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sua conta foi suspensa",
+        )
+
+    return user
+
+
+async def get_current_admin(
+    current_user: UserInDB = Depends(get_current_user),
+) -> UserInDB:
+    """
+    Require admin privileges.
+
+    Use as dependency:
+        admin: UserInDB = Depends(get_current_admin)
+    """
+    if not current_user.isAdmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso restrito a administradores",
+        )
+    return current_user
 
 
 async def get_current_estudante(

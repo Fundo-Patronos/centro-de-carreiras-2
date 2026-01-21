@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { userService } from '../../services/userService';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function GoogleButton({ onNewUser, label = 'Entrar com Google' }) {
   const [loading, setLoading] = useState(false);
@@ -11,6 +12,7 @@ export default function GoogleButton({ onNewUser, label = 'Entrar com Google' })
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
+    analytics.track(EVENTS.GOOGLE_AUTH_STARTED);
 
     try {
       // Sign in with Google

@@ -153,3 +153,88 @@ Migrated from WorkOS AuthKit (v1) to Firebase Authentication.
 - Connect to Airtable for mentor browsing
 - Build out mentor listing page
 - Implement booking system
+
+---
+
+### Session 2 - 2026-01-19
+
+**Mixpanel Analytics Implementation**
+
+Implemented Mixpanel analytics on both frontend and backend to track user authentication, mentor browsing, and session booking events.
+
+**Frontend Analytics:**
+- Created `frontend/src/services/analytics.js` - Analytics service with `identify()`, `track()`, `reset()` functions
+- Added `VITE_MIXPANEL_TOKEN` environment variable
+
+**Events Tracked (Frontend):**
+
+| Event | Component | Trigger |
+|-------|-----------|---------|
+| `Sign Up Started` | SignupForm | Form submit |
+| `Sign Up Completed` | SignupForm, RoleModal | After profile creation |
+| `Login Started` | LoginForm | Form submit |
+| `Login Completed` | AuthContext | Auth state change with profile |
+| `Google Auth Started` | GoogleButton | Button click |
+| `Role Selected` | RoleModal | Form submit |
+| `Magic Link Sent` | MagicLinkForm | After sendMagicLink |
+| `Magic Link Verified` | VerifyEmail | After verification |
+| `Logout` | Sidebar | Logout click |
+| `Mentors Viewed` | MentorList | On page load/fetch success |
+| `Mentor Search` | MentorList | Search input (debounced) |
+| `Mentor Profile Viewed` | MentorList | handleMentorClick |
+| `LinkedIn Clicked` | MentorDrawer | LinkedIn link click |
+| `Book Session Clicked` | MentorDrawer | Agendar button click |
+
+**Backend Analytics:**
+- Created `backend/app/core/analytics.py` - Analytics module with `track_event()` function
+- Added `MIXPANEL_TOKEN` to config.py and .env
+- Added `mixpanel==4.10.1` to requirements.txt
+
+**Events Tracked (Backend):**
+
+| Event | Endpoint | Trigger |
+|-------|----------|---------|
+| `API: Mentors Fetched` | GET /mentors | list_mentors |
+| `API: Mentor Detail Fetched` | GET /mentors/{id} | get_mentor |
+| `API: Profile Updated` | PATCH /users/me | update_current_user_profile |
+
+**User Identification:**
+- Users are identified in Mixpanel on login via `analytics.identify(uid)`
+- User properties set: email, role, authProvider, displayName
+- Identity reset on logout via `analytics.reset()`
+
+**Files Modified:**
+- Frontend: AuthContext.jsx, LoginForm.jsx, SignupForm.jsx, GoogleButton.jsx, MagicLinkForm.jsx, RoleModal.jsx, VerifyEmail.jsx, MentorList.jsx, MentorDrawer.jsx, Sidebar.jsx
+- Backend: config.py, mentors.py, users.py, requirements.txt
+
+**Files Created:**
+- `frontend/src/services/analytics.js`
+- `backend/app/core/analytics.py`
+
+---
+
+## Development Guidelines
+
+### Analytics Requirement
+
+**All new features must include Mixpanel event tracking.**
+
+When building new functionality:
+1. Define meaningful events that capture user actions
+2. Add events to `EVENTS` constant in `frontend/src/services/analytics.js`
+3. Add events to `Events` class in `backend/app/core/analytics.py`
+4. Include relevant properties (IDs, names, counts, etc.)
+5. Track both user-initiated actions (frontend) and API calls (backend)
+
+Example pattern:
+```javascript
+// Frontend
+import analytics, { EVENTS } from '../../services/analytics';
+analytics.track(EVENTS.YOUR_EVENT, { property: 'value' });
+```
+
+```python
+# Backend
+from ...core.analytics import track_event, Events
+track_event(user_id=current_user.uid, event_name=Events.YOUR_EVENT, properties={...})
+```

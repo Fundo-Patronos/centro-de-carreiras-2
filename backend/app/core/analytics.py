@@ -1,0 +1,104 @@
+"""
+Mixpanel Analytics Module for Centro de Carreiras API.
+
+Provides server-side event tracking for API endpoints.
+"""
+
+import logging
+from datetime import datetime
+from typing import Any, Optional
+
+from .config import settings
+
+logger = logging.getLogger(__name__)
+
+# Try to import mixpanel, gracefully handle if not available
+try:
+    from mixpanel import Mixpanel
+    MIXPANEL_AVAILABLE = True
+except ImportError:
+    MIXPANEL_AVAILABLE = False
+    logger.warning("Mixpanel package not installed. Analytics will be disabled.")
+
+
+# Event name constants
+class Events:
+    # API events
+    MENTORS_FETCHED = "API: Mentors Fetched"
+    MENTOR_DETAIL_FETCHED = "API: Mentor Detail Fetched"
+    PROFILE_UPDATED = "API: Profile Updated"
+    AUTH_VERIFIED = "API: Auth Verified"
+    SESSION_REQUESTED = "API: Session Requested"
+
+
+# Initialize Mixpanel client
+_mp: Optional[Any] = None
+
+if MIXPANEL_AVAILABLE and settings.MIXPANEL_TOKEN:
+    try:
+        _mp = Mixpanel(settings.MIXPANEL_TOKEN)
+        logger.info("Mixpanel analytics initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize Mixpanel: {e}")
+        _mp = None
+else:
+    if not settings.MIXPANEL_TOKEN:
+        logger.warning("Mixpanel token not configured. Analytics will be disabled.")
+
+
+def track_event(
+    user_id: str,
+    event_name: str,
+    properties: Optional[dict] = None,
+) -> None:
+    """
+    Track an event in Mixpanel.
+
+    Args:
+        user_id: The user's unique identifier (Firebase UID)
+        event_name: Name of the event (use Events constants)
+        properties: Additional event properties
+    """
+    if not _mp:
+        return
+
+    try:
+        event_properties = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "source": "api",
+            **(properties or {}),
+        }
+        _mp.track(user_id, event_name, event_properties)
+        logger.debug(f"Tracked event: {event_name} for user {user_id}")
+    except Exception as e:
+        # Don't let analytics errors affect API functionality
+        logger.error(f"Failed to track event {event_name}: {e}")
+
+
+def set_user_properties(
+    user_id: str,
+    properties: dict,
+) -> None:
+    """
+    Set user profile properties in Mixpanel.
+
+    Args:
+        user_id: The user's unique identifier
+        properties: User properties to set
+    """
+    if not _mp:
+        return
+
+    try:
+        _mp.people_set(user_id, properties)
+        logger.debug(f"Set user properties for {user_id}")
+    except Exception as e:
+        logger.error(f"Failed to set user properties: {e}")
+
+
+# Convenience instance for importing
+analytics = {
+    "track": track_event,
+    "set_user": set_user_properties,
+    "Events": Events,
+}

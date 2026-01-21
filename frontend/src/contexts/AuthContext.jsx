@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { userService } from '../services/userService';
+import analytics, { EVENTS } from '../services/analytics';
 
 // Create context
 const AuthContext = createContext(null);
@@ -47,6 +48,18 @@ export function AuthProvider({ children }) {
               setUserProfile(profile);
               setNeedsRoleSelection(false);
               setLoading(false);
+
+              // Identify user in Mixpanel
+              analytics.identify(user.uid, {
+                email: profile.email,
+                role: profile.role,
+                authProvider: profile.authProvider,
+                displayName: profile.displayName,
+              });
+              analytics.track(EVENTS.LOGIN_COMPLETED, {
+                auth_provider: profile.authProvider,
+                role: profile.role,
+              });
             } else {
               // No profile yet - user needs to complete signup
               setUserProfile(null);
@@ -60,6 +73,9 @@ export function AuthProvider({ children }) {
         setUserProfile(null);
         setNeedsRoleSelection(false);
         setLoading(false);
+
+        // Reset Mixpanel identity
+        analytics.reset();
       }
     });
 
@@ -119,6 +135,10 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!firebaseUser && !!userProfile,
     isEstudante: userProfile?.role === 'estudante',
     isMentor: userProfile?.role === 'mentor',
+    isAdmin: userProfile?.isAdmin === true,
+    isPending: userProfile?.status === 'pending',
+    isSuspended: userProfile?.status === 'suspended',
+    isActive: userProfile?.status === 'active',
 
     // Methods
     getIdToken,

@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import analytics, { EVENTS } from '../../services/analytics';
+import BookingModal from '../session/BookingModal';
 
 function getTagColor(tag) {
   const tagColors = {
@@ -15,6 +18,25 @@ function getTagColor(tag) {
 }
 
 export default function MentorDrawer({ mentor, isOpen, onClose }) {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
+  // Track LinkedIn clicks
+  const handleLinkedInClick = () => {
+    analytics.track(EVENTS.LINKEDIN_CLICKED, {
+      mentor_id: mentor?.id,
+      mentor_name: mentor?.name,
+    });
+  };
+
+  // Track book session clicks and open modal
+  const handleBookSessionClick = () => {
+    analytics.track(EVENTS.BOOK_SESSION_CLICKED, {
+      mentor_id: mentor?.id,
+      mentor_name: mentor?.name,
+    });
+    setIsBookingModalOpen(true);
+  };
+
   if (!mentor) return null;
 
   return (
@@ -86,6 +108,7 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
                         <div className="mt-5 flex flex-wrap gap-3">
                           <button
                             type="button"
+                            onClick={handleBookSessionClick}
                             className="inline-flex shrink-0 items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-purple/90 focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:ring-offset-2"
                           >
                             Agendar Mentoria
@@ -95,6 +118,7 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
                               href={mentor.linkedin}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={handleLinkedInClick}
                               className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                             >
                               Ver LinkedIn
@@ -176,6 +200,13 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      <BookingModal
+        mentor={mentor}
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
     </Dialog>
   );
 }

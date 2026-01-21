@@ -6,9 +6,11 @@ import {
   CalendarDaysIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
+import analytics, { EVENTS } from '../../services/analytics';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -21,6 +23,7 @@ export default function Sidebar() {
   // Navigation items based on role
   const isEstudante = userProfile?.role === 'estudante';
   const isMentor = userProfile?.role === 'mentor';
+  const isAdmin = userProfile?.isAdmin === true;
 
   const navigation = isEstudante
     ? [
@@ -36,6 +39,7 @@ export default function Sidebar() {
       ];
 
   const handleLogout = async () => {
+    analytics.track(EVENTS.LOGOUT);
     await authService.logout();
     navigate('/auth');
   };
@@ -92,6 +96,33 @@ export default function Sidebar() {
               </span>
             </div>
           </li>
+
+          {/* Admin section */}
+          {isAdmin && (
+            <li>
+              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Administracao
+              </div>
+              <ul role="list" className="mt-2 -mx-2 space-y-1">
+                <li>
+                  <NavLink
+                    to="/admin/approvals"
+                    className={({ isActive }) =>
+                      classNames(
+                        isActive
+                          ? 'bg-patronos-accent text-white'
+                          : 'text-gray-400 hover:bg-white/5 hover:text-white',
+                        'group flex gap-x-3 rounded-md p-2 text-sm font-semibold transition-colors'
+                      )
+                    }
+                  >
+                    <ShieldCheckIcon aria-hidden="true" className="h-6 w-6 shrink-0" />
+                    Aprovacoes
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
+          )}
 
           {/* User profile at bottom */}
           <li className="-mx-6 mt-auto">

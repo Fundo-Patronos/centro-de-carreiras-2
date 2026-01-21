@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { authService } from '../../services/authService';
 import RoleSelector from './RoleSelector';
 import { EnvelopeIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function MagicLinkForm() {
   const [formData, setFormData] = useState({
@@ -38,6 +39,7 @@ export default function MagicLinkForm() {
     try {
       await authService.sendMagicLink(formData.email, formData.role);
       setEmailSent(true);
+      analytics.track(EVENTS.MAGIC_LINK_SENT, { role: formData.role });
     } catch (err) {
       console.error('Magic link error:', err);
 

@@ -18,10 +18,17 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
+# Parse CORS origins (supports comma-separated list)
+cors_origins = [
+    origin.strip()
+    for origin in settings.FRONTEND_URL.split(",")
+    if origin.strip()
+]
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

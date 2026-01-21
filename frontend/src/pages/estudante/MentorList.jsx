@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -7,6 +7,7 @@ import {
 import { mentorService } from '../../services/mentorService';
 import MentorDrawer from '../../components/mentor/MentorDrawer';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import analytics, { EVENTS } from '../../services/analytics';
 
 // Tag color mapping
 const tagColors = {
@@ -114,6 +115,7 @@ export default function MentorList() {
         const data = await mentorService.getMentors();
         setMentors(data.mentors || []);
         setError(null);
+        analytics.track(EVENTS.MENTORS_VIEWED, { results_count: data.mentors?.length || 0 });
       } catch (err) {
         console.error('Error fetching mentors:', err);
         setError('Não foi possível carregar os mentores. Tente novamente.');
@@ -139,7 +141,29 @@ export default function MentorList() {
   const handleMentorClick = (mentor) => {
     setSelectedMentor(mentor);
     setDrawerOpen(true);
+    analytics.track(EVENTS.MENTOR_PROFILE_VIEWED, {
+      mentor_id: mentor.id,
+      mentor_name: mentor.name,
+    });
   };
+
+  // Debounced search tracking
+  const trackSearch = useCallback((query) => {
+    if (query.trim()) {
+      analytics.track(EVENTS.MENTOR_SEARCH, {
+        search_query: query,
+        results_count: filteredMentors.length,
+      });
+    }
+  }, [filteredMentors.length]);
+
+  // Track search with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      trackSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, trackSearch]);
 
   const handleDrawerClose = () => {
     setDrawerOpen(false);

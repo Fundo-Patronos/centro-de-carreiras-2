@@ -18,3 +18,9 @@ python-multipart==0.0.6
 
 # HTTP client for Airtable
 httpx==0.27.0
+
+# Analytics
+mixpanel==4.10.1
+
+# Email service
+resend==0.7.0

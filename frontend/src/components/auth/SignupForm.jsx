@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { authService } from '../../services/authService';
 import { userService } from '../../services/userService';
 import RoleSelector from './RoleSelector';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -51,6 +52,8 @@ export default function SignupForm() {
     if (!validateForm()) return;
 
     setLoading(true);
+    analytics.track(EVENTS.SIGN_UP_STARTED, { auth_provider: 'email', role: formData.role });
+
     try {
       // Create Firebase Auth user
       const user = await authService.signUpWithEmail(
@@ -69,6 +72,8 @@ export default function SignupForm() {
         role: formData.role,
         authProvider: 'email',
       });
+
+      analytics.track(EVENTS.SIGN_UP_COMPLETED, { auth_provider: 'email', role: formData.role });
       // Don't navigate here - let AuthContext handle it via real-time subscription
     } catch (err) {
       console.error('Signup error:', err);

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -30,6 +31,8 @@ export default function LoginForm() {
     if (!validateForm()) return;
 
     setLoading(true);
+    analytics.track(EVENTS.LOGIN_STARTED, { auth_provider: 'email' });
+
     try {
       // Sign in with Firebase - AuthContext will handle the redirect
       await authService.signInWithEmail(formData.email, formData.password);

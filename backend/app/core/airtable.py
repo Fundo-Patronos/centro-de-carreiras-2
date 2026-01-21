@@ -97,7 +97,7 @@ class AirtableService:
         - Foto -> photoURL (attachment)
         - Tags -> tags
         - Pode ajudar com -> expertise
-        - Linkedin -> linkedin
+        - LinkedIn -> linkedin
         - Curso -> course
         """
         fields = record.get("fields", {})
@@ -118,6 +118,11 @@ class AirtableService:
         if isinstance(expertise, str):
             expertise = [e.strip() for e in expertise.split(",") if e.strip()]
 
+        # Handle LinkedIn - could be string or button object
+        linkedin = fields.get("LinkedIn", "")
+        if isinstance(linkedin, dict):
+            linkedin = linkedin.get("url", "")
+
         return {
             "id": record.get("id"),
             "name": fields.get("Name", ""),
@@ -127,7 +132,7 @@ class AirtableService:
             "photoURL": photo_url,
             "tags": tags,
             "expertise": expertise,
-            "linkedin": fields.get("Linkedin", ""),
+            "linkedin": linkedin,
             "course": fields.get("Curso", ""),
         }
 

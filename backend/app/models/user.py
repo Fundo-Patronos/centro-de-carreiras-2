@@ -40,6 +40,7 @@ class UserInDB(UserBase):
     profile: UserProfile = UserProfile()
     emailNotifications: bool = True
     language: str = "pt-BR"
+    isAdmin: bool = False  # Users can be estudante/mentor AND admin simultaneously
     createdAt: Optional[datetime] = None
     updatedAt: Optional[datetime] = None
     lastLoginAt: Optional[datetime] = None
@@ -54,6 +55,7 @@ class UserResponse(BaseModel):
     photoURL: Optional[str] = None
     role: Literal["estudante", "mentor"]
     status: str
+    isAdmin: bool = False
     profile: UserProfile
 
 

@@ -6,6 +6,7 @@ from google.cloud.firestore import SERVER_TIMESTAMP
 from ..deps import get_current_user
 from ...models.user import UserInDB, UserResponse, UserUpdate
 from ...core.firebase import db
+from ...core.analytics import track_event, Events
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -58,6 +59,15 @@ async def update_current_user_profile(
     # Fetch updated user
     updated_doc = user_ref.get()
     updated_data = updated_doc.to_dict()
+
+    # Track analytics
+    track_event(
+        user_id=current_user.uid,
+        event_name=Events.PROFILE_UPDATED,
+        properties={
+            "fields_updated": list(update_data.keys()),
+        },
+    )
 
     return UserResponse(
         uid=current_user.uid,

@@ -5,6 +5,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from ...core.airtable import airtable_service
+from ...core.analytics import track_event, Events
 from ..deps import get_current_user
 
 
@@ -41,6 +42,14 @@ async def list_mentors(
     """
     try:
         mentors = await airtable_service.get_mentors()
+
+        # Track analytics
+        track_event(
+            user_id=current_user.uid,
+            event_name=Events.MENTORS_FETCHED,
+            properties={"results_count": len(mentors)},
+        )
+
         return MentorListResponse(
             mentors=mentors,
             total=len(mentors),
@@ -68,6 +77,17 @@ async def get_mentor(
                 status_code=404,
                 detail="Mentor not found",
             )
+
+        # Track analytics
+        track_event(
+            user_id=current_user.uid,
+            event_name=Events.MENTOR_DETAIL_FETCHED,
+            properties={
+                "mentor_id": mentor_id,
+                "mentor_name": mentor.get("name") if isinstance(mentor, dict) else getattr(mentor, "name", None),
+            },
+        )
+
         return mentor
     except HTTPException:
         raise

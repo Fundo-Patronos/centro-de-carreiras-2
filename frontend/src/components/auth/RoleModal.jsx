@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { userService } from '../../services/userService';
 import RoleSelector from './RoleSelector';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function RoleModal({ isOpen, user, onClose }) {
   const [role, setRole] = useState('');
@@ -28,6 +29,9 @@ export default function RoleModal({ isOpen, user, onClose }) {
         role,
         authProvider: 'google',
       });
+
+      analytics.track(EVENTS.ROLE_SELECTED, { role, auth_provider: 'google' });
+      analytics.track(EVENTS.SIGN_UP_COMPLETED, { auth_provider: 'google', role });
 
       // Redirect to role-specific dashboard
       navigate(role === 'mentor' ? '/mentor/dashboard' : '/estudante/dashboard');
