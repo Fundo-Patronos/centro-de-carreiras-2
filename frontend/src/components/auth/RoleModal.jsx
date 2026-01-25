@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { userService } from '../../services/userService';
@@ -10,6 +10,15 @@ export default function RoleModal({ isOpen, user, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // Track modal opened
+  useEffect(() => {
+    if (isOpen && user) {
+      analytics.track(EVENTS.ROLE_MODAL_OPENED, {
+        auth_provider: 'google',
+      });
+    }
+  }, [isOpen, user]);
 
   const handleSubmit = async () => {
     if (!role) {

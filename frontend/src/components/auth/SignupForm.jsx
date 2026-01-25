@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { userService } from '../../services/userService';
+import { verificationService } from '../../services/verificationService';
 import RoleSelector from './RoleSelector';
 import analytics, { EVENTS } from '../../services/analytics';
 
 export default function SignupForm() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -64,7 +67,6 @@ export default function SignupForm() {
 
       // Create Firestore profile with role
       // AuthContext's real-time subscription will detect this and update state
-      // Then AuthPage's useEffect will redirect based on role
       await userService.createUserProfile(user.uid, {
         email: formData.email,
         displayName: formData.name,
@@ -74,9 +76,30 @@ export default function SignupForm() {
       });
 
       analytics.track(EVENTS.SIGN_UP_COMPLETED, { auth_provider: 'email', role: formData.role });
-      // Don't navigate here - let AuthContext handle it via real-time subscription
+
+      // Check if user needs email verification (auto-approved domain with email/password)
+      const profile = await userService.getUserProfile(user.uid);
+      if (profile?.status === 'pending_verification') {
+        // Send verification email
+        try {
+          await verificationService.sendVerificationEmail();
+          analytics.track(EVENTS.VERIFICATION_EMAIL_SENT, { role: formData.role });
+        } catch (emailError) {
+          console.error('Error sending verification email:', emailError);
+          // Don't block signup, user can resend from pending verification page
+        }
+        navigate('/pending-verification');
+        return;
+      }
+      // For other statuses, let AuthContext handle redirect via real-time subscription
     } catch (err) {
       console.error('Signup error:', err);
+
+      analytics.track(EVENTS.SIGN_UP_ERROR, {
+        auth_provider: 'email',
+        role: formData.role,
+        error_code: err.code,
+      });
 
       // Handle Firebase errors in Portuguese
       if (err.code === 'auth/email-already-in-use') {

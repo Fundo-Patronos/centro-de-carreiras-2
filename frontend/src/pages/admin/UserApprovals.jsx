@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { adminService } from '../../services/adminService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function UserApprovals() {
   const [users, setUsers] = useState([]);
@@ -15,6 +16,11 @@ export default function UserApprovals() {
   const [filter, setFilter] = useState('all'); // 'all' | 'estudante' | 'mentor'
   const [actionLoading, setActionLoading] = useState(null); // uid of user being processed
   const [toast, setToast] = useState(null);
+
+  // Track page view on mount
+  useEffect(() => {
+    analytics.track(EVENTS.ADMIN_APPROVALS_VIEWED);
+  }, []);
 
   // Fetch pending users on mount
   useEffect(() => {
@@ -41,14 +47,25 @@ export default function UserApprovals() {
   };
 
   const handleApprove = async (uid, email) => {
+    const user = users.find(u => u.uid === uid);
     try {
       setActionLoading(uid);
       await adminService.approveUser(uid);
       setUsers(users.filter((u) => u.uid !== uid));
       showToast(`Usuario ${email} aprovado com sucesso`);
+      analytics.track(EVENTS.USER_APPROVED, {
+        approved_user_uid: uid,
+        approved_user_email: email,
+        approved_user_role: user?.role,
+      });
     } catch (err) {
       showToast('Erro ao aprovar usuario', 'error');
       console.error(err);
+      analytics.track(EVENTS.ADMIN_ACTION_ERROR, {
+        action: 'approve',
+        user_uid: uid,
+        error: err.message,
+      });
     } finally {
       setActionLoading(null);
     }
@@ -59,17 +76,35 @@ export default function UserApprovals() {
       return;
     }
 
+    const user = users.find(u => u.uid === uid);
     try {
       setActionLoading(uid);
       await adminService.rejectUser(uid);
       setUsers(users.filter((u) => u.uid !== uid));
       showToast(`Usuario ${email} rejeitado`);
+      analytics.track(EVENTS.USER_REJECTED, {
+        rejected_user_uid: uid,
+        rejected_user_email: email,
+        rejected_user_role: user?.role,
+      });
     } catch (err) {
       showToast('Erro ao rejeitar usuario', 'error');
       console.error(err);
+      analytics.track(EVENTS.ADMIN_ACTION_ERROR, {
+        action: 'reject',
+        user_uid: uid,
+        error: err.message,
+      });
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    analytics.track(EVENTS.ADMIN_FILTER_CHANGED, {
+      filter_type: newFilter,
+    });
   };
 
   const filteredUsers =
@@ -111,7 +146,7 @@ export default function UserApprovals() {
           <FunnelIcon className="h-5 w-5 text-gray-400" />
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
+            onChange={(e) => handleFilterChange(e.target.value)}
             className="rounded-lg border-gray-300 text-sm focus:border-patronos-accent focus:ring-patronos-accent"
           >
             <option value="all">Todos</option>

@@ -1,14 +1,24 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClockIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function PendingApproval() {
   const { userProfile, loading, firebaseUser } = useAuth();
   const navigate = useNavigate();
 
+  // Track page view on mount
+  useEffect(() => {
+    analytics.track(EVENTS.PENDING_APPROVAL_VIEWED, {
+      user_role: userProfile?.role,
+    });
+  }, [userProfile?.role]);
+
   const handleLogout = async () => {
+    analytics.track(EVENTS.LOGOUT, { from_page: 'pending_approval' });
     await authService.logout();
     navigate('/auth');
   };

@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str = ""
     EMAIL_FROM_ADDRESS: str = "Centro de Carreiras <noreply@patronos.org>"
     EMAIL_ADMIN_CC: str = "contato@patronos.org"
+    EMAIL_ADMIN_BCC: str = "gabriel.aquino@patronos.org"
 
     class Config:
         env_file = ".env"

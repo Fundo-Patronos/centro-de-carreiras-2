@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -6,9 +7,23 @@ import {
   CalendarIcon,
   BriefcaseIcon,
 } from '@heroicons/react/24/outline';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function EstudanteDashboard() {
   const { userProfile } = useAuth();
+
+  // Track page view on mount
+  useEffect(() => {
+    analytics.track(EVENTS.ESTUDANTE_DASHBOARD_VIEWED);
+  }, []);
+
+  // Track quick access clicks
+  const handleQuickAccessClick = (destination) => {
+    analytics.track(EVENTS.QUICK_ACCESS_CLICKED, {
+      destination,
+      user_role: 'estudante',
+    });
+  };
 
   return (
     <div className="p-6 lg:p-8">
@@ -29,6 +44,7 @@ export default function EstudanteDashboard() {
         {/* Find Mentors */}
         <Link
           to="/estudante/mentores"
+          onClick={() => handleQuickAccessClick('mentores')}
           className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group"
         >
           <div className="w-11 h-11 bg-patronos-accent/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-patronos-accent/20 transition-colors">
@@ -43,6 +59,7 @@ export default function EstudanteDashboard() {
         {/* My Sessions */}
         <Link
           to="/estudante/sessoes"
+          onClick={() => handleQuickAccessClick('sessoes')}
           className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group"
         >
           <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-green-200 transition-colors">
@@ -57,6 +74,7 @@ export default function EstudanteDashboard() {
         {/* Jobs */}
         <Link
           to="/estudante/vagas"
+          onClick={() => handleQuickAccessClick('vagas')}
           className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group"
         >
           <div className="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-200 transition-colors">
@@ -69,7 +87,10 @@ export default function EstudanteDashboard() {
         </Link>
 
         {/* Profile */}
-        <div className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group cursor-pointer">
+        <div
+          onClick={() => handleQuickAccessClick('perfil')}
+          className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group cursor-pointer"
+        >
           <div className="w-11 h-11 bg-orange-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-orange-200 transition-colors">
             <AcademicCapIcon className="w-5 h-5 text-orange-600" />
           </div>

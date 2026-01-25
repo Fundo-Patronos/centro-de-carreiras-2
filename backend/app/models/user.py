@@ -35,7 +35,7 @@ class UserInDB(UserBase):
     """User data as stored in Firestore."""
 
     uid: str
-    status: Literal["active", "pending", "suspended"] = "active"
+    status: Literal["active", "pending", "pending_verification", "suspended"] = "active"
     authProvider: Literal["email", "google", "magic_link"]
     profile: UserProfile = UserProfile()
     emailNotifications: bool = True

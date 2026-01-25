@@ -91,6 +91,7 @@ class AirtableService:
 
         Airtable field mapping:
         - Name -> name
+        - Email / E-mail -> email
         - Título -> title
         - Companhia -> company
         - Bio -> bio
@@ -123,9 +124,13 @@ class AirtableService:
         if isinstance(linkedin, dict):
             linkedin = linkedin.get("url", "")
 
+        # Handle email - try different possible field names
+        email = fields.get("Email") or fields.get("E-mail") or fields.get("email") or ""
+
         return {
             "id": record.get("id"),
             "name": fields.get("Name", ""),
+            "email": email,
             "title": fields.get("Título", ""),
             "company": fields.get("Companhia", ""),
             "bio": fields.get("Bio", ""),

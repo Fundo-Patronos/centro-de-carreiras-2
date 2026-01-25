@@ -15,16 +15,28 @@ const APPROVED_DOMAINS = {
 };
 
 /**
- * Get initial status for a new user based on email domain
+ * Get initial status for a new user based on email domain and auth provider
  * @param {string} email - User's email address
  * @param {string} role - User's role ('estudante' or 'mentor')
- * @returns {string} 'active' if auto-approved, 'pending' otherwise
+ * @param {string} authProvider - Authentication method ('email', 'google', 'magic_link')
+ * @returns {string} 'active', 'pending_verification', or 'pending'
  */
-function getInitialStatus(email, role) {
+function getInitialStatus(email, role, authProvider) {
   try {
     const domain = email.split('@')[1].toLowerCase();
     const approvedDomains = APPROVED_DOMAINS[role] || [];
-    return approvedDomains.includes(domain) ? 'active' : 'pending';
+
+    if (!approvedDomains.includes(domain)) {
+      return 'pending';
+    }
+
+    // Auto-approved domain - check auth provider
+    if (authProvider === 'google' || authProvider === 'magic_link') {
+      return 'active';
+    }
+
+    // Email/password signup needs email verification
+    return 'pending_verification';
   } catch {
     return 'pending';
   }
@@ -43,7 +55,7 @@ export const userService = {
    */
   async createUserProfile(uid, userData) {
     const userRef = doc(db, 'users', uid);
-    const status = getInitialStatus(userData.email, userData.role);
+    const status = getInitialStatus(userData.email, userData.role, userData.authProvider);
     await setDoc(userRef, {
       uid,
       email: userData.email,

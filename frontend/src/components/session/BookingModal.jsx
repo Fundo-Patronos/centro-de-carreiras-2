@@ -33,6 +33,13 @@ ${userProfile.displayName}`;
       setMessage(defaultMessage);
       setSubmitState('idle');
       setError('');
+
+      // Track modal opened
+      analytics.track(EVENTS.BOOKING_MODAL_OPENED, {
+        mentor_id: mentor.id,
+        mentor_name: mentor.name,
+        mentor_company: mentor.company,
+      });
     }
   }, [isOpen, mentor, userProfile]);
 
@@ -63,23 +70,43 @@ ${userProfile.displayName}`;
         mentor_company: mentor.company,
       });
 
+      analytics.track(EVENTS.SESSION_REQUEST_SUCCESS, {
+        mentor_id: mentor.id,
+        mentor_name: mentor.name,
+      });
+
       setSubmitState('success');
     } catch (err) {
       console.error('Error creating session:', err);
-      setError(err.response?.data?.detail || 'Erro ao enviar solicitacao. Tente novamente.');
+      const errorMessage = err.response?.data?.detail || 'Erro ao enviar solicitacao. Tente novamente.';
+      setError(errorMessage);
       setSubmitState('error');
+
+      analytics.track(EVENTS.SESSION_REQUEST_ERROR, {
+        mentor_id: mentor.id,
+        mentor_name: mentor.name,
+        error: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleGoToSessions = () => {
+    analytics.track(EVENTS.VIEW_MY_SESSIONS_CLICKED, {
+      from: 'booking_modal_success',
+      mentor_id: mentor?.id,
+    });
     onClose();
     navigate('/estudante/sessoes');
   };
 
   const handleClose = () => {
     if (!isSubmitting) {
+      analytics.track(EVENTS.BOOKING_MODAL_CLOSED, {
+        mentor_id: mentor?.id,
+        submit_state: submitState,
+      });
       setSubmitState('idle');
       onClose();
     }

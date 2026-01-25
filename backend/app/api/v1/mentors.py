@@ -13,6 +13,7 @@ class MentorResponse(BaseModel):
     """Mentor data response model."""
     id: str
     name: str
+    email: str = ""
     title: str
     company: str
     bio: str

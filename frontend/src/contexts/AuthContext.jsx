@@ -137,6 +137,7 @@ export function AuthProvider({ children }) {
     isMentor: userProfile?.role === 'mentor',
     isAdmin: userProfile?.isAdmin === true,
     isPending: userProfile?.status === 'pending',
+    isPendingVerification: userProfile?.status === 'pending_verification',
     isSuspended: userProfile?.status === 'suspended',
     isActive: userProfile?.status === 'active',
 

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -6,9 +7,23 @@ import {
   UserCircleIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function MentorDashboard() {
   const { userProfile } = useAuth();
+
+  // Track page view on mount
+  useEffect(() => {
+    analytics.track(EVENTS.MENTOR_DASHBOARD_VIEWED);
+  }, []);
+
+  // Track quick access clicks
+  const handleQuickAccessClick = (destination) => {
+    analytics.track(EVENTS.QUICK_ACCESS_CLICKED, {
+      destination,
+      user_role: 'mentor',
+    });
+  };
 
   return (
     <div className="p-6 lg:p-8">
@@ -68,6 +83,7 @@ export default function MentorDashboard() {
         {/* Sessions */}
         <Link
           to="/mentor/sessoes"
+          onClick={() => handleQuickAccessClick('sessoes')}
           className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group"
         >
           <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-green-200 transition-colors">
@@ -82,6 +98,7 @@ export default function MentorDashboard() {
         {/* Availability */}
         <Link
           to="/mentor/disponibilidade"
+          onClick={() => handleQuickAccessClick('disponibilidade')}
           className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group"
         >
           <div className="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-200 transition-colors">
@@ -94,7 +111,10 @@ export default function MentorDashboard() {
         </Link>
 
         {/* Profile */}
-        <div className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group cursor-pointer">
+        <div
+          onClick={() => handleQuickAccessClick('perfil')}
+          className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group cursor-pointer"
+        >
           <div className="w-11 h-11 bg-patronos-accent/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-patronos-accent/20 transition-colors">
             <BriefcaseIcon className="w-5 h-5 text-patronos-accent" />
           </div>

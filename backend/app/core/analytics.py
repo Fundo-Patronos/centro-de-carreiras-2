@@ -23,12 +23,52 @@ except ImportError:
 
 # Event name constants
 class Events:
-    # API events
+    # ============================================
+    # AUTH API EVENTS
+    # ============================================
+    AUTH_VERIFIED = "API: Auth Verified"
+    AUTH_LOGOUT = "API: User Logout"
+
+    # ============================================
+    # USER API EVENTS
+    # ============================================
+    USER_PROFILE_FETCHED = "API: User Profile Fetched"
+    PROFILE_UPDATED = "API: Profile Updated"
+
+    # ============================================
+    # MENTOR API EVENTS
+    # ============================================
     MENTORS_FETCHED = "API: Mentors Fetched"
     MENTOR_DETAIL_FETCHED = "API: Mentor Detail Fetched"
-    PROFILE_UPDATED = "API: Profile Updated"
-    AUTH_VERIFIED = "API: Auth Verified"
+
+    # ============================================
+    # SESSION API EVENTS
+    # ============================================
     SESSION_REQUESTED = "API: Session Requested"
+    SESSION_CREATED = "API: Session Created"
+    SESSIONS_LISTED = "API: Sessions Listed"
+    SESSION_DETAIL_FETCHED = "API: Session Detail Fetched"
+
+    # ============================================
+    # EMAIL EVENTS
+    # ============================================
+    EMAIL_MENTOR_REQUEST_SENT = "API: Mentor Session Request Email Sent"
+    EMAIL_MENTOR_REQUEST_FAILED = "API: Mentor Session Request Email Failed"
+    EMAIL_STUDENT_CONFIRMATION_SENT = "API: Student Confirmation Email Sent"
+    EMAIL_STUDENT_CONFIRMATION_FAILED = "API: Student Confirmation Email Failed"
+
+    # ============================================
+    # ADMIN API EVENTS
+    # ============================================
+    ADMIN_PENDING_USERS_LISTED = "API: Pending Users Listed"
+    ADMIN_USER_APPROVED = "API: User Approved"
+    ADMIN_USER_REJECTED = "API: User Rejected"
+
+    # ============================================
+    # ERROR EVENTS
+    # ============================================
+    API_ERROR = "API: Error"
+    SESSION_CREATION_FAILED = "API: Session Creation Failed"
 
 
 # Initialize Mixpanel client

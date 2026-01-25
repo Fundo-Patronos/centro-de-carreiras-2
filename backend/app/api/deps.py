@@ -76,6 +76,11 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Sua conta está pendente de aprovação",
         )
+    elif user.status == "pending_verification":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Por favor, verifique seu email",
+        )
     elif user.status == "suspended":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

@@ -35,9 +35,13 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Check user status - redirect pending/suspended users
+  // Check user status - redirect pending/pending_verification/suspended users
   if (userProfile.status === 'pending') {
     return <Navigate to="/pending-approval" replace />;
+  }
+
+  if (userProfile.status === 'pending_verification') {
+    return <Navigate to="/pending-verification" replace />;
   }
 
   if (userProfile.status === 'suspended') {

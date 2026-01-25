@@ -107,6 +107,11 @@ export default function MentorList() {
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Track page view on mount
+  useEffect(() => {
+    analytics.track(EVENTS.MENTORS_LIST_VIEWED);
+  }, []);
+
   // Fetch mentors on mount
   useEffect(() => {
     const fetchMentors = async () => {
@@ -119,6 +124,7 @@ export default function MentorList() {
       } catch (err) {
         console.error('Error fetching mentors:', err);
         setError('Não foi possível carregar os mentores. Tente novamente.');
+        analytics.trackError('load_mentors', { error: err.message });
       } finally {
         setLoading(false);
       }
@@ -141,6 +147,11 @@ export default function MentorList() {
   const handleMentorClick = (mentor) => {
     setSelectedMentor(mentor);
     setDrawerOpen(true);
+    analytics.track(EVENTS.MENTOR_DRAWER_OPENED, {
+      mentor_id: mentor.id,
+      mentor_name: mentor.name,
+      mentor_company: mentor.company,
+    });
     analytics.track(EVENTS.MENTOR_PROFILE_VIEWED, {
       mentor_id: mentor.id,
       mentor_name: mentor.name,
@@ -166,6 +177,12 @@ export default function MentorList() {
   }, [searchQuery, trackSearch]);
 
   const handleDrawerClose = () => {
+    if (selectedMentor) {
+      analytics.track(EVENTS.MENTOR_DRAWER_CLOSED, {
+        mentor_id: selectedMentor.id,
+        mentor_name: selectedMentor.name,
+      });
+    }
     setDrawerOpen(false);
     // Delay clearing mentor to allow animation
     setTimeout(() => setSelectedMentor(null), 300);

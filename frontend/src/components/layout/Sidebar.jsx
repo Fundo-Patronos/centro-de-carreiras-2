@@ -7,6 +7,7 @@ import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   ShieldCheckIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
@@ -39,9 +40,20 @@ export default function Sidebar() {
       ];
 
   const handleLogout = async () => {
-    analytics.track(EVENTS.LOGOUT);
+    analytics.track(EVENTS.LOGOUT, {
+      user_role: userProfile?.role,
+    });
     await authService.logout();
     navigate('/auth');
+  };
+
+  // Track navigation clicks
+  const handleNavClick = (itemName, itemHref) => {
+    analytics.track(EVENTS.NAVIGATION_CLICKED, {
+      destination: itemName,
+      destination_path: itemHref,
+      user_role: userProfile?.role,
+    });
   };
 
   return (
@@ -63,6 +75,7 @@ export default function Sidebar() {
                 <li key={item.name}>
                   <NavLink
                     to={item.href}
+                    onClick={() => handleNavClick(item.name, item.href)}
                     className={({ isActive }) =>
                       classNames(
                         isActive
@@ -107,6 +120,7 @@ export default function Sidebar() {
                 <li>
                   <NavLink
                     to="/admin/approvals"
+                    onClick={() => handleNavClick('Admin Aprovacoes', '/admin/approvals')}
                     className={({ isActive }) =>
                       classNames(
                         isActive
@@ -118,6 +132,23 @@ export default function Sidebar() {
                   >
                     <ShieldCheckIcon aria-hidden="true" className="h-6 w-6 shrink-0" />
                     Aprovacoes
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/admin/feedback"
+                    onClick={() => handleNavClick('Admin Feedback', '/admin/feedback')}
+                    className={({ isActive }) =>
+                      classNames(
+                        isActive
+                          ? 'bg-patronos-accent text-white'
+                          : 'text-gray-400 hover:bg-white/5 hover:text-white',
+                        'group flex gap-x-3 rounded-md p-2 text-sm font-semibold transition-colors'
+                      )
+                    }
+                  >
+                    <ChatBubbleLeftRightIcon aria-hidden="true" className="h-6 w-6 shrink-0" />
+                    Feedback
                   </NavLink>
                 </li>
               </ul>

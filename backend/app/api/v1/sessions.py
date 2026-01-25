@@ -5,6 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Optional
 from firebase_admin import firestore
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from ...core.firebase import db
 from ...core.email import email_service
@@ -67,6 +68,28 @@ async def create_session(
             message=session_data.message,
         )
 
+        # Track mentor email result
+        if mentor_email_result.get("success", False):
+            track_event(
+                user_id=current_user.uid,
+                event_name=Events.EMAIL_MENTOR_REQUEST_SENT,
+                properties={
+                    "session_id": session_id,
+                    "mentor_email": session_data.mentor_email,
+                    "mentor_name": session_data.mentor_name,
+                },
+            )
+        else:
+            track_event(
+                user_id=current_user.uid,
+                event_name=Events.EMAIL_MENTOR_REQUEST_FAILED,
+                properties={
+                    "session_id": session_id,
+                    "mentor_email": session_data.mentor_email,
+                    "error": mentor_email_result.get("error", "Unknown error"),
+                },
+            )
+
         student_email_result = email_service.send_session_confirmation_to_student(
             student_name=current_user.displayName,
             student_email=current_user.email,
@@ -75,6 +98,27 @@ async def create_session(
             message=session_data.message,
         )
 
+        # Track student email result
+        if student_email_result.get("success", False):
+            track_event(
+                user_id=current_user.uid,
+                event_name=Events.EMAIL_STUDENT_CONFIRMATION_SENT,
+                properties={
+                    "session_id": session_id,
+                    "student_email": current_user.email,
+                },
+            )
+        else:
+            track_event(
+                user_id=current_user.uid,
+                event_name=Events.EMAIL_STUDENT_CONFIRMATION_FAILED,
+                properties={
+                    "session_id": session_id,
+                    "student_email": current_user.email,
+                    "error": student_email_result.get("error", "Unknown error"),
+                },
+            )
+
         # Update email status in Firestore
         update_data = {
             "mentor_email_sent": mentor_email_result.get("success", False),
@@ -82,16 +126,17 @@ async def create_session(
         }
         sessions_ref.document(session_id).update(update_data)
 
-        # Track analytics
+        # Track session created
         track_event(
             user_id=current_user.uid,
-            event_name=Events.SESSION_REQUESTED,
+            event_name=Events.SESSION_CREATED,
             properties={
                 "session_id": session_id,
                 "mentor_id": session_data.mentor_id,
                 "mentor_name": session_data.mentor_name,
                 "mentor_company": session_data.mentor_company,
-                "emails_sent": mentor_email_result.get("success", False) and student_email_result.get("success", False),
+                "mentor_email_sent": mentor_email_result.get("success", False),
+                "student_email_sent": student_email_result.get("success", False),
             },
         )
 
@@ -131,15 +176,15 @@ async def list_sessions(
     try:
         sessions_ref = db.collection("sessions")
 
-        # Filter by user role
+        # Filter by user role using new filter syntax
         if current_user.role == "estudante":
-            query = sessions_ref.where("student_uid", "==", current_user.uid)
+            query = sessions_ref.where(filter=FieldFilter("student_uid", "==", current_user.uid))
         else:  # mentor
-            query = sessions_ref.where("mentor_email", "==", current_user.email)
+            query = sessions_ref.where(filter=FieldFilter("mentor_email", "==", current_user.email))
 
         # Filter by status if provided
         if status:
-            query = query.where("status", "==", status)
+            query = query.where(filter=FieldFilter("status", "==", status))
 
         # Order by creation date (most recent first)
         query = query.order_by("created_at", direction=firestore.Query.DESCENDING)
@@ -164,6 +209,17 @@ async def list_sessions(
                 created_at=data.get("created_at"),
                 updated_at=data.get("updated_at"),
             ))
+
+        # Track analytics
+        track_event(
+            user_id=current_user.uid,
+            event_name=Events.SESSIONS_LISTED,
+            properties={
+                "role": current_user.role,
+                "status_filter": status,
+                "result_count": len(sessions),
+            },
+        )
 
         return SessionListResponse(
             sessions=sessions,
@@ -207,6 +263,18 @@ async def get_session(
                 status_code=403,
                 detail="Access denied",
             )
+
+        # Track analytics
+        track_event(
+            user_id=current_user.uid,
+            event_name=Events.SESSION_DETAIL_FETCHED,
+            properties={
+                "session_id": session_id,
+                "user_role": current_user.role,
+                "is_student": is_student,
+                "is_mentor": is_mentor,
+            },
+        )
 
         return SessionResponse(
             id=data["id"],

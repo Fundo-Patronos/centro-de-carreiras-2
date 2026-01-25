@@ -25,9 +25,22 @@ export default function GoogleButton({ onNewUser, label = 'Entrar com Google' })
         // Existing user - update last login and redirect
         const profile = await userService.getUserProfile(user.uid);
         await userService.updateLastLogin(user.uid);
+
+        analytics.track(EVENTS.GOOGLE_AUTH_COMPLETED, {
+          is_new_user: false,
+          role: profile.role,
+        });
+        analytics.track(EVENTS.LOGIN_COMPLETED, {
+          auth_provider: 'google',
+          role: profile.role,
+        });
+
         navigate(profile.role === 'mentor' ? '/mentor/dashboard' : '/estudante/dashboard');
       } else {
         // New user - needs role selection
+        analytics.track(EVENTS.GOOGLE_AUTH_COMPLETED, {
+          is_new_user: true,
+        });
         onNewUser?.(user);
       }
     } catch (err) {
@@ -39,10 +52,12 @@ export default function GoogleButton({ onNewUser, label = 'Entrar com Google' })
         setError('');
       } else if (err.code === 'auth/popup-blocked') {
         setError('Popup bloqueado. Permita popups para este site.');
+        analytics.track(EVENTS.GOOGLE_AUTH_ERROR, { error_code: err.code });
       } else if (err.code === 'auth/cancelled-popup-request') {
         setError('');
       } else {
         setError('Erro ao entrar com Google. Tente novamente.');
+        analytics.track(EVENTS.GOOGLE_AUTH_ERROR, { error_code: err.code });
       }
     } finally {
       setLoading(false);

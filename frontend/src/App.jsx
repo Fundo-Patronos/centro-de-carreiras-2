@@ -7,9 +7,15 @@ import AppLayout from './components/layout/AppLayout';
 import AuthPage from './pages/auth/AuthPage';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import PendingApproval from './pages/auth/PendingApproval';
+import PendingVerification from './pages/auth/PendingVerification';
+import VerifyEmailToken from './pages/auth/VerifyEmailToken';
 
 // Admin pages
 import UserApprovals from './pages/admin/UserApprovals';
+import SessionFeedback from './pages/admin/SessionFeedback';
+
+// Public pages
+import FeedbackForm from './pages/public/FeedbackForm';
 
 // Estudante pages
 import EstudanteDashboard from './pages/estudante/Dashboard';
@@ -28,8 +34,11 @@ export default function App() {
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/verify" element={<VerifyEmail />} />
+          <Route path="/auth/verify-email" element={<VerifyEmailToken />} />
           <Route path="/pending-approval" element={<PendingApproval />} />
+          <Route path="/pending-verification" element={<PendingVerification />} />
           <Route path="/suspended" element={<SuspendedPage />} />
+          <Route path="/feedback" element={<FeedbackForm />} />
 
           {/* Admin routes - with sidebar layout */}
           <Route
@@ -42,6 +51,7 @@ export default function App() {
           >
             <Route index element={<Navigate to="approvals" replace />} />
             <Route path="approvals" element={<UserApprovals />} />
+            <Route path="feedback" element={<SessionFeedback />} />
           </Route>
 
           {/* Estudante routes - with sidebar layout */}

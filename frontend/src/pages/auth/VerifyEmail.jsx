@@ -13,6 +13,7 @@ export default function VerifyEmail() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    analytics.track(EVENTS.VERIFY_EMAIL_VIEWED);
     verifyMagicLink();
   }, []);
 
@@ -74,6 +75,11 @@ export default function VerifyEmail() {
     } catch (err) {
       console.error('Magic link verification error:', err);
       setStatus('error');
+
+      analytics.track(EVENTS.MAGIC_LINK_ERROR, {
+        error_code: err.code,
+        error_message: err.message,
+      });
 
       if (err.code === 'auth/invalid-action-code') {
         setError('Link expirado. Solicite um novo link de acesso.');

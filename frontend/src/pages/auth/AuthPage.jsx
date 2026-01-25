@@ -7,6 +7,7 @@ import GoogleButton from '../../components/auth/GoogleButton';
 import MagicLinkForm from '../../components/auth/MagicLinkForm';
 import RoleModal from '../../components/auth/RoleModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import analytics, { EVENTS } from '../../services/analytics';
 
 export default function AuthPage() {
   const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'magic'
@@ -15,6 +16,21 @@ export default function AuthPage() {
 
   const { isAuthenticated, userProfile, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Track page view on mount
+  useEffect(() => {
+    analytics.track(EVENTS.AUTH_PAGE_VIEWED, { initial_mode: mode });
+  }, []);
+
+  // Track mode changes
+  const handleModeChange = (newMode) => {
+    analytics.track(EVENTS.PAGE_VIEWED, {
+      page_name: `Auth - ${newMode}`,
+      from_mode: mode,
+      to_mode: newMode,
+    });
+    setMode(newMode);
+  };
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -88,7 +104,7 @@ export default function AuthPage() {
                 <div>
                   <button
                     type="button"
-                    onClick={() => setMode('signup')}
+                    onClick={() => handleModeChange('signup')}
                     className="text-patronos-accent hover:underline"
                   >
                     Não tem conta? Cadastre-se
@@ -97,7 +113,7 @@ export default function AuthPage() {
                 <div>
                   <button
                     type="button"
-                    onClick={() => setMode('magic')}
+                    onClick={() => handleModeChange('magic')}
                     className="text-gray-500 hover:text-gray-700"
                   >
                     Entrar sem senha
@@ -108,7 +124,7 @@ export default function AuthPage() {
             {mode === 'signup' && (
               <button
                 type="button"
-                onClick={() => setMode('login')}
+                onClick={() => handleModeChange('login')}
                 className="text-patronos-accent hover:underline"
               >
                 Já tem conta? Entre
@@ -117,7 +133,7 @@ export default function AuthPage() {
             {mode === 'magic' && (
               <button
                 type="button"
-                onClick={() => setMode('login')}
+                onClick={() => handleModeChange('login')}
                 className="text-patronos-accent hover:underline"
               >
                 Voltar para login

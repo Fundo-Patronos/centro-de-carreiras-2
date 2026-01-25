@@ -41,6 +41,11 @@ export default function LoginForm() {
     } catch (err) {
       console.error('Login error:', err);
 
+      analytics.track(EVENTS.LOGIN_ERROR, {
+        auth_provider: 'email',
+        error_code: err.code,
+      });
+
       // Handle Firebase errors in Portuguese
       if (err.code === 'auth/user-not-found') {
         setErrors({ email: 'Email não cadastrado' });

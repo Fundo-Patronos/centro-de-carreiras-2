@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import sessionService from '../../services/sessionService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import analytics, { EVENTS } from '../../services/analytics';
 
 // Status badge configuration
 const statusConfig = {
@@ -103,6 +104,11 @@ export default function MySessions() {
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState(null);
 
+  // Track page view on mount
+  useEffect(() => {
+    analytics.track(EVENTS.MY_SESSIONS_VIEWED);
+  }, []);
+
   // Fetch sessions on mount
   useEffect(() => {
     const fetchSessions = async () => {
@@ -114,6 +120,7 @@ export default function MySessions() {
       } catch (err) {
         console.error('Error fetching sessions:', err);
         setError('Nao foi possivel carregar suas sessoes. Tente novamente.');
+        analytics.trackError('load_sessions', { error: err.message });
       } finally {
         setLoading(false);
       }
@@ -121,6 +128,14 @@ export default function MySessions() {
 
     fetchSessions();
   }, []);
+
+  // Track filter changes
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+    analytics.track(EVENTS.SESSION_FILTER_APPLIED, {
+      filter_status: filter || 'all',
+    });
+  };
 
   // Filter sessions based on active filter
   const filteredSessions = activeFilter
@@ -170,7 +185,7 @@ export default function MySessions() {
         {filterTabs.map((tab) => (
           <button
             key={tab.key || 'all'}
-            onClick={() => setActiveFilter(tab.key)}
+            onClick={() => handleFilterChange(tab.key)}
             className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
               activeFilter === tab.key
                 ? 'bg-patronos-accent text-white'

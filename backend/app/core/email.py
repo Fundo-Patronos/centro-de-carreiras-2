@@ -39,6 +39,7 @@ class EmailService:
         subject: str,
         html: str,
         cc: Optional[list[str]] = None,
+        bcc: Optional[list[str]] = None,
         reply_to: Optional[str] = None,
     ) -> dict:
         """
@@ -49,6 +50,7 @@ class EmailService:
             subject: Email subject
             html: HTML email content
             cc: Optional list of CC recipients
+            bcc: Optional list of BCC recipients
             reply_to: Optional reply-to address
 
         Returns:
@@ -68,6 +70,9 @@ class EmailService:
 
             if cc:
                 params["cc"] = cc
+
+            if bcc:
+                params["bcc"] = bcc
 
             if reply_to:
                 params["reply_to"] = reply_to
@@ -156,6 +161,7 @@ class EmailService:
             subject=subject,
             html=html,
             cc=[settings.EMAIL_ADMIN_CC],
+            bcc=[settings.EMAIL_ADMIN_BCC],
             reply_to=student_email,
         )
 
@@ -233,6 +239,234 @@ class EmailService:
 
         return self.send_email(
             to=[student_email],
+            subject=subject,
+            html=html,
+            bcc=[settings.EMAIL_ADMIN_BCC],
+        )
+
+
+    def send_verification_email(
+        self,
+        user_name: str,
+        user_email: str,
+        verification_url: str,
+    ) -> dict:
+        """
+        Send email verification link to user.
+
+        Args:
+            user_name: User's display name
+            user_email: User's email address
+            verification_url: The verification URL with token
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        subject = "Verifique seu email - Centro de Carreiras"
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {user_name}!</h2>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                Obrigado por se cadastrar no Centro de Carreiras. Para ativar sua conta, clique no botao abaixo para verificar seu email.
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{verification_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Verificar Email
+                </a>
+            </div>
+
+            <p style="color: #6a6a6a; line-height: 1.6; margin: 24px 0 0 0; font-size: 14px;">
+                Se voce nao conseguir clicar no botao, copie e cole o link abaixo no seu navegador:
+            </p>
+            <p style="color: #9B5DE5; line-height: 1.6; margin: 8px 0 0 0; font-size: 13px; word-break: break-all;">
+                {verification_url}
+            </p>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
+                <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
+                    <strong>Importante:</strong> Este link expira em 24 horas. Se voce nao solicitou esta verificacao, pode ignorar este email com seguranca.
+                </p>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        return self.send_email(
+            to=[user_email],
+            subject=subject,
+            html=html,
+        )
+
+    def send_feedback_request_to_student(
+        self,
+        student_name: str,
+        student_email: str,
+        mentor_name: str,
+        feedback_url: str,
+    ) -> dict:
+        """
+        Send feedback request email to student after a session.
+
+        Args:
+            student_name: Student's display name
+            student_email: Student's email address
+            mentor_name: Mentor's display name
+            feedback_url: URL with token to access feedback form
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        subject = f"Como foi sua mentoria com {mentor_name}?"
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {student_name}!</h2>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                Ha alguns dias voce solicitou uma mentoria com <strong>{mentor_name}</strong>. Gostaríamos de saber como foi sua experiencia!
+            </p>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 24px 0;">
+                Seu feedback e muito importante para melhorarmos o programa de mentorias do Centro de Carreiras.
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{feedback_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Responder Feedback
+                </a>
+            </div>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
+                <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
+                    O formulario leva menos de 1 minuto para responder e suas respostas sao confidenciais - apenas a equipe Patronos tera acesso.
+                </p>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        return self.send_email(
+            to=[student_email],
+            subject=subject,
+            html=html,
+        )
+
+    def send_feedback_request_to_mentor(
+        self,
+        mentor_name: str,
+        mentor_email: str,
+        student_name: str,
+        feedback_url: str,
+    ) -> dict:
+        """
+        Send feedback request email to mentor after a session.
+
+        Args:
+            mentor_name: Mentor's display name
+            mentor_email: Mentor's email address
+            student_name: Student's display name
+            feedback_url: URL with token to access feedback form
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        subject = f"Como foi sua mentoria com {student_name}?"
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {mentor_name}!</h2>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                Ha alguns dias voce recebeu uma solicitacao de mentoria de <strong>{student_name}</strong>. Gostaríamos de saber como foi!
+            </p>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 24px 0;">
+                Seu feedback e muito importante para acompanharmos o progresso do programa e apoiar nossos estudantes.
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{feedback_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Responder Feedback
+                </a>
+            </div>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
+                <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
+                    O formulario leva menos de 1 minuto para responder e suas respostas sao confidenciais - apenas a equipe Patronos tera acesso.
+                </p>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        return self.send_email(
+            to=[mentor_email],
             subject=subject,
             html=html,
         )
