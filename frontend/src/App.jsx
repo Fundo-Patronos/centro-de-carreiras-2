@@ -27,68 +27,79 @@ import MentorDashboard from './pages/mentor/Dashboard';
 
 export default function App() {
   return (
+    <BrowserRouter>
+      <Routes>
+        {/* Fully public routes (no Firebase auth needed) */}
+        <Route path="/feedback" element={<FeedbackForm />} />
+
+        {/* Routes that need AuthProvider */}
+        <Route path="/*" element={<AuthenticatedRoutes />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+function AuthenticatedRoutes() {
+  return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Navigate to="/auth" replace />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/auth/verify" element={<VerifyEmail />} />
-          <Route path="/auth/verify-email" element={<VerifyEmailToken />} />
-          <Route path="/pending-approval" element={<PendingApproval />} />
-          <Route path="/pending-verification" element={<PendingVerification />} />
-          <Route path="/suspended" element={<SuspendedPage />} />
-          <Route path="/feedback" element={<FeedbackForm />} />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Navigate to="/auth" replace />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth/verify" element={<VerifyEmail />} />
+        <Route path="/auth/verify-email" element={<VerifyEmailToken />} />
+        <Route path="/pending-approval" element={<PendingApproval />} />
+        <Route path="/pending-verification" element={<PendingVerification />} />
+        <Route path="/suspended" element={<SuspendedPage />} />
 
-          {/* Admin routes - with sidebar layout */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="approvals" replace />} />
-            <Route path="approvals" element={<UserApprovals />} />
-            <Route path="feedback" element={<SessionFeedback />} />
-          </Route>
+        {/* Admin routes - with sidebar layout */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="approvals" replace />} />
+          <Route path="approvals" element={<UserApprovals />} />
+          <Route path="feedback" element={<SessionFeedback />} />
+        </Route>
 
-          {/* Estudante routes - with sidebar layout */}
-          <Route
-            path="/estudante"
-            element={
-              <ProtectedRoute allowedRoles={['estudante']}>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<EstudanteDashboard />} />
-            <Route path="mentores" element={<MentorList />} />
-            <Route path="sessoes" element={<MySessions />} />
-            <Route path="vagas" element={<PlaceholderPage title="Vagas" />} />
-          </Route>
+        {/* Estudante routes - with sidebar layout */}
+        <Route
+          path="/estudante"
+          element={
+            <ProtectedRoute allowedRoles={['estudante']}>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<EstudanteDashboard />} />
+          <Route path="mentores" element={<MentorList />} />
+          <Route path="sessoes" element={<MySessions />} />
+          <Route path="vagas" element={<PlaceholderPage title="Vagas" />} />
+        </Route>
 
-          {/* Mentor routes - with sidebar layout */}
-          <Route
-            path="/mentor"
-            element={
-              <ProtectedRoute allowedRoles={['mentor']}>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<MentorDashboard />} />
-            <Route path="sessoes" element={<PlaceholderPage title="Minhas Sessões" />} />
-            <Route path="disponibilidade" element={<PlaceholderPage title="Disponibilidade" />} />
-          </Route>
+        {/* Mentor routes - with sidebar layout */}
+        <Route
+          path="/mentor"
+          element={
+            <ProtectedRoute allowedRoles={['mentor']}>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<MentorDashboard />} />
+          <Route path="sessoes" element={<PlaceholderPage title="Minhas Sessões" />} />
+          <Route path="disponibilidade" element={<PlaceholderPage title="Disponibilidade" />} />
+        </Route>
 
-          {/* Catch-all redirect */}
-          <Route path="*" element={<Navigate to="/auth" replace />} />
-        </Routes>
-      </BrowserRouter>
+        {/* Catch-all redirect */}
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+      </Routes>
     </AuthProvider>
   );
 }
