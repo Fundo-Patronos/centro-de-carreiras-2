@@ -1,13 +1,22 @@
-import api from './api';
 import axios from 'axios';
 
-// Public API instance (no auth required)
+// Public API instance (no auth required, no Firebase dependency)
 const publicApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Lazy load authenticated API to avoid Firebase initialization on public pages
+let _api = null;
+const getApi = async () => {
+  if (!_api) {
+    const module = await import('./api');
+    _api = module.default;
+  }
+  return _api;
+};
 
 export const feedbackService = {
   /**
@@ -41,6 +50,7 @@ export const feedbackService = {
    * @returns {Promise<Object>} Send result
    */
   async sendFeedbackEmails(sessionId) {
+    const api = await getApi();
     const response = await api.post('/feedback/send', { session_id: sessionId });
     return response.data;
   },
@@ -50,6 +60,7 @@ export const feedbackService = {
    * @returns {Promise<Object>} List of sessions with feedback
    */
   async getAllFeedback() {
+    const api = await getApi();
     const response = await api.get('/admin/feedback');
     return response.data;
   },
@@ -60,6 +71,7 @@ export const feedbackService = {
    * @returns {Promise<Object>} Session feedback details
    */
   async getSessionFeedback(sessionId) {
+    const api = await getApi();
     const response = await api.get(`/admin/feedback/${sessionId}`);
     return response.data;
   },
