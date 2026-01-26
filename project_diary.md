@@ -238,3 +238,94 @@ analytics.track(EVENTS.YOUR_EVENT, { property: 'value' });
 from ...core.analytics import track_event, Events
 track_event(user_id=current_user.uid, event_name=Events.YOUR_EVENT, properties={...})
 ```
+
+---
+
+### Session 3 - 2026-01-25
+
+**Post-Session Feedback Collection System**
+
+Implemented a complete feedback system that collects feedback from both students and mentors 5 days after a mentorship session. The system includes automated email sending via Cloud Scheduler and a public form for responses.
+
+**Features:**
+- Automated feedback request emails 5 days after session creation
+- Public feedback form (token-based, no login required)
+- Admin dashboard to view all feedback and manually trigger emails
+- Star rating system (1-5) for sessions that happened
+- Reason collection for sessions that didn't happen
+
+**Backend Implementation:**
+
+| File | Type | Description |
+|------|------|-------------|
+| `app/models/feedback.py` | NEW | Pydantic models for feedback system |
+| `app/core/email.py` | EDIT | Added student/mentor email templates |
+| `app/api/v1/feedback.py` | NEW | Public endpoints for feedback submission |
+| `app/api/v1/admin.py` | EDIT | Admin endpoints for feedback management |
+| `app/api/v1/router.py` | EDIT | Registered feedback router |
+
+**Frontend Implementation:**
+
+| File | Type | Description |
+|------|------|-------------|
+| `services/feedbackService.js` | NEW | API service with lazy Firebase loading |
+| `pages/public/FeedbackForm.jsx` | NEW | Public form (no auth) |
+| `pages/admin/SessionFeedback.jsx` | NEW | Admin dashboard |
+| `App.jsx` | EDIT | Routes outside AuthProvider |
+| `components/layout/Sidebar.jsx` | EDIT | Admin nav item |
+
+**Key Technical Decision:**
+- `/feedback` route placed **outside** `<AuthProvider>` in App.jsx to avoid Firebase initialization
+- `feedbackService.js` uses dynamic import (`import()`) to lazy-load Firebase API module
+- This ensures public feedback forms work without requiring any Firebase credentials
+
+**Firestore Collections:**
+- `feedback_requests` - Tracks sent email requests with unique tokens
+- `session_feedback` - Stores submitted feedback responses
+
+**Cloud Scheduler Setup:**
+- Job name: `feedback-requests-daily`
+- Schedule: `0 9 * * *` (9am daily, America/Sao_Paulo timezone)
+- Target: `POST https://centro-carreiras-api-3qjayzhclq-ue.a.run.app/api/v1/feedback/process-pending`
+- Auth: OIDC token with service account `cloud-scheduler-invoker@centro-carreiras-fire.iam.gserviceaccount.com`
+
+---
+
+## Google Cloud Secret Manager
+
+**All sensitive credentials are stored in Google Cloud Secret Manager.**
+
+| Secret Name | Description |
+|-------------|-------------|
+| `airtable-api-token` | Airtable API token for mentor directory |
+| `airtable-base-id` | Airtable base ID |
+| `resend-api-key` | Resend API key for transactional emails |
+| `mixpanel-token` | Mixpanel analytics token |
+
+**Accessing Secrets:**
+
+Cloud Run services reference secrets directly (not as env vars):
+```bash
+# View current secret bindings
+gcloud run services describe centro-carreiras-api --region=us-east1 --format="yaml(spec.template.spec.containers[0].env)"
+```
+
+**Service Account with Access:**
+- `129179710207-compute@developer.gserviceaccount.com` (Cloud Run default)
+
+**Adding New Secrets:**
+```bash
+# Create secret
+echo -n "secret-value" | gcloud secrets create secret-name --data-file=-
+
+# Grant access
+gcloud secrets add-iam-policy-binding secret-name \
+  --member="serviceAccount:129179710207-compute@developer.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
+
+# Mount in Cloud Run
+gcloud run services update centro-carreiras-api \
+  --update-secrets="ENV_VAR_NAME=secret-name:latest"
+```
+
+---
