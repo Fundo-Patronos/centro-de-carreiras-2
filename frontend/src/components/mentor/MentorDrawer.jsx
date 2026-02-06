@@ -109,7 +109,7 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
                           <button
                             type="button"
                             onClick={handleBookSessionClick}
-                            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-purple/90 focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:ring-offset-2"
+                            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-orange/90 focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:ring-offset-2"
                           >
                             Agendar Mentoria
                           </button>

@@ -52,6 +52,7 @@ export const userService = {
    * @param {string|null} userData.photoURL
    * @param {string} userData.role - 'estudante' or 'mentor'
    * @param {string} userData.authProvider - 'email', 'google', or 'magic_link'
+   * @param {string} [userData.curso] - User's course/major
    */
   async createUserProfile(uid, userData) {
     const userRef = doc(db, 'users', uid);
@@ -68,8 +69,9 @@ export const userService = {
         phone: null,
         linkedIn: null,
         bio: null,
+        // Shared field
+        course: userData.curso || null,
         // Estudante fields
-        course: null,
         graduationYear: null,
         // Mentor fields
         company: null,

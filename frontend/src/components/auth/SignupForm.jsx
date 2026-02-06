@@ -14,6 +14,7 @@ export default function SignupForm() {
     password: '',
     confirmPassword: '',
     role: '',
+    curso: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -27,6 +28,10 @@ export default function SignupForm() {
 
     if (!formData.name.trim()) {
       newErrors.name = 'Nome é obrigatório';
+    }
+
+    if (!formData.curso.trim()) {
+      newErrors.curso = 'Curso é obrigatório';
     }
 
     if (!formData.email.trim()) {
@@ -73,6 +78,7 @@ export default function SignupForm() {
         photoURL: null,
         role: formData.role,
         authProvider: 'email',
+        curso: formData.curso,
       });
 
       analytics.track(EVENTS.SIGN_UP_COMPLETED, { auth_provider: 'email', role: formData.role });
@@ -160,6 +166,27 @@ export default function SignupForm() {
       </div>
 
       <div>
+        <label htmlFor="curso" className="block text-sm font-medium text-gray-700">
+          Curso
+        </label>
+        <input
+          type="text"
+          id="curso"
+          value={formData.curso}
+          onChange={(e) => handleChange('curso', e.target.value)}
+          className={`
+            mt-1 block w-full rounded-lg border px-3 py-2 shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
+            ${errors.curso ? 'border-red-300' : 'border-gray-300'}
+          `}
+          placeholder="Ex: Engenharia de Computação"
+        />
+        {errors.curso && (
+          <p className="mt-1 text-sm text-red-600">{errors.curso}</p>
+        )}
+      </div>
+
+      <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email
         </label>
@@ -228,7 +255,7 @@ export default function SignupForm() {
         className="
           w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg
           text-sm font-medium text-white bg-patronos-accent
-          hover:bg-patronos-purple/90 focus:outline-none focus:ring-2
+          hover:bg-patronos-orange/90 focus:outline-none focus:ring-2
           focus:ring-offset-2 focus:ring-patronos-accent
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-colors duration-200

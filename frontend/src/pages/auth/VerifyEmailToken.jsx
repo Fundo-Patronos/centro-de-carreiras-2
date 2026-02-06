@@ -113,7 +113,7 @@ export default function VerifyEmailToken() {
 
               <button
                 onClick={() => navigate('/auth')}
-                className="mt-6 inline-flex items-center justify-center w-full px-4 py-2 border border-transparent rounded-lg text-white bg-patronos-accent hover:bg-patronos-purple/90 transition-colors"
+                className="mt-6 inline-flex items-center justify-center w-full px-4 py-2 border border-transparent rounded-lg text-white bg-patronos-accent hover:bg-patronos-orange/90 transition-colors"
               >
                 Ir para o Painel
               </button>
@@ -140,7 +140,7 @@ export default function VerifyEmailToken() {
 
               <button
                 onClick={() => navigate('/auth')}
-                className="mt-6 inline-flex items-center justify-center w-full px-4 py-2 border border-transparent rounded-lg text-white bg-patronos-accent hover:bg-patronos-purple/90 transition-colors"
+                className="mt-6 inline-flex items-center justify-center w-full px-4 py-2 border border-transparent rounded-lg text-white bg-patronos-accent hover:bg-patronos-orange/90 transition-colors"
               >
                 Ir para Login
               </button>

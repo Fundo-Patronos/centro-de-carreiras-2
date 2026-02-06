@@ -160,7 +160,7 @@ ${userProfile.displayName}`;
                   <button
                     type="button"
                     onClick={handleGoToSessions}
-                    className="inline-flex items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-purple/90"
+                    className="inline-flex items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-orange/90"
                   >
                     Ver Minhas Sessoes
                   </button>
@@ -237,7 +237,7 @@ ${userProfile.displayName}`;
                   <button
                     type="submit"
                     disabled={isSubmitting || !message.trim()}
-                    className="inline-flex items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-purple/90 disabled:opacity-50"
+                    className="inline-flex items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-orange/90 disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <>

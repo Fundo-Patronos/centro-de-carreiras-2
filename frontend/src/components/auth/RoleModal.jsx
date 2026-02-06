@@ -7,6 +7,7 @@ import analytics, { EVENTS } from '../../services/analytics';
 
 export default function RoleModal({ isOpen, user, onClose }) {
   const [role, setRole] = useState('');
+  const [curso, setCurso] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -26,6 +27,11 @@ export default function RoleModal({ isOpen, user, onClose }) {
       return;
     }
 
+    if (!curso.trim()) {
+      setError('Informe o seu curso');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -37,6 +43,7 @@ export default function RoleModal({ isOpen, user, onClose }) {
         photoURL: user.photoURL,
         role,
         authProvider: 'google',
+        curso,
       });
 
       analytics.track(EVENTS.ROLE_SELECTED, { role, auth_provider: 'google' });
@@ -101,6 +108,23 @@ export default function RoleModal({ isOpen, user, onClose }) {
             <RoleSelector value={role} onChange={setRole} />
           </div>
 
+          <div className="mt-4">
+            <label htmlFor="curso" className="block text-sm font-medium text-gray-700">
+              Curso
+            </label>
+            <input
+              type="text"
+              id="curso"
+              value={curso}
+              onChange={(e) => setCurso(e.target.value)}
+              className="
+                mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm
+                focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
+              "
+              placeholder="Ex: Engenharia de Computação"
+            />
+          </div>
+
           <button
             type="button"
             onClick={handleSubmit}
@@ -108,7 +132,7 @@ export default function RoleModal({ isOpen, user, onClose }) {
             className="
               mt-6 w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg
               text-sm font-medium text-white bg-patronos-accent
-              hover:bg-patronos-purple/90 focus:outline-none focus:ring-2
+              hover:bg-patronos-orange/90 focus:outline-none focus:ring-2
               focus:ring-offset-2 focus:ring-patronos-accent
               disabled:opacity-50 disabled:cursor-not-allowed
               transition-colors duration-200

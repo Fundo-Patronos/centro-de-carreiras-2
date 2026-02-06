@@ -185,7 +185,7 @@ export default function VerifyEmail() {
                   className="
                     w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg
                     text-sm font-medium text-white bg-patronos-accent
-                    hover:bg-patronos-purple/90 focus:outline-none focus:ring-2
+                    hover:bg-patronos-orange/90 focus:outline-none focus:ring-2
                     focus:ring-offset-2 focus:ring-patronos-accent
                     transition-colors duration-200
                   "

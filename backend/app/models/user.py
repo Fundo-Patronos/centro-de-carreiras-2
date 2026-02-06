@@ -12,8 +12,10 @@ class UserProfile(BaseModel):
     linkedIn: Optional[str] = None
     bio: Optional[str] = None
 
-    # Estudante-specific fields
+    # Shared field (both estudante and mentor)
     course: Optional[str] = None
+
+    # Estudante-specific fields
     graduationYear: Optional[int] = None
 
     # Mentor-specific fields
