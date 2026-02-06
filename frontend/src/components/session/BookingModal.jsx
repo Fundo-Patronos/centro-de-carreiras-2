@@ -21,9 +21,9 @@ export default function BookingModal({ mentor, isOpen, onClose }) {
       const defaultMessage = `Ola ${mentor.name},
 
 Meu nome e ${userProfile.displayName} e sou estudante da Unicamp.
-Gostaria de agendar uma sessao de mentoria com voce para conversar sobre minha carreira e tirar algumas duvidas sobre a area de ${mentor.company || 'sua empresa'}.
+Gostaria de agendar uma sessao de mentoria com voce para conversar sobre minha carreira.
 
-Tenho interesse em aprender mais sobre sua trajetoria profissional e receber orientacoes sobre os proximos passos da minha carreira.
+Tenho interesse em aprender mais sobre sua trajetoria profissional e receber orientacoes sobre proximos passos.
 
 Fico a disposicao para agendarmos um horario que seja conveniente para voce.
 
