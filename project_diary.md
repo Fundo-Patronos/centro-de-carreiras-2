@@ -291,6 +291,222 @@ Implemented a complete feedback system that collects feedback from both students
 
 ---
 
+### Session 4 - 2026-02-05
+
+**User Import Migration (IN PROGRESS)**
+
+Migrating ~294 verified students from the previous Centro de Carreiras v1 (CSV export) to the new Firebase Auth + Firestore system. Users receive welcome emails with password setup links.
+
+**Context:**
+- Previous system stored users in a different database
+- CSV export: `Users - Produção-Grid view.csv` (294 verified students)
+- Resend email limit: 80/day → requires 4 batches over 4 days
+
+#### Implementation Completed
+
+**1. Import Script (`backend/scripts/import_users.py`)**
+
+A standalone CLI script that:
+- Parses the CSV file
+- Creates Firebase Auth users (without password, `email_verified=True`)
+- Creates Firestore user profiles with proper field mapping
+- Generates password reset links via Firebase Admin SDK
+- Sends welcome emails via Resend
+- Tracks progress in Firestore `user_imports` collection (idempotent/resumable)
+
+**CSV Field Mapping:**
+
+| CSV Column | Firestore Field |
+|------------|-----------------|
+| `email` | `email` |
+| `name` | `displayName` |
+| `course` | `profile.course` |
+| `graduation_year` | `profile.graduationYear` |
+| `linkedin` | `profile.linkedIn` (normalized to full URL) |
+| `role` (STUDENT) | `role` → "estudante" |
+
+**Additional fields set automatically:**
+- `status`: "active"
+- `authProvider`: "imported"
+- `emailNotifications`: true
+- `language`: "pt-BR"
+
+**Script Commands:**
+
+```bash
+cd backend
+source venv/bin/activate
+
+# Dry run (preview, no changes)
+python scripts/import_users.py --dry-run --batch 1
+
+# Process a batch (1-4)
+python scripts/import_users.py --batch 1
+
+# Check import status
+python scripts/import_users.py --status
+
+# Re-send emails only (skip auth/firestore creation)
+python scripts/import_users.py --batch 1 --email-only
+
+# Test with single email
+python scripts/import_users.py --test-email "user@example.com" --test-name "Test User"
+```
+
+**2. Welcome Email Template (`backend/app/core/email.py`)**
+
+Added `send_welcome_import_email()` method:
+- **Subject:** "Bem-vindo ao Centro de Carreiras - Configure sua senha"
+- **Content:** Explains platform update, lists new features, CTA button to set password
+- **Styling:** Matches existing email templates (gradient header, clean design)
+
+**3. Domain Configuration**
+
+Migrated custom domains from old Cloud Run service to new frontend:
+
+| Domain | Service | Region |
+|--------|---------|--------|
+| `centro.patronos.org` | centro-carreiras-web | us-east1 |
+| `carreiras.patronos.org` | centro-carreiras-web | us-east1 |
+
+**DNS Records (configured in Vercel):**
+```
+centro     CNAME  ghs.googlehosted.com.
+carreiras  CNAME  ghs.googlehosted.com.
+```
+
+**Firebase Auth:** Both domains added to Authorized Domains.
+
+#### Current Status
+
+| Task | Status |
+|------|--------|
+| Import script created | ✅ Done |
+| Welcome email template | ✅ Done |
+| Dry run batch 1 (80 users) | ✅ Done - 0 errors |
+| Test email sent | ✅ Done (gustavo.beltrami@patronos.org) |
+| Email content verified | ✅ Done |
+| Domain mappings created | ✅ Done |
+| SSL certificate provisioning | ⏳ **PENDING** |
+| Batch 1 execution | ⏳ Pending (waiting for SSL) |
+| Batch 2 execution | ⏳ Pending |
+| Batch 3 execution | ⏳ Pending |
+| Batch 4 execution | ⏳ Pending |
+
+#### Batch Schedule
+
+| Batch | Users | Count | Status |
+|-------|-------|-------|--------|
+| 1 | 1-80 | 80 | Pending |
+| 2 | 81-160 | 80 | Pending |
+| 3 | 161-240 | 80 | Pending |
+| 4 | 241-294 | 54 | Pending |
+
+**Total:** 294 verified students
+
+---
+
+## NEXT STEPS (For Future Sessions)
+
+### Step 1: Verify Domain SSL Certificate (BLOCKING)
+
+Before running import batches, confirm SSL is active:
+
+```bash
+gcloud beta run domain-mappings describe --domain=centro.patronos.org --region=us-central1
+```
+
+**Expected output should show:** `certificateStatus: CERTIFICATE_STATUS_READY`
+
+**Also verify in browser:**
+- https://centro.patronos.org → Should load frontend
+- https://carreiras.patronos.org → Should load frontend
+
+### Step 2: Run Import Batches
+
+Execute **one batch per day** (Resend 80 emails/day limit):
+
+```bash
+cd backend
+source venv/bin/activate
+
+# Ensure RESEND_API_KEY is in .env (or fetch from Secret Manager)
+# Already configured in current .env
+
+# Day 1 - Batch 1
+python scripts/import_users.py --batch 1
+
+# Day 2 - Batch 2
+python scripts/import_users.py --batch 2
+
+# Day 3 - Batch 3
+python scripts/import_users.py --batch 3
+
+# Day 4 - Batch 4
+python scripts/import_users.py --batch 4
+```
+
+### Step 3: Monitor Progress
+
+After each batch:
+
+```bash
+python scripts/import_users.py --status
+```
+
+**Also check Firebase Console:**
+- **Authentication** → Users should appear
+- **Firestore** → `users` collection for profiles
+- **Firestore** → `user_imports` collection for tracking
+
+### Step 4: Handle Any Failures
+
+If emails fail to send for some users:
+
+```bash
+# Re-send emails for a specific batch (skips auth/firestore)
+python scripts/import_users.py --batch 1 --email-only
+```
+
+The script is **idempotent** - tracks each step per user in `user_imports` collection.
+
+### Step 5: Post-Import Verification
+
+After all batches complete:
+1. Run `--status` to confirm all 294 users processed
+2. Test login with an imported user (use password reset link)
+3. Verify Firestore profiles have correct data (course, graduation year, etc.)
+
+---
+
+## Firestore Collections (Updated)
+
+| Collection | Purpose |
+|------------|---------|
+| `users` | User profiles (document ID = Firebase UID) |
+| `feedback_requests` | Feedback email tracking |
+| `session_feedback` | Submitted feedback responses |
+| `user_imports` | **NEW** - Import tracking (document ID = email with @ → _at_) |
+
+**`user_imports` document structure:**
+```json
+{
+  "email": "user@example.com",
+  "name": "User Name",
+  "uid": "firebase-uid",
+  "auth_created": true,
+  "firestore_created": true,
+  "email_sent": true,
+  "reset_link": "https://...",
+  "error": null,
+  "batch_number": 1,
+  "created_at": "2026-02-05T...",
+  "updated_at": "2026-02-05T..."
+}
+```
+
+---
+
 ## Google Cloud Secret Manager
 
 **All sensitive credentials are stored in Google Cloud Secret Manager.**

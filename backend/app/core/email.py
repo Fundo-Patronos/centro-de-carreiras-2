@@ -396,6 +396,90 @@ class EmailService:
             html=html,
         )
 
+    def send_welcome_import_email(
+        self,
+        user_name: str,
+        user_email: str,
+        password_reset_url: str,
+    ) -> dict:
+        """
+        Send welcome email to imported users with password setup link.
+
+        Args:
+            user_name: User's display name
+            user_email: User's email address
+            password_reset_url: Firebase password reset URL
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        subject = "Bem-vindo ao Centro de Carreiras - Configure sua senha"
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {user_name}!</h2>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                O <strong>Centro de Carreiras</strong> foi atualizado! Estamos com uma nova plataforma, mais moderna e com novos recursos para conectar voce a mentores incriveis.
+            </p>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                Sua conta foi migrada automaticamente. Para acessar a nova plataforma, voce precisa configurar uma nova senha clicando no botao abaixo:
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{password_reset_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Configurar Senha
+                </a>
+            </div>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0;">O que ha de novo?</p>
+                <ul style="color: #4a4a4a; line-height: 1.8; margin: 0; padding-left: 20px;">
+                    <li>Interface completamente redesenhada</li>
+                    <li>Novos perfis de mentores</li>
+                    <li>Sistema de agendamento simplificado</li>
+                    <li>Melhor experiencia em dispositivos moveis</li>
+                </ul>
+            </div>
+
+            <p style="color: #6a6a6a; line-height: 1.6; margin: 24px 0 0 0; font-size: 14px;">
+                Se voce nao conseguir clicar no botao, copie e cole o link abaixo no seu navegador:
+            </p>
+            <p style="color: #9B5DE5; line-height: 1.6; margin: 8px 0 0 0; font-size: 13px; word-break: break-all;">
+                {password_reset_url}
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        return self.send_email(
+            to=[user_email],
+            subject=subject,
+            html=html,
+        )
+
     def send_feedback_request_to_mentor(
         self,
         mentor_name: str,

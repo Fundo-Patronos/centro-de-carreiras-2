@@ -52,3 +52,7 @@ htmlcov/
 logs/
 *.log
 npm-debug.log*
+
+# User data exports (PII - never commit!)
+*.csv
+Users*.csv
