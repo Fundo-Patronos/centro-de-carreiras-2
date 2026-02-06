@@ -377,6 +377,31 @@ carreiras  CNAME  ghs.googlehosted.com.
 
 **Firebase Auth:** Both domains added to Authorized Domains.
 
+**CAA Record (required for SSL):**
+```
+0 issue "pki.goog"
+0 issue "letsencrypt.org"
+```
+Google Cloud Run uses `pki.goog` for certificates. Without this CAA record, SSL provisioning fails.
+
+**4. CORS Configuration**
+
+Updated `FRONTEND_URL` environment variable on `centro-carreiras-api` to include custom domains:
+```
+https://centro.patronos.org,https://carreiras.patronos.org,https://centro-carreiras-web-3qjayzhclq-ue.a.run.app
+```
+
+**5. Booking Message Template**
+
+Simplified the default message template in `frontend/src/components/session/BookingModal.jsx`:
+- Removed company-specific reference ("tirar algumas duvidas sobre a area de...")
+- Streamlined career guidance text
+
+**6. Admin Users**
+
+Added admin privileges via `scripts/set_admin.py`:
+- gabriel.aquino@patronos.org ✅
+
 #### Current Status
 
 | Task | Status |
@@ -387,8 +412,10 @@ carreiras  CNAME  ghs.googlehosted.com.
 | Test email sent | ✅ Done (gustavo.beltrami@patronos.org) |
 | Email content verified | ✅ Done |
 | Domain mappings created | ✅ Done |
-| SSL certificate provisioning | ⏳ **PENDING** |
-| Batch 1 execution | ⏳ Pending (waiting for SSL) |
+| SSL certificate provisioned | ✅ Done |
+| CORS configured for custom domains | ✅ Done |
+| Platform tested and working | ✅ Done |
+| Batch 1 execution | ⏳ Pending |
 | Batch 2 execution | ⏳ Pending |
 | Batch 3 execution | ⏳ Pending |
 | Batch 4 execution | ⏳ Pending |
@@ -408,21 +435,7 @@ carreiras  CNAME  ghs.googlehosted.com.
 
 ## NEXT STEPS (For Future Sessions)
 
-### Step 1: Verify Domain SSL Certificate (BLOCKING)
-
-Before running import batches, confirm SSL is active:
-
-```bash
-gcloud beta run domain-mappings describe --domain=centro.patronos.org --region=us-central1
-```
-
-**Expected output should show:** `certificateStatus: CERTIFICATE_STATUS_READY`
-
-**Also verify in browser:**
-- https://centro.patronos.org → Should load frontend
-- https://carreiras.patronos.org → Should load frontend
-
-### Step 2: Run Import Batches
+### Step 1: Run Import Batches
 
 Execute **one batch per day** (Resend 80 emails/day limit):
 
