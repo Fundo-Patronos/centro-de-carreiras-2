@@ -9,6 +9,8 @@ import VerifyEmail from './pages/auth/VerifyEmail';
 import PendingApproval from './pages/auth/PendingApproval';
 import PendingVerification from './pages/auth/PendingVerification';
 import VerifyEmailToken from './pages/auth/VerifyEmailToken';
+import ResetPassword from './pages/auth/ResetPassword';
+import FirebaseActionHandler from './pages/auth/FirebaseActionHandler';
 
 // Admin pages
 import UserApprovals from './pages/admin/UserApprovals';
@@ -32,6 +34,9 @@ export default function App() {
         {/* Fully public routes (no Firebase auth needed) */}
         <Route path="/feedback" element={<FeedbackForm />} />
 
+        {/* Firebase auth action handler (handles /__/auth/action URLs) */}
+        <Route path="/__/auth/action" element={<FirebaseActionHandler />} />
+
         {/* Routes that need AuthProvider */}
         <Route path="/*" element={<AuthenticatedRoutes />} />
       </Routes>
@@ -48,6 +53,7 @@ function AuthenticatedRoutes() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/verify" element={<VerifyEmail />} />
         <Route path="/auth/verify-email" element={<VerifyEmailToken />} />
+        <Route path="/auth/action" element={<ResetPassword />} />
         <Route path="/pending-approval" element={<PendingApproval />} />
         <Route path="/pending-verification" element={<PendingVerification />} />
         <Route path="/suspended" element={<SuspendedPage />} />

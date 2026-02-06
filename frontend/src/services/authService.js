@@ -5,6 +5,7 @@ import {
   sendSignInLinkToEmail,
   isSignInWithEmailLink,
   signInWithEmailLink,
+  sendPasswordResetEmail,
   signOut,
   updateProfile,
 } from 'firebase/auth';
@@ -13,6 +14,12 @@ import { auth, googleProvider } from '../config/firebase';
 // Magic link settings
 const actionCodeSettings = {
   url: `${window.location.origin}/auth/verify`,
+  handleCodeInApp: true,
+};
+
+// Password reset settings
+const passwordResetSettings = {
+  url: `${window.location.origin}/auth/action`,
   handleCodeInApp: true,
 };
 
@@ -118,6 +125,18 @@ export const authService = {
    */
   getStoredRole() {
     return window.localStorage.getItem('roleForSignIn');
+  },
+
+  // ==========================================
+  // Password Reset
+  // ==========================================
+
+  /**
+   * Send password reset email
+   * @param {string} email
+   */
+  async sendPasswordReset(email) {
+    await sendPasswordResetEmail(auth, email, passwordResetSettings);
   },
 
   // ==========================================

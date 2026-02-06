@@ -24,6 +24,8 @@ export const EVENTS = {
   MAGIC_LINK_SENT: 'Magic Link Sent',
   MAGIC_LINK_VERIFIED: 'Magic Link Verified',
   MAGIC_LINK_ERROR: 'Magic Link Error',
+  PASSWORD_RESET_REQUESTED: 'Password Reset Requested',
+  PASSWORD_RESET_COMPLETED: 'Password Reset Completed',
   LOGOUT: 'Logout',
 
   // ============================================
