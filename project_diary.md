@@ -520,6 +520,130 @@ After all batches complete:
 
 ---
 
+### Session 5 - 2026-02-06
+
+**Major UI Refresh, Auth Flow Fixes, and CI/CD Automation**
+
+This session focused on fixing authentication issues, implementing a new UI design, and setting up proper CI/CD automation.
+
+#### 1. Authentication Flow Fixes
+
+**Problem:** Magic links and password reset links were not working - users were redirected to the login page instead of being authenticated.
+
+**Root Cause:** Firebase sends auth action emails to `/__/auth/action` which is handled by Firebase Hosting. Since we use Cloud Run (not Firebase Hosting), this path wasn't handled.
+
+**Solution:** Created `FirebaseActionHandler.jsx` to intercept and route Firebase action URLs:
+
+| Mode | Action |
+|------|--------|
+| `signIn` | Redirect to `/auth/verify` (magic link) |
+| `resetPassword` | Redirect to `/auth/action` (password reset) |
+| `verifyEmail` | Redirect to `/auth/verify-email` |
+
+**Files Created:**
+
+| File | Description |
+|------|-------------|
+| `frontend/src/pages/auth/FirebaseActionHandler.jsx` | Routes Firebase action URLs |
+| `frontend/src/pages/auth/ResetPassword.jsx` | Password reset form |
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `frontend/src/App.jsx` | Added `/__/auth/action` route |
+| `frontend/src/services/authService.js` | Added `sendPasswordReset()` method |
+| `frontend/src/components/auth/LoginForm.jsx` | Added "Esqueceu a senha?" feature |
+| `backend/scripts/import_users.py` | Updated to generate correct password reset URLs with `ActionCodeSettings` |
+
+#### 2. UI Refresh - White Sidebar Design
+
+Replaced the dark sidebar with a clean white design matching Patronos branding.
+
+**Changes:**
+- White background sidebar with light gray border
+- Patronos logo + "Centro de Carreiras" text in header
+- Orange accent color (`patronos-accent`) for active states
+- Mobile responsive slide-out drawer with backdrop
+- Top bar with user profile dropdown
+- Role badges with colored backgrounds (blue for Estudante, green for Mentor)
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `frontend/src/components/layout/AppLayout.jsx` | Complete rewrite with new design |
+| `frontend/index.html` | Updated title and favicon |
+
+**Assets Added:**
+- `frontend/public/patronos-logo.svg` - Logo for sidebar
+- `frontend/public/patronos-favicon.svg` - Browser favicon
+
+**Branding Updates:**
+- Tab title: "Carreiras - Fundo Patronos"
+- HTML lang: `pt-BR`
+- Favicon: Patronos symbol
+
+#### 3. CI/CD Pipeline Fixed
+
+**Problem:** Cloud Build triggers were pointing to the wrong repository (`centro-de-carreiras` instead of `centro-de-carreiras-2`).
+
+**Solution:**
+1. Connected `centro-de-carreiras-2` repo to Cloud Build
+2. Deleted old triggers
+3. Created new triggers pointing to correct repo
+
+**Triggers Created:**
+
+| Trigger | Repository | Branch | Watches | Config |
+|---------|------------|--------|---------|--------|
+| `deploy-frontend` | `centro-de-carreiras-2` | `main` | `frontend/**` | `frontend/cloudbuild.yaml` |
+| `deploy-backend` | `centro-de-carreiras-2` | `main` | `backend/**` | `backend/cloudbuild.yaml` |
+
+**Backend cloudbuild.yaml Updated:**
+- Now uses Cloud Run secrets instead of plain env vars
+- Secrets: `firebase-service-account`, `airtable-api-token`, `airtable-base-id`, `resend-api-key`, `mixpanel-token`
+- FRONTEND_URL includes all domains for CORS
+
+#### 4. Analytics Documentation
+
+Created comprehensive Mixpanel events documentation for the team.
+
+**File Created:** `docs/MIXPANEL_EVENTS.md`
+
+Contains:
+- All 50+ tracked events organized by category
+- Trigger descriptions for each event
+- Properties sent with each event
+- User identification details
+- Implementation notes
+
+#### 5. Batch 1 Import Completed
+
+Successfully imported the first batch of 80 users from the v1 system.
+
+**Status:**
+- Batch 1: ✅ Completed (80 users, 0 errors)
+- Batches 2-4: Pending (one per day due to Resend limit)
+
+---
+
+#### Files Changed Summary
+
+| Category | Files |
+|----------|-------|
+| **New Files** | `FirebaseActionHandler.jsx`, `ResetPassword.jsx`, `patronos-logo.svg`, `patronos-favicon.svg`, `MIXPANEL_EVENTS.md` |
+| **Frontend** | `App.jsx`, `AppLayout.jsx`, `LoginForm.jsx`, `authService.js`, `analytics.js`, `index.html` |
+| **Backend** | `cloudbuild.yaml`, `import_users.py` |
+
+#### Deployment
+
+All changes deployed to production via CI/CD:
+- Frontend: https://centro.patronos.org
+- Backend: https://centro-carreiras-api-129179710207.southamerica-east1.run.app
+
+---
+
 ## Google Cloud Secret Manager
 
 **All sensitive credentials are stored in Google Cloud Secret Manager.**
