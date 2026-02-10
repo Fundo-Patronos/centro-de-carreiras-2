@@ -4,6 +4,8 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, Literal
 from datetime import datetime
 
+from .mentor import MentorProfile
+
 
 class UserProfile(BaseModel):
     """User profile data (nested in user document)."""
@@ -40,6 +42,7 @@ class UserInDB(UserBase):
     status: Literal["active", "pending", "pending_verification", "suspended"] = "active"
     authProvider: Literal["email", "google", "magic_link"]
     profile: UserProfile = UserProfile()
+    mentorProfile: Optional[MentorProfile] = None  # Only for mentors
     emailNotifications: bool = True
     language: str = "pt-BR"
     isAdmin: bool = False  # Users can be estudante/mentor AND admin simultaneously
@@ -59,6 +62,7 @@ class UserResponse(BaseModel):
     status: str
     isAdmin: bool = False
     profile: UserProfile
+    mentorProfile: Optional[MentorProfile] = None
 
 
 class UserUpdate(BaseModel):

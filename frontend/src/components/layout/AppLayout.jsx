@@ -21,6 +21,7 @@ import {
   ArrowRightOnRectangleIcon,
   ShieldCheckIcon,
   ChatBubbleLeftRightIcon,
+  UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { useAuth } from '../../contexts/AuthContext';
@@ -52,6 +53,7 @@ export default function AppLayout() {
         { name: 'Inicio', href: '/mentor/dashboard', icon: HomeIcon },
         { name: 'Minhas Sessoes', href: '/mentor/sessoes', icon: CalendarDaysIcon },
         { name: 'Disponibilidade', href: '/mentor/disponibilidade', icon: Cog6ToothIcon },
+        { name: 'Meu Perfil', href: '/mentor/perfil', icon: UserCircleIcon },
       ];
 
   const adminNavigation = [

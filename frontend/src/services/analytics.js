@@ -104,6 +104,15 @@ export const EVENTS = {
   // ============================================
   PROFILE_UPDATED: 'Profile Updated',
   PROFILE_UPDATE_ERROR: 'Profile Update Error',
+
+  // ============================================
+  // MENTOR PROFILE EVENTS
+  // ============================================
+  MENTOR_PROFILE_PAGE_VIEWED: 'Mentor Profile Page Viewed',
+  MENTOR_PROFILE_SAVED: 'Mentor Profile Saved',
+  MENTOR_PROFILE_SAVE_ERROR: 'Mentor Profile Save Error',
+  MENTOR_PHOTO_UPLOADED: 'Mentor Photo Uploaded',
+  MENTOR_PHOTO_UPLOAD_ERROR: 'Mentor Photo Upload Error',
 };
 
 // Initialize Mixpanel

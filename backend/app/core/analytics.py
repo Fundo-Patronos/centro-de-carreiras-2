@@ -40,6 +40,9 @@ class Events:
     # ============================================
     MENTORS_FETCHED = "API: Mentors Fetched"
     MENTOR_DETAIL_FETCHED = "API: Mentor Detail Fetched"
+    MENTOR_PROFILE_VIEWED = "API: Mentor Profile Viewed"
+    MENTOR_PROFILE_UPDATED = "API: Mentor Profile Updated"
+    MENTOR_PHOTO_UPLOADED = "API: Mentor Photo Uploaded"
 
     # ============================================
     # SESSION API EVENTS

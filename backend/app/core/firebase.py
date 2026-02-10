@@ -41,6 +41,7 @@ def _get_credentials():
 _cred = _get_credentials()
 _app = firebase_admin.initialize_app(_cred, {
     "projectId": settings.FIREBASE_PROJECT_ID,
+    "storageBucket": f"{settings.FIREBASE_PROJECT_ID}.appspot.com",
 })
 
 # Firestore client

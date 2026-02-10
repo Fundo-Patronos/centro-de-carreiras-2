@@ -111,18 +111,19 @@ export default function MentorDashboard() {
         </Link>
 
         {/* Profile */}
-        <div
+        <Link
+          to="/mentor/perfil"
           onClick={() => handleQuickAccessClick('perfil')}
-          className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group cursor-pointer"
+          className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group"
         >
           <div className="w-11 h-11 bg-patronos-accent/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-patronos-accent/20 transition-colors">
             <BriefcaseIcon className="w-5 h-5 text-patronos-accent" />
           </div>
           <h4 className="font-semibold text-gray-900">Meu Perfil</h4>
           <p className="mt-1 text-sm text-gray-500">
-            Atualize suas informações e expertise
+            Atualize suas informacoes e expertise
           </p>
-        </div>
+        </Link>
       </div>
 
       {/* Recent activity sections */}

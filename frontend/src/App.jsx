@@ -26,6 +26,7 @@ import MySessions from './pages/estudante/MySessions';
 
 // Mentor pages
 import MentorDashboard from './pages/mentor/Dashboard';
+import MeuPerfil from './pages/mentor/MeuPerfil';
 
 export default function App() {
   return (
@@ -101,6 +102,7 @@ function AuthenticatedRoutes() {
           <Route path="dashboard" element={<MentorDashboard />} />
           <Route path="sessoes" element={<PlaceholderPage title="Minhas Sessões" />} />
           <Route path="disponibilidade" element={<PlaceholderPage title="Disponibilidade" />} />
+          <Route path="perfil" element={<MeuPerfil />} />
         </Route>
 
         {/* Catch-all redirect */}
