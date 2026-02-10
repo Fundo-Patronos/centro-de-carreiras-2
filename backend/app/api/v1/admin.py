@@ -9,6 +9,8 @@ from firebase_admin import firestore
 from ..deps import get_current_admin
 from ...core.firebase import db
 from ...core.analytics import track_event, Events
+from ...core.email import email_service
+from ...core.config import settings
 from ...models.user import UserInDB
 from ...models.feedback import (
     FeedbackResponse,
@@ -139,6 +141,37 @@ async def approve_user(
                 "approved_user_role": user_data.get("role"),
             },
         )
+
+        # Send approval confirmation email (non-blocking)
+        login_url = f"{settings.FRONTEND_URL}/auth"
+        email_result = email_service.send_approval_confirmation_email(
+            user_name=user_data.get("displayName", ""),
+            user_email=user_data.get("email", ""),
+            role=user_data.get("role", "estudante"),
+            login_url=login_url,
+        )
+
+        if email_result.get("success"):
+            track_event(
+                admin.uid,
+                Events.EMAIL_APPROVAL_CONFIRMATION_SENT,
+                {
+                    "user_uid": uid,
+                    "user_email": user_data.get("email"),
+                    "user_role": user_data.get("role"),
+                },
+            )
+        else:
+            track_event(
+                admin.uid,
+                Events.EMAIL_APPROVAL_CONFIRMATION_FAILED,
+                {
+                    "user_uid": uid,
+                    "user_email": user_data.get("email"),
+                    "user_role": user_data.get("role"),
+                    "error": email_result.get("error"),
+                },
+            )
 
         return ApprovalResponse(
             success=True,

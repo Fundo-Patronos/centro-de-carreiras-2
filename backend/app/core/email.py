@@ -5,8 +5,7 @@ Provides email sending functionality using Resend.
 """
 
 import logging
-from typing import Optional
-
+from typing import Literal, Optional
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -553,6 +552,113 @@ class EmailService:
             to=[mentor_email],
             subject=subject,
             html=html,
+        )
+
+    def send_approval_confirmation_email(
+        self,
+        user_name: str,
+        user_email: str,
+        role: Literal["estudante", "mentor"],
+        login_url: str,
+    ) -> dict:
+        """
+        Send approval confirmation email to user when their account is approved.
+
+        Args:
+            user_name: User's display name
+            user_email: User's email address
+            role: User's role (estudante or mentor)
+            login_url: URL to the login page
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        subject = "Sua conta foi aprovada - Centro de Carreiras"
+
+        # Role-specific content
+        if role == "estudante":
+            role_message = "Como estudante, voce agora pode explorar mentores, agendar sessoes de mentoria e acessar recursos de carreira exclusivos."
+            features = [
+                "Explorar perfis de mentores experientes",
+                "Solicitar sessoes de mentoria",
+                "Acessar recursos de desenvolvimento de carreira",
+            ]
+        else:  # mentor
+            role_message = "Como mentor, voce agora pode gerenciar seu perfil e receber solicitacoes de mentoria de estudantes da Unicamp."
+            features = [
+                "Gerenciar seu perfil de mentor",
+                "Receber solicitacoes de mentoria de estudantes",
+                "Contribuir para o desenvolvimento de futuros profissionais",
+            ]
+
+        features_html = "".join(
+            f'<li style="color: #4a4a4a; margin: 8px 0;">{feature}</li>'
+            for feature in features
+        )
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {user_name}!</h2>
+
+            <div style="background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(155,93,229,0.1) 100%); border-radius: 12px; padding: 20px; margin: 0 0 24px 0; text-align: center;">
+                <p style="color: #1a1a1a; font-size: 18px; font-weight: 600; margin: 0;">
+                    🎉 Parabens! Sua conta foi aprovada
+                </p>
+            </div>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                {role_message}
+            </p>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0;">O que voce pode fazer agora</p>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                    {features_html}
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{login_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Acessar o Centro de Carreiras
+                </a>
+            </div>
+
+            <p style="color: #6a6a6a; line-height: 1.6; margin: 24px 0 0 0; font-size: 14px;">
+                Se voce nao conseguir clicar no botao, copie e cole o link abaixo no seu navegador:
+            </p>
+            <p style="color: #9B5DE5; line-height: 1.6; margin: 8px 0 0 0; font-size: 13px; word-break: break-all;">
+                {login_url}
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        return self.send_email(
+            to=[user_email],
+            subject=subject,
+            html=html,
+            bcc=[settings.EMAIL_ADMIN_BCC],
         )
 
 

@@ -56,6 +56,8 @@ class Events:
     EMAIL_MENTOR_REQUEST_FAILED = "API: Mentor Session Request Email Failed"
     EMAIL_STUDENT_CONFIRMATION_SENT = "API: Student Confirmation Email Sent"
     EMAIL_STUDENT_CONFIRMATION_FAILED = "API: Student Confirmation Email Failed"
+    EMAIL_APPROVAL_CONFIRMATION_SENT = "API: Approval Confirmation Email Sent"
+    EMAIL_APPROVAL_CONFIRMATION_FAILED = "API: Approval Confirmation Email Failed"
 
     # ============================================
     # ADMIN API EVENTS
