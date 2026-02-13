@@ -29,6 +29,26 @@ export const adminService = {
     const response = await api.patch(`/admin/users/${uid}/reject`);
     return response.data;
   },
+
+  /**
+   * Get all mentors for admin management
+   * @returns {Promise<{mentors: Array, total: number}>}
+   */
+  async getMentors() {
+    const response = await api.get('/admin/mentors');
+    return response.data;
+  },
+
+  /**
+   * Update mentor visibility
+   * @param {string} uid - Mentor's Firebase UID
+   * @param {boolean} isActive - Whether mentor should be visible
+   * @returns {Promise<Object>}
+   */
+  async updateMentorVisibility(uid, isActive) {
+    const response = await api.patch(`/admin/mentors/${uid}/visibility`, { isActive });
+    return response.data;
+  },
 };
 
 export default adminService;

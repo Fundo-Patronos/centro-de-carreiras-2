@@ -14,15 +14,28 @@ Usage:
 
 import sys
 import os
-import asyncio
-import argparse
-from datetime import datetime
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+# Load .env file BEFORE importing app modules
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
+import asyncio
+import argparse
+from datetime import datetime
+
 from app.core.firebase import db
-from app.core.airtable import airtable_service
+from app.core.airtable import AirtableService
+
+# Create fresh instance with env vars loaded, manually set headers
+airtable_service = AirtableService()
+airtable_service.headers = {
+    "Authorization": f"Bearer {os.environ.get('AIRTABLE_API_TOKEN', '')}",
+    "Content-Type": "application/json",
+}
+airtable_service.base_id = os.environ.get('AIRTABLE_BASE_ID', '')
 
 
 async def migrate_mentors(dry_run: bool = True):

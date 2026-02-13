@@ -12,6 +12,7 @@ from ...core.analytics import track_event, Events
 from ...core.email import email_service
 from ...core.config import settings
 from ...models.user import UserInDB
+from ...models.mentor import MentorProfile
 from ...models.feedback import (
     FeedbackResponse,
     SessionFeedbackSummary,
@@ -426,4 +427,144 @@ async def get_session_feedback(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao buscar feedback da sessao: {str(e)}",
+        )
+
+
+# ==================== Mentor Management Endpoints ====================
+
+
+class MentorAdminResponse(BaseModel):
+    """Response model for mentor in admin panel."""
+
+    uid: str
+    email: str
+    displayName: str
+    photoURL: str | None = None
+    title: str = ""
+    company: str = ""
+    isActive: bool = True
+    isProfileComplete: bool = False
+
+
+class MentorListAdminResponse(BaseModel):
+    """Response model for list of mentors in admin."""
+
+    mentors: list[MentorAdminResponse]
+    total: int
+
+
+class MentorVisibilityUpdate(BaseModel):
+    """Request model for updating mentor visibility."""
+
+    isActive: bool
+
+
+@router.get("/mentors", response_model=MentorListAdminResponse)
+async def list_all_mentors(
+    admin: UserInDB = Depends(get_current_admin),
+):
+    """
+    List all mentors for admin management.
+    Includes both visible and hidden mentors.
+    Requires admin privileges.
+    """
+    try:
+        users_ref = db.collection("users")
+        query = users_ref.where("role", "==", "mentor")
+
+        mentors = []
+        for doc in query.stream():
+            user_data = doc.to_dict()
+            mentor_profile = user_data.get("mentorProfile", {}) or {}
+
+            mentors.append(
+                MentorAdminResponse(
+                    uid=doc.id,
+                    email=user_data.get("email", ""),
+                    displayName=user_data.get("displayName", ""),
+                    photoURL=mentor_profile.get("photoURL") or user_data.get("photoURL"),
+                    title=mentor_profile.get("title", ""),
+                    company=mentor_profile.get("company", ""),
+                    isActive=mentor_profile.get("isActive", True),
+                    isProfileComplete=mentor_profile.get("isProfileComplete", False),
+                )
+            )
+
+        # Sort by name
+        mentors.sort(key=lambda m: m.displayName.lower())
+
+        return MentorListAdminResponse(mentors=mentors, total=len(mentors))
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao buscar mentores: {str(e)}",
+        )
+
+
+@router.patch("/mentors/{uid}/visibility", response_model=MentorAdminResponse)
+async def update_mentor_visibility(
+    uid: str,
+    update: MentorVisibilityUpdate,
+    admin: UserInDB = Depends(get_current_admin),
+):
+    """
+    Toggle mentor visibility (isActive field).
+    Requires admin privileges.
+    """
+    try:
+        user_ref = db.collection("users").document(uid)
+        user_doc = user_ref.get()
+
+        if not user_doc.exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Mentor nao encontrado",
+            )
+
+        user_data = user_doc.to_dict()
+
+        if user_data.get("role") != "mentor":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Usuario nao e um mentor",
+            )
+
+        # Update mentor profile isActive field
+        mentor_profile = user_data.get("mentorProfile", {}) or {}
+        mentor_profile["isActive"] = update.isActive
+
+        user_ref.update({
+            "mentorProfile": mentor_profile,
+            "updatedAt": datetime.utcnow(),
+        })
+
+        # Track event
+        track_event(
+            admin.uid,
+            "Admin: Mentor Visibility Changed",
+            {
+                "mentor_uid": uid,
+                "mentor_email": user_data.get("email"),
+                "is_active": update.isActive,
+            },
+        )
+
+        return MentorAdminResponse(
+            uid=uid,
+            email=user_data.get("email", ""),
+            displayName=user_data.get("displayName", ""),
+            photoURL=mentor_profile.get("photoURL") or user_data.get("photoURL"),
+            title=mentor_profile.get("title", ""),
+            company=mentor_profile.get("company", ""),
+            isActive=update.isActive,
+            isProfileComplete=mentor_profile.get("isProfileComplete", False),
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao atualizar visibilidade do mentor: {str(e)}",
         )

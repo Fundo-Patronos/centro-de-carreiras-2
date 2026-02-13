@@ -58,6 +58,7 @@ export default function AppLayout() {
 
   const adminNavigation = [
     { name: 'Aprovacoes', href: '/admin/approvals', icon: ShieldCheckIcon },
+    { name: 'Mentores', href: '/admin/mentors', icon: UserGroupIcon },
     { name: 'Feedback', href: '/admin/feedback', icon: ChatBubbleLeftRightIcon },
   ];
 

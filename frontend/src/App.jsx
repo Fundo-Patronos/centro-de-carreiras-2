@@ -15,6 +15,7 @@ import FirebaseActionHandler from './pages/auth/FirebaseActionHandler';
 // Admin pages
 import UserApprovals from './pages/admin/UserApprovals';
 import SessionFeedback from './pages/admin/SessionFeedback';
+import MentorManagement from './pages/admin/MentorManagement';
 
 // Public pages
 import FeedbackForm from './pages/public/FeedbackForm';
@@ -71,6 +72,7 @@ function AuthenticatedRoutes() {
           <Route index element={<Navigate to="approvals" replace />} />
           <Route path="approvals" element={<UserApprovals />} />
           <Route path="feedback" element={<SessionFeedback />} />
+          <Route path="mentors" element={<MentorManagement />} />
         </Route>
 
         {/* Estudante routes - with sidebar layout */}
