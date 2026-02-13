@@ -94,7 +94,13 @@ async def update_my_profile(
     merged_profile = {**current_profile, **update_dict}
 
     # Check profile completeness
-    merged_profile["isProfileComplete"] = _check_profile_completeness(merged_profile)
+    was_complete = current_profile.get("isProfileComplete", False)
+    is_now_complete = _check_profile_completeness(merged_profile)
+    merged_profile["isProfileComplete"] = is_now_complete
+
+    # Auto-show mentor when profile becomes complete (but don't auto-hide)
+    if is_now_complete and not was_complete:
+        merged_profile["isActive"] = True
 
     # Update Firestore
     user_ref.update({

@@ -75,6 +75,14 @@ async def migrate_mentors(dry_run: bool = True):
         print(f"Processing: {name} ({email})")
 
         # Build mentor profile data
+        is_profile_complete = bool(
+            mentor.get("title")
+            and mentor.get("company")
+            and mentor.get("bio")
+            and mentor.get("tags")
+            and mentor.get("expertise")
+        )
+
         mentor_profile = {
             "title": mentor.get("title", ""),
             "company": mentor.get("company", ""),
@@ -89,14 +97,8 @@ async def migrate_mentors(dry_run: bool = True):
             "alternativeUniversity": None,
             "patronosRelation": None,
             "photoURL": mentor.get("photoURL"),
-            "isActive": True,
-            "isProfileComplete": bool(
-                mentor.get("title")
-                and mentor.get("company")
-                and mentor.get("bio")
-                and mentor.get("tags")
-                and mentor.get("expertise")
-            ),
+            "isActive": is_profile_complete,  # Hidden by default if profile incomplete
+            "isProfileComplete": is_profile_complete,
         }
 
         try:
