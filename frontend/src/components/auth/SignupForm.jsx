@@ -15,6 +15,10 @@ export default function SignupForm() {
     confirmPassword: '',
     role: '',
     curso: '',
+    // Mentor-specific fields
+    company: '',
+    title: '',
+    linkedin: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -32,6 +36,16 @@ export default function SignupForm() {
 
     if (!formData.curso.trim()) {
       newErrors.curso = 'Curso é obrigatório';
+    }
+
+    // Mentor-specific validation
+    if (formData.role === 'mentor') {
+      if (!formData.company.trim()) {
+        newErrors.company = 'Empresa é obrigatória';
+      }
+      if (!formData.title.trim()) {
+        newErrors.title = 'Cargo é obrigatório';
+      }
     }
 
     if (!formData.email.trim()) {
@@ -79,6 +93,12 @@ export default function SignupForm() {
         role: formData.role,
         authProvider: 'email',
         curso: formData.curso,
+        // Mentor-specific fields
+        ...(formData.role === 'mentor' && {
+          company: formData.company,
+          title: formData.title,
+          linkedin: formData.linkedin || null,
+        }),
       });
 
       analytics.track(EVENTS.SIGN_UP_COMPLETED, { auth_provider: 'email', role: formData.role });
@@ -185,6 +205,71 @@ export default function SignupForm() {
           <p className="mt-1 text-sm text-red-600">{errors.curso}</p>
         )}
       </div>
+
+      {/* Mentor-specific fields */}
+      {formData.role === 'mentor' && (
+        <>
+          <div>
+            <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+              Empresa
+            </label>
+            <input
+              type="text"
+              id="company"
+              value={formData.company}
+              onChange={(e) => handleChange('company', e.target.value)}
+              className={`
+                mt-1 block w-full rounded-lg border px-3 py-2 shadow-sm
+                focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
+                ${errors.company ? 'border-red-300' : 'border-gray-300'}
+              `}
+              placeholder="Ex: Google, McKinsey, Itau"
+            />
+            {errors.company && (
+              <p className="mt-1 text-sm text-red-600">{errors.company}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              Cargo
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleChange('title', e.target.value)}
+              className={`
+                mt-1 block w-full rounded-lg border px-3 py-2 shadow-sm
+                focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
+                ${errors.title ? 'border-red-300' : 'border-gray-300'}
+              `}
+              placeholder="Ex: Software Engineer, Consultor, Analista"
+            />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700">
+              LinkedIn <span className="text-gray-400 font-normal">(opcional)</span>
+            </label>
+            <input
+              type="url"
+              id="linkedin"
+              value={formData.linkedin}
+              onChange={(e) => handleChange('linkedin', e.target.value)}
+              className={`
+                mt-1 block w-full rounded-lg border px-3 py-2 shadow-sm
+                focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
+                border-gray-300
+              `}
+              placeholder="https://linkedin.com/in/seu-perfil"
+            />
+          </div>
+        </>
+      )}
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">

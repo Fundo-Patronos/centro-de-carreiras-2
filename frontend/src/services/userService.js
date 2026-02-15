@@ -53,11 +53,15 @@ export const userService = {
    * @param {string} userData.role - 'estudante' or 'mentor'
    * @param {string} userData.authProvider - 'email', 'google', or 'magic_link'
    * @param {string} [userData.curso] - User's course/major
+   * @param {string} [userData.company] - Mentor's company (mentor only)
+   * @param {string} [userData.title] - Mentor's job title (mentor only)
+   * @param {string} [userData.linkedin] - Mentor's LinkedIn URL (mentor only)
    */
   async createUserProfile(uid, userData) {
     const userRef = doc(db, 'users', uid);
     const status = getInitialStatus(userData.email, userData.role, userData.authProvider);
-    await setDoc(userRef, {
+
+    const profileData = {
       uid,
       email: userData.email,
       displayName: userData.displayName,
@@ -67,15 +71,15 @@ export const userService = {
       authProvider: userData.authProvider,
       profile: {
         phone: null,
-        linkedIn: null,
+        linkedIn: userData.linkedin || null,
         bio: null,
         // Shared field
         course: userData.curso || null,
         // Estudante fields
         graduationYear: null,
         // Mentor fields
-        company: null,
-        position: null,
+        company: userData.company || null,
+        position: userData.title || null,
         expertise: [],
       },
       emailNotifications: true,
@@ -83,7 +87,30 @@ export const userService = {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       lastLoginAt: serverTimestamp(),
-    });
+    };
+
+    // Add mentorProfile for mentors with initial data from signup
+    if (userData.role === 'mentor') {
+      profileData.mentorProfile = {
+        title: userData.title || '',
+        company: userData.company || '',
+        bio: '',
+        linkedin: userData.linkedin || '',
+        tags: [],
+        expertise: [],
+        course: userData.curso || '',
+        graduationYear: null,
+        isUnicampAlumni: null,
+        unicampDegreeLevel: null,
+        alternativeUniversity: null,
+        patronosRelation: null,
+        photoURL: null,
+        isActive: false, // Hidden until profile is complete
+        isProfileComplete: false,
+      };
+    }
+
+    await setDoc(userRef, profileData);
   },
 
   /**

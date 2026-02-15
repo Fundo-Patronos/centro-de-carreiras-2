@@ -583,13 +583,22 @@ class EmailService:
                 "Solicitar sessoes de mentoria",
                 "Acessar recursos de desenvolvimento de carreira",
             ]
+            extra_message = ""
         else:  # mentor
             role_message = "Como mentor, voce agora pode gerenciar seu perfil e receber solicitacoes de mentoria de estudantes da Unicamp."
             features = [
-                "Gerenciar seu perfil de mentor",
+                "Completar seu perfil de mentor",
                 "Receber solicitacoes de mentoria de estudantes",
                 "Contribuir para o desenvolvimento de futuros profissionais",
             ]
+            extra_message = """
+            <div style="background: #FFF3E0; border-left: 4px solid #FF6B35; border-radius: 8px; padding: 16px; margin: 24px 0;">
+                <p style="color: #1a1a1a; font-weight: 600; margin: 0 0 8px 0;">Proximo passo importante</p>
+                <p style="color: #4a4a4a; font-size: 14px; margin: 0; line-height: 1.6;">
+                    Para aparecer na lista de mentores e receber solicitacoes de estudantes, complete seu perfil com sua biografia, areas de expertise e foto. Acesse "Meu Perfil" no menu lateral apos fazer login.
+                </p>
+            </div>
+            """
 
         features_html = "".join(
             f'<li style="color: #4a4a4a; margin: 8px 0;">{feature}</li>'
@@ -629,6 +638,8 @@ class EmailService:
                     {features_html}
                 </ul>
             </div>
+
+            {extra_message}
 
             <div style="text-align: center; margin: 32px 0;">
                 <a href="{login_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
