@@ -644,6 +644,131 @@ All changes deployed to production via CI/CD:
 
 ---
 
+### Session 6 - 2026-02-15
+
+**Mentor Profile System & Improved Signup Flow**
+
+This session focused on implementing a complete mentor profile management system, migrating data from Airtable to Firestore, and improving the mentor signup experience.
+
+#### 1. Mentor Profile Feature ("Meu Perfil")
+
+Created a full profile management page for mentors to view and edit their information.
+
+**Backend Implementation:**
+
+| File | Type | Description |
+|------|------|-------------|
+| `app/models/mentor.py` | NEW | MentorProfile, MentorProfileUpdate, MentorPublicResponse models |
+| `app/api/v1/mentors.py` | REWRITE | Switched from Airtable to Firestore, added /me endpoints |
+| `app/api/v1/admin.py` | EDIT | Added mentor visibility management endpoints |
+
+**New API Endpoints:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/mentors/me` | Get own mentor profile |
+| PUT | `/mentors/me` | Update own mentor profile |
+| POST | `/mentors/me/photo` | Upload profile photo to Firebase Storage |
+| GET | `/admin/mentors` | List all mentors with admin controls |
+| PATCH | `/admin/mentors/{uid}/visibility` | Toggle mentor visibility |
+
+**Frontend Implementation:**
+
+| File | Type | Description |
+|------|------|-------------|
+| `pages/mentor/MeuPerfil.jsx` | NEW | Profile editing page with 5 sections |
+| `components/mentor/TagInput.jsx` | NEW | Multi-tag input with suggestions |
+| `components/mentor/PhotoUpload.jsx` | NEW | Drag & drop photo upload |
+| `pages/admin/MentorManagement.jsx` | NEW | Admin page for mentor visibility |
+| `services/mentorService.js` | EDIT | Added profile management methods |
+| `services/adminService.js` | EDIT | Added mentor admin methods |
+| `components/layout/AppLayout.jsx` | EDIT | Added "Meu Perfil" to mentor nav |
+
+**Profile Fields:**
+- Basic: title, company, bio, linkedin, photoURL
+- Career: tags (areas), expertise (what they help with)
+- Education: course, graduationYear, isUnicampAlumni, unicampDegreeLevel
+- Patronos: patronosRelation
+
+#### 2. Data Migration (Airtable → Firestore)
+
+Migrated all mentor data from Airtable to Firestore as single source of truth.
+
+**Scripts Created:**
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/migrate_mentors.py` | Migrate mentor profiles to Firestore |
+| `scripts/migrate_mentor_photos.py` | Download photos from Airtable, upload to Firebase Storage |
+
+**Migration Results:**
+- 25 mentors migrated (23 created, 2 updated)
+- 25 photos migrated to Firebase Storage
+- No production dependency on Airtable for mentor data
+
+**Firebase Storage Configuration:**
+- Bucket: `centro-carreiras-fire.firebasestorage.app`
+- Path: `mentor-photos/{uid}/{filename}`
+- CORS configured for production domains
+
+#### 3. Mentor Visibility Controls
+
+Implemented automatic and manual visibility controls.
+
+**Automatic:**
+- New mentors hidden by default (`isActive: false`)
+- Auto-show when profile becomes complete
+- Profile completeness requires: title, company, bio, tags, expertise
+
+**Manual (Admin):**
+- Admin panel at `/admin/mentors`
+- Toggle visibility with confirmation
+- Search/filter mentors
+
+#### 4. Improved Mentor Signup Flow
+
+Enhanced the signup form for better mentor onboarding.
+
+**Two-Step Signup Process:**
+
+| Step | Content |
+|------|---------|
+| Step 1 | Role selection only ("Estudante" or "Mentor") |
+| Step 2 | Form fields based on selected role |
+
+**New Mentor Fields at Signup:**
+- Company (required)
+- Title/Cargo (required)
+- LinkedIn (optional)
+
+**Data Flow:**
+- Fields saved to both `profile` and `mentorProfile` objects
+- `mentorProfile.isActive = false` until profile is complete
+- `mentorProfile.isProfileComplete = false` initially
+
+**Updated Approval Email:**
+- Changed first action to "Completar seu perfil de mentor"
+- Added orange callout box explaining profile completion requirement
+- Message: "Para aparecer na lista de mentores e receber solicitacoes de estudantes, complete seu perfil com sua biografia, areas de expertise e foto."
+
+#### Files Changed Summary
+
+| Category | Files |
+|----------|-------|
+| **New Backend** | `models/mentor.py`, `scripts/migrate_mentors.py`, `scripts/migrate_mentor_photos.py` |
+| **New Frontend** | `MeuPerfil.jsx`, `TagInput.jsx`, `PhotoUpload.jsx`, `MentorManagement.jsx` |
+| **Modified Backend** | `mentors.py`, `admin.py`, `firebase.py`, `email.py`, `analytics.py` |
+| **Modified Frontend** | `SignupForm.jsx`, `userService.js`, `mentorService.js`, `adminService.js`, `AppLayout.jsx` |
+
+#### Key Technical Decisions
+
+1. **Firestore over Airtable** for mentor profiles - single database, native Firebase integration
+2. **Two-step signup** - less overwhelming, role-specific fields
+3. **Auto-hide incomplete profiles** - ensures quality mentor directory
+4. **Firebase Storage for photos** - permanent URLs, no expiration
+
+---
+
 ## Google Cloud Secret Manager
 
 **All sensitive credentials are stored in Google Cloud Secret Manager.**
