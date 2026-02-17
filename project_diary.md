@@ -807,3 +807,47 @@ gcloud run services update centro-carreiras-api \
 ```
 
 ---
+
+### Session 7 - 2026-02-17
+
+**CORS Fix & Signup UX Improvements**
+
+This session fixed a critical CORS issue blocking the platform and added informational callouts to the signup flow.
+
+#### 1. CORS Configuration Fix
+
+**Problem:** Admin pages showing "Erro ao carregar mentores" with CORS errors. Requests from `https://carreiras.patronos.org` were being blocked.
+
+**Root Cause:** The `FRONTEND_URL` environment variable on Cloud Run was only set to `https://centro.patronos.org`, missing the other allowed origins.
+
+**Solution:** Updated Cloud Run service with all CORS origins:
+```bash
+gcloud run services update centro-carreiras-api \
+  --region=southamerica-east1 \
+  --set-env-vars='^@^FRONTEND_URL=https://centro.patronos.org,https://carreiras.patronos.org,https://centro-carreiras-web-3qjayzhclq-ue.a.run.app'
+```
+
+**Note:** The `cloudbuild.yaml` already had the correct substitution variable, but it wasn't being applied. Future deployments via CI/CD should maintain the correct configuration.
+
+#### 2. Signup Flow Callouts
+
+Added informational callouts to guide users during registration.
+
+**Student Callout (blue):**
+> **Dica:** Use seu email Unicamp (`@dac.unicamp.br`) para ter acesso imediato à plataforma. Cadastros com outros emails precisam ser aprovados pela equipe Patronos.
+
+**Mentor Callout (amber):**
+> **Importante:** Seu cadastro será revisado e aprovado pela equipe Patronos. Após a aprovação, você poderá completar seu perfil dentro da plataforma para ser exibido aos estudantes.
+
+**Files Modified:**
+- `frontend/src/components/auth/SignupForm.jsx` - Added role-specific callouts
+
+#### Summary
+
+| Task | Status |
+|------|--------|
+| CORS fix for carreiras.patronos.org | ✅ Done |
+| Student signup callout (@dac.unicamp.br) | ✅ Done |
+| Mentor signup callout (approval process) | ✅ Done |
+
+---
