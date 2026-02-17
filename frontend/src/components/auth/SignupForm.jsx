@@ -274,9 +274,25 @@ export default function SignupForm() {
         )}
       </div>
 
+      {/* Student email callout */}
+      {formData.role === 'estudante' && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-sm text-blue-800">
+            <strong>Dica:</strong> Use seu email Unicamp (<span className="font-mono">@dac.unicamp.br</span>) para ter acesso imediato a plataforma. Cadastros com outros emails precisam ser aprovados pela equipe Patronos.
+          </p>
+        </div>
+      )}
+
       {/* Mentor-specific fields */}
       {formData.role === 'mentor' && (
         <>
+          {/* Mentor approval callout */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <p className="text-sm text-amber-800">
+              <strong>Importante:</strong> Seu cadastro será revisado e aprovado pela equipe Patronos. Após a aprovação, você poderá completar seu perfil dentro da plataforma para ser exibido aos estudantes.
+            </p>
+          </div>
+
           <div>
             <label htmlFor="company" className="block text-sm font-medium text-gray-700">
               Empresa
