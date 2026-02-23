@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { auth } from '../config/firebase';
+import analytics, { EVENTS } from './analytics';
 
 // Create axios instance with base URL
 const api = axios.create({
@@ -28,11 +29,24 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - handle 401 errors
+// Response interceptor - handle errors and track them
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const url = error.config?.url;
+    const method = error.config?.method?.toUpperCase();
+
+    // Track all API errors in analytics
+    analytics.track(EVENTS.API_ERROR, {
+      status: status || 'network_error',
+      url: url,
+      method: method,
+      error_message: error.response?.data?.detail || error.message,
+      error_type: status ? 'http_error' : 'network_error',
+    });
+
+    if (status === 401) {
       // Token expired or invalid
       console.error('Authentication error - signing out');
       await auth.signOut();

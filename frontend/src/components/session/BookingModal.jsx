@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,8 @@ export default function BookingModal({ mentor, isOpen, onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState('idle'); // idle, success, error
   const [error, setError] = useState('');
+  const initialMessageRef = useRef('');
+  const hasTrackedEditRef = useRef(false);
 
   // Generate default message template when modal opens
   useEffect(() => {
@@ -33,6 +35,8 @@ ${userProfile.displayName}`;
       setMessage(defaultMessage);
       setSubmitState('idle');
       setError('');
+      initialMessageRef.current = defaultMessage;
+      hasTrackedEditRef.current = false;
 
       // Track modal opened
       analytics.track(EVENTS.BOOKING_MODAL_OPENED, {
@@ -42,6 +46,21 @@ ${userProfile.displayName}`;
       });
     }
   }, [isOpen, mentor, userProfile]);
+
+  // Handle message change and track when user edits
+  const handleMessageChange = (e) => {
+    const newMessage = e.target.value;
+    setMessage(newMessage);
+
+    // Track first edit (when message differs from initial template)
+    if (!hasTrackedEditRef.current && newMessage !== initialMessageRef.current) {
+      hasTrackedEditRef.current = true;
+      analytics.track(EVENTS.BOOKING_MESSAGE_EDITED, {
+        mentor_id: mentor?.id,
+        mentor_name: mentor?.name,
+      });
+    }
+  };
 
   // Validate mentor data before submission
   const validateMentorData = () => {
@@ -243,7 +262,7 @@ ${userProfile.displayName}`;
                       id="message"
                       rows={10}
                       value={message}
-                      onChange={(e) => setMessage(e.target.value)}
+                      onChange={handleMessageChange}
                       disabled={isSubmitting}
                       className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-patronos-accent focus:ring-patronos-accent text-sm resize-none disabled:bg-gray-50 disabled:text-gray-500"
                       placeholder="Escreva sua mensagem para o mentor..."

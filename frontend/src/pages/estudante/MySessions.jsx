@@ -57,9 +57,12 @@ function formatDate(dateString) {
   });
 }
 
-function SessionCard({ session }) {
+function SessionCard({ session, onClick }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+    <div
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => onClick(session)}
+    >
       {/* Header with mentor info */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
@@ -137,6 +140,17 @@ export default function MySessions() {
     });
   };
 
+  // Handle session card click
+  const handleSessionClick = (session) => {
+    analytics.track(EVENTS.SESSION_CARD_CLICKED, {
+      session_id: session.id,
+      session_status: session.status,
+      mentor_name: session.mentor_name,
+      mentor_company: session.mentor_company,
+    });
+    // Could navigate to session detail page in the future
+  };
+
   // Filter sessions based on active filter
   const filteredSessions = activeFilter
     ? sessions.filter((session) => session.status === activeFilter)
@@ -206,7 +220,7 @@ export default function MySessions() {
       {filteredSessions.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {filteredSessions.map((session) => (
-            <SessionCard key={session.id} session={session} />
+            <SessionCard key={session.id} session={session} onClick={handleSessionClick} />
           ))}
         </div>
       ) : (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -106,6 +106,20 @@ export default function MentorList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const filterDropdownRef = useRef(null);
+
+  // Close filter dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
+        setShowFilterDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Track page view on mount
   useEffect(() => {
@@ -133,16 +147,32 @@ export default function MentorList() {
     fetchMentors();
   }, []);
 
-  // Filter mentors based on search
+  // Get unique tags from all mentors for filter dropdown
+  const availableTags = [...new Set(mentors.flatMap(m => m.tags || []))].sort();
+
+  // Filter mentors based on search and tag filter
   const filteredMentors = mentors.filter((mentor) => {
     const query = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = !query || (
       mentor.name?.toLowerCase().includes(query) ||
       mentor.company?.toLowerCase().includes(query) ||
       mentor.tags?.some((tag) => tag.toLowerCase().includes(query)) ||
       mentor.expertise?.some((exp) => exp.toLowerCase().includes(query))
     );
+    const matchesTag = !selectedTag || mentor.tags?.includes(selectedTag);
+    return matchesSearch && matchesTag;
   });
+
+  // Handle tag filter change
+  const handleTagFilter = (tag) => {
+    setSelectedTag(tag);
+    setShowFilterDropdown(false);
+    analytics.track(EVENTS.MENTOR_FILTER_APPLIED, {
+      filter_type: 'tag',
+      filter_value: tag || 'all',
+      results_count: mentors.filter(m => !tag || m.tags?.includes(tag)).length,
+    });
+  };
 
   const handleMentorClick = (mentor) => {
     setSelectedMentor(mentor);
@@ -243,12 +273,65 @@ export default function MentorList() {
           />
         </div>
 
-        {/* Filter button */}
-        <button className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-          <FunnelIcon className="h-5 w-5 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Filtros</span>
-        </button>
+        {/* Filter button with dropdown */}
+        <div className="relative" ref={filterDropdownRef}>
+          <button
+            onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 border rounded-lg transition-colors ${
+              selectedTag
+                ? 'border-patronos-accent bg-patronos-accent/5 text-patronos-accent'
+                : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+            }`}
+          >
+            <FunnelIcon className="h-5 w-5" />
+            <span className="text-sm font-medium">
+              {selectedTag || 'Filtros'}
+            </span>
+          </button>
+
+          {/* Dropdown */}
+          {showFilterDropdown && (
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-10 max-h-64 overflow-y-auto">
+              <button
+                onClick={() => handleTagFilter(null)}
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
+                  !selectedTag ? 'text-patronos-accent font-medium' : 'text-gray-700'
+                }`}
+              >
+                Todas as areas
+              </button>
+              <div className="border-t border-gray-100" />
+              {availableTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => handleTagFilter(tag)}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
+                    selectedTag === tag ? 'text-patronos-accent font-medium' : 'text-gray-700'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Active filter tag */}
+      {selectedTag && (
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-sm text-gray-500">Filtro ativo:</span>
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-medium bg-patronos-accent/10 text-patronos-accent">
+            {selectedTag}
+            <button
+              onClick={() => handleTagFilter(null)}
+              className="ml-1 hover:text-patronos-accent/70"
+            >
+              &times;
+            </button>
+          </span>
+        </div>
+      )}
 
       {/* Results count */}
       <p className="text-sm text-gray-500 mb-4">
