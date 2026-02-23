@@ -976,8 +976,47 @@ submitFeedback(sessionId, feedback)      // POST /sessions/{id}/feedback
 | **New Frontend** | `SessionCard.jsx`, `ResendEmailModal.jsx`, `FeedbackModal.jsx` |
 | **Modified Frontend** | `MySessions.jsx`, `AppLayout.jsx`, `App.jsx`, `sessionService.js`, `analytics.js` |
 
+#### 7. UI Polish & Brand Consistency
+
+**Button Text Improvements:**
+- Shortened button labels for single-line display: "Concluida", "Pendente", "Feedback", "Enviado"
+- Changed "Concluida" button to brand red (`patronos-coral` / `#ff6253`)
+
+**Full 4-Color Brand Gradient Applied:**
+
+Updated all gradient usages across the platform to use the official Patronos diagonal gradient:
+```css
+linear-gradient(135deg, #ff9700, #ff6253, #fc4696, #c964e2)
+```
+
+Previously, some components used a simplified 2-color gradient (`from-patronos-orange to-patronos-purple`). Now all use `bg-patronos-gradient` for consistency.
+
+**Files Updated for Gradient:**
+- `MentorDrawer.jsx` - Header banner + avatar fallback
+- `BookingModal.jsx` - Avatar fallback
+- `FeedbackModal.jsx` - Avatar fallback
+- `ResendEmailModal.jsx` - Avatar fallback
+- `SessionCard.jsx` - Avatar fallback
+- `MentorList.jsx` - Avatar fallback
+- `FeedbackForm.jsx` - Submit button
+
+**Feedback Button Logic:**
+- Feedback button is **disabled (gray)** for pending sessions
+- Only **active (orange)** when session is marked as completed
+- Shows **submitted state (blue)** after feedback is sent
+
 #### Deployment
 
 Deployed to production via CI/CD (Cloud Build triggers on push to main).
+
+#### Commits
+
+| Hash | Description |
+|------|-------------|
+| `5c8e115` | feat: Implement session tracking system with status management and feedback |
+| `6011469` | docs: Update project diary with Session 8 |
+| `69c3359` | fix: Update SessionCard buttons - single line text and brand red color |
+| `c55443b` | style: Apply full 4-color brand gradient across platform |
+| `0ea3847` | fix: Disable feedback button until session is completed |
 
 ---
