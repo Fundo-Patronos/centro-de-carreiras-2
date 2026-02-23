@@ -2,115 +2,99 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CalendarDaysIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
+  UserGroupIcon,
+  BriefcaseIcon,
+  Cog6ToothIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '../../contexts/AuthContext';
 import sessionService from '../../services/sessionService';
+import SessionCard from '../../components/session/SessionCard';
+import ResendEmailModal from '../../components/session/ResendEmailModal';
+import FeedbackModal from '../../components/session/FeedbackModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import analytics, { EVENTS } from '../../services/analytics';
-
-// Status badge configuration
-const statusConfig = {
-  pending: {
-    label: 'Pendente',
-    color: 'bg-yellow-100 text-yellow-700',
-    icon: ClockIcon,
-  },
-  confirmed: {
-    label: 'Confirmada',
-    color: 'bg-green-100 text-green-700',
-    icon: CheckCircleIcon,
-  },
-  completed: {
-    label: 'Concluida',
-    color: 'bg-blue-100 text-blue-700',
-    icon: CheckCircleIcon,
-  },
-  cancelled: {
-    label: 'Cancelada',
-    color: 'bg-red-100 text-red-700',
-    icon: XCircleIcon,
-  },
-};
-
-function StatusBadge({ status }) {
-  const config = statusConfig[status] || statusConfig.pending;
-  const Icon = config.icon;
-
-  return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.color}`}>
-      <Icon className="h-3.5 w-3.5" />
-      {config.label}
-    </span>
-  );
-}
-
-function formatDate(dateString) {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
-function SessionCard({ session, onClick }) {
-  return (
-    <div
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow cursor-pointer"
-      onClick={() => onClick(session)}
-    >
-      {/* Header with mentor info */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-patronos-orange to-patronos-purple text-lg font-semibold text-white">
-            {session.mentor_name?.split(' ').map(n => n[0]).slice(0, 2).join('')}
-          </div>
-          <div className="min-w-0">
-            <h3 className="font-semibold text-gray-900 truncate">{session.mentor_name}</h3>
-            <p className="text-sm text-patronos-accent font-medium">{session.mentor_company}</p>
-          </div>
-        </div>
-        <StatusBadge status={session.status} />
-      </div>
-
-      {/* Message preview */}
-      <div className="mt-4">
-        <p className="text-sm text-gray-600 line-clamp-3">{session.message}</p>
-      </div>
-
-      {/* Footer with date */}
-      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-sm text-gray-500">
-          <CalendarDaysIcon className="h-4 w-4" />
-          <span>Solicitado em {formatDate(session.created_at)}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // Filter tabs
 const filterTabs = [
   { key: null, label: 'Todas' },
   { key: 'pending', label: 'Pendentes' },
-  { key: 'confirmed', label: 'Confirmadas' },
   { key: 'completed', label: 'Concluidas' },
 ];
 
+// Quick Access cards configuration
+const studentQuickAccess = [
+  {
+    name: 'Mentores',
+    href: '/estudante/mentores',
+    icon: UserGroupIcon,
+    description: 'Encontrar mentores',
+    bgColor: 'bg-patronos-accent/10',
+    hoverColor: 'group-hover:bg-patronos-accent/20',
+    iconColor: 'text-patronos-accent',
+  },
+  {
+    name: 'Vagas',
+    href: '/estudante/vagas',
+    icon: BriefcaseIcon,
+    description: 'Ver oportunidades',
+    bgColor: 'bg-blue-100',
+    hoverColor: 'group-hover:bg-blue-200',
+    iconColor: 'text-blue-600',
+  },
+  {
+    name: 'Meu Perfil',
+    href: '/estudante/dashboard',
+    icon: UserCircleIcon,
+    description: 'Ver meu perfil',
+    bgColor: 'bg-orange-100',
+    hoverColor: 'group-hover:bg-orange-200',
+    iconColor: 'text-orange-600',
+  },
+];
+
+const mentorQuickAccess = [
+  {
+    name: 'Disponibilidade',
+    href: '/mentor/disponibilidade',
+    icon: Cog6ToothIcon,
+    description: 'Gerenciar horarios',
+    bgColor: 'bg-patronos-accent/10',
+    hoverColor: 'group-hover:bg-patronos-accent/20',
+    iconColor: 'text-patronos-accent',
+  },
+  {
+    name: 'Meu Perfil',
+    href: '/mentor/perfil',
+    icon: UserCircleIcon,
+    description: 'Editar perfil',
+    bgColor: 'bg-green-100',
+    hoverColor: 'group-hover:bg-green-200',
+    iconColor: 'text-green-600',
+  },
+];
+
 export default function MySessions() {
+  const { userProfile } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState(null);
 
+  // Modal states
+  const [resendModalSession, setResendModalSession] = useState(null);
+  const [feedbackModalSession, setFeedbackModalSession] = useState(null);
+
+  const viewerRole = userProfile?.role || 'estudante';
+  const isStudent = viewerRole === 'estudante';
+  const quickAccessItems = isStudent ? studentQuickAccess : mentorQuickAccess;
+
   // Track page view on mount
   useEffect(() => {
-    analytics.track(EVENTS.MY_SESSIONS_VIEWED);
-  }, []);
+    analytics.track(EVENTS.MY_SESSIONS_VIEWED, {
+      user_role: viewerRole,
+    });
+  }, [viewerRole]);
 
   // Fetch sessions on mount
   useEffect(() => {
@@ -137,18 +121,39 @@ export default function MySessions() {
     setActiveFilter(filter);
     analytics.track(EVENTS.SESSION_FILTER_APPLIED, {
       filter_status: filter || 'all',
+      user_role: viewerRole,
     });
   };
 
-  // Handle session card click
-  const handleSessionClick = (session) => {
-    analytics.track(EVENTS.SESSION_CARD_CLICKED, {
-      session_id: session.id,
-      session_status: session.status,
-      mentor_name: session.mentor_name,
-      mentor_company: session.mentor_company,
+  // Handle quick access click
+  const handleQuickAccessClick = (itemName) => {
+    analytics.track(EVENTS.QUICK_ACCESS_CLICKED, {
+      destination: itemName,
+      user_role: viewerRole,
     });
-    // Could navigate to session detail page in the future
+  };
+
+  // Handle session status change
+  const handleStatusChange = (updatedSession) => {
+    setSessions(prev =>
+      prev.map(s => (s.id === updatedSession.id ? updatedSession : s))
+    );
+  };
+
+  // Handle feedback success
+  const handleFeedbackSuccess = (sessionId, role) => {
+    setSessions(prev =>
+      prev.map(s => {
+        if (s.id === sessionId) {
+          return {
+            ...s,
+            student_feedback_submitted: role === 'estudante' ? true : s.student_feedback_submitted,
+            mentor_feedback_submitted: role === 'mentor' ? true : s.mentor_feedback_submitted,
+          };
+        }
+        return s;
+      })
+    );
   };
 
   // Filter sessions based on active filter
@@ -186,11 +191,36 @@ export default function MySessions() {
 
   return (
     <div className="p-6 lg:p-8">
-      {/* Header */}
+      {/* Quick Access Section */}
       <div className="mb-8">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+          Acesso Rapido
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {quickAccessItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.href}
+              onClick={() => handleQuickAccessClick(item.name)}
+              className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow group"
+            >
+              <div className={`w-10 h-10 ${item.bgColor} rounded-xl flex items-center justify-center mb-2 ${item.hoverColor} transition-colors`}>
+                <item.icon className={`w-5 h-5 ${item.iconColor}`} />
+              </div>
+              <h4 className="font-semibold text-gray-900 text-sm">{item.name}</h4>
+              <p className="text-xs text-gray-500">{item.description}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Header */}
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Minhas Sessoes</h1>
         <p className="mt-1 text-gray-600">
-          Acompanhe suas solicitacoes de mentoria
+          {isStudent
+            ? 'Acompanhe suas solicitacoes de mentoria'
+            : 'Gerencie as sessoes solicitadas por estudantes'}
         </p>
       </div>
 
@@ -220,7 +250,14 @@ export default function MySessions() {
       {filteredSessions.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {filteredSessions.map((session) => (
-            <SessionCard key={session.id} session={session} onClick={handleSessionClick} />
+            <SessionCard
+              key={session.id}
+              session={session}
+              viewerRole={viewerRole}
+              onStatusChange={handleStatusChange}
+              onOpenResendModal={setResendModalSession}
+              onOpenFeedbackModal={setFeedbackModalSession}
+            />
           ))}
         </div>
       ) : (
@@ -232,9 +269,11 @@ export default function MySessions() {
           <p className="mt-1 text-gray-500 max-w-sm mx-auto">
             {activeFilter
               ? 'Tente ajustar o filtro para ver outras sessoes.'
-              : 'Encontre um mentor e agende sua primeira sessao de mentoria.'}
+              : isStudent
+                ? 'Encontre um mentor e agende sua primeira sessao de mentoria.'
+                : 'Quando estudantes solicitarem mentorias, elas aparecerao aqui.'}
           </p>
-          {!activeFilter && (
+          {!activeFilter && isStudent && (
             <Link
               to="/estudante/mentores"
               className="mt-4 inline-block px-4 py-2 bg-patronos-accent text-white rounded-lg hover:bg-patronos-accent/90"
@@ -244,6 +283,25 @@ export default function MySessions() {
           )}
         </div>
       )}
+
+      {/* Resend Email Modal */}
+      <ResendEmailModal
+        session={resendModalSession}
+        isOpen={Boolean(resendModalSession)}
+        onClose={() => setResendModalSession(null)}
+        onSuccess={() => {
+          // Optionally refresh sessions or show a toast
+        }}
+      />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        session={feedbackModalSession}
+        viewerRole={viewerRole}
+        isOpen={Boolean(feedbackModalSession)}
+        onClose={() => setFeedbackModalSession(null)}
+        onSuccess={handleFeedbackSuccess}
+      />
     </div>
   );
 }

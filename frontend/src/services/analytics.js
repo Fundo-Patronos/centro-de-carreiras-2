@@ -83,6 +83,13 @@ export const EVENTS = {
   VIEW_MY_SESSIONS_CLICKED: 'View My Sessions Clicked',
   SESSION_FILTER_APPLIED: 'Session Filter Applied',
   SESSION_CARD_CLICKED: 'Session Card Clicked',
+  SESSION_STATUS_UPDATED: 'Session Status Updated',
+  SESSION_FEEDBACK_SUBMITTED: 'Session Feedback Submitted',
+  SESSION_EMAIL_RESENT: 'Session Email Resent',
+  RESEND_EMAIL_MODAL_OPENED: 'Resend Email Modal Opened',
+  RESEND_EMAIL_MODAL_CLOSED: 'Resend Email Modal Closed',
+  FEEDBACK_MODAL_OPENED: 'Feedback Modal Opened',
+  FEEDBACK_MODAL_CLOSED: 'Feedback Modal Closed',
 
   // ============================================
   // ADMIN EVENTS

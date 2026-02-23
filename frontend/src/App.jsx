@@ -30,6 +30,9 @@ import MySessions from './pages/estudante/MySessions';
 import MentorDashboard from './pages/mentor/Dashboard';
 import MeuPerfil from './pages/mentor/MeuPerfil';
 
+// Shared pages - MySessions works for both roles
+const MentorSessions = MySessions;
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -87,7 +90,7 @@ function AuthenticatedRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route index element={<Navigate to="sessoes" replace />} />
           <Route path="dashboard" element={<EstudanteDashboard />} />
           <Route path="mentores" element={<MentorList />} />
           <Route path="sessoes" element={<MySessions />} />
@@ -103,9 +106,9 @@ function AuthenticatedRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route index element={<Navigate to="sessoes" replace />} />
           <Route path="dashboard" element={<MentorDashboard />} />
-          <Route path="sessoes" element={<PlaceholderPage title="Minhas Sessões" />} />
+          <Route path="sessoes" element={<MentorSessions />} />
           <Route path="disponibilidade" element={<PlaceholderPage title="Disponibilidade" />} />
           <Route path="perfil" element={<MeuPerfil />} />
         </Route>

@@ -51,6 +51,9 @@ class Events:
     SESSION_CREATED = "API: Session Created"
     SESSIONS_LISTED = "API: Sessions Listed"
     SESSION_DETAIL_FETCHED = "API: Session Detail Fetched"
+    SESSION_STATUS_UPDATED = "API: Session Status Updated"
+    SESSION_EMAIL_RESENT = "API: Session Email Resent"
+    SESSION_FEEDBACK_SUBMITTED = "API: Session Feedback Submitted"
 
     # ============================================
     # EMAIL EVENTS

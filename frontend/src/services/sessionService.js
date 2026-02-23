@@ -36,6 +36,41 @@ export const sessionService = {
     const response = await api.get(`/sessions/${sessionId}`);
     return response.data;
   },
+
+  /**
+   * Update session status
+   * @param {string} sessionId - Session ID
+   * @param {string} status - New status ("pending" or "completed")
+   * @returns {Promise<Object>} Updated session
+   */
+  async updateSessionStatus(sessionId, status) {
+    const response = await api.patch(`/sessions/${sessionId}/status`, { status });
+    return response.data;
+  },
+
+  /**
+   * Resend session email to mentor
+   * @param {string} sessionId - Session ID
+   * @param {string} message - Updated message to send
+   * @returns {Promise<Object>} Result with success flag
+   */
+  async resendSessionEmail(sessionId, message) {
+    const response = await api.post(`/sessions/${sessionId}/resend`, { message });
+    return response.data;
+  },
+
+  /**
+   * Submit feedback for a session
+   * @param {string} sessionId - Session ID
+   * @param {Object} feedback - Feedback data
+   * @param {number} feedback.rating - Rating 1-5
+   * @param {string} [feedback.comments] - Optional comments
+   * @returns {Promise<Object>} Result with success flag
+   */
+  async submitFeedback(sessionId, feedback) {
+    const response = await api.post(`/sessions/${sessionId}/feedback`, feedback);
+    return response.data;
+  },
 };
 
 export default sessionService;

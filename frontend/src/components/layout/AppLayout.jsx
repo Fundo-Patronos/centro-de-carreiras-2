@@ -13,7 +13,6 @@ import {
 import {
   Bars3Icon,
   XMarkIcon,
-  HomeIcon,
   UserGroupIcon,
   BriefcaseIcon,
   CalendarDaysIcon,
@@ -44,13 +43,11 @@ export default function AppLayout() {
 
   const navigation = isEstudante
     ? [
-        { name: 'Inicio', href: '/estudante/dashboard', icon: HomeIcon },
-        { name: 'Mentores', href: '/estudante/mentores', icon: UserGroupIcon },
         { name: 'Minhas Sessoes', href: '/estudante/sessoes', icon: CalendarDaysIcon },
+        { name: 'Mentores', href: '/estudante/mentores', icon: UserGroupIcon },
         { name: 'Vagas', href: '/estudante/vagas', icon: BriefcaseIcon },
       ]
     : [
-        { name: 'Inicio', href: '/mentor/dashboard', icon: HomeIcon },
         { name: 'Minhas Sessoes', href: '/mentor/sessoes', icon: CalendarDaysIcon },
         { name: 'Disponibilidade', href: '/mentor/disponibilidade', icon: Cog6ToothIcon },
         { name: 'Meu Perfil', href: '/mentor/perfil', icon: UserCircleIcon },

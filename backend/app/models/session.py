@@ -32,6 +32,8 @@ class SessionInDB(BaseModel):
     updated_at: Optional[datetime] = None
     mentor_email_sent: bool = False
     student_email_sent: bool = False
+    student_feedback_submitted: bool = False
+    mentor_feedback_submitted: bool = False
 
 
 class SessionResponse(BaseModel):
@@ -49,6 +51,8 @@ class SessionResponse(BaseModel):
     status: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    student_feedback_submitted: bool = False
+    mentor_feedback_submitted: bool = False
 
 
 class SessionListResponse(BaseModel):
@@ -56,3 +60,22 @@ class SessionListResponse(BaseModel):
 
     sessions: list[SessionResponse]
     total: int
+
+
+class SessionStatusUpdate(BaseModel):
+    """Data for updating session status."""
+
+    status: Literal["pending", "completed"]
+
+
+class SessionResendEmail(BaseModel):
+    """Data for resending session email."""
+
+    message: str
+
+
+class SessionFeedback(BaseModel):
+    """Data for submitting session feedback."""
+
+    rating: int  # 1-5 stars
+    comments: str = ""
