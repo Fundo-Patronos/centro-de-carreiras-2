@@ -186,15 +186,15 @@ export default function SessionCard({
         <button
           onClick={handleStatusToggle}
           disabled={isUpdating}
-          className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 ${
+          className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap ${
             session.status === 'pending'
-              ? 'bg-green-600 text-white hover:bg-green-700'
+              ? 'bg-patronos-coral text-white hover:bg-patronos-coral/90'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
           {isUpdating ? (
             <>
-              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
@@ -202,13 +202,13 @@ export default function SessionCard({
             </>
           ) : session.status === 'pending' ? (
             <>
-              <CheckCircleIcon className="h-4 w-4" />
-              Marcar Concluida
+              <CheckCircleIcon className="h-4 w-4 flex-shrink-0" />
+              Concluida
             </>
           ) : (
             <>
-              <ClockIcon className="h-4 w-4" />
-              Marcar Pendente
+              <ClockIcon className="h-4 w-4 flex-shrink-0" />
+              Pendente
             </>
           )}
         </button>
@@ -217,7 +217,7 @@ export default function SessionCard({
         <button
           onClick={handleFeedbackClick}
           disabled={hasFeedbackSubmitted}
-          className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
+          className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap ${
             hasFeedbackSubmitted
               ? 'bg-blue-50 text-blue-600 cursor-default'
               : 'bg-patronos-accent text-white hover:bg-patronos-orange/90'
@@ -225,13 +225,13 @@ export default function SessionCard({
         >
           {hasFeedbackSubmitted ? (
             <>
-              <CheckCircleSolidIcon className="h-4 w-4" />
-              Feedback Enviado
+              <CheckCircleSolidIcon className="h-4 w-4 flex-shrink-0" />
+              Enviado
             </>
           ) : (
             <>
-              <ChatBubbleLeftEllipsisIcon className="h-4 w-4" />
-              Responder Feedback
+              <ChatBubbleLeftEllipsisIcon className="h-4 w-4 flex-shrink-0" />
+              Feedback
             </>
           )}
         </button>
