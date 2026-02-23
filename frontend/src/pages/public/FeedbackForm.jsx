@@ -318,7 +318,7 @@ export default function FeedbackForm() {
             <button
               type="submit"
               disabled={submitting || !meetingStatus}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-patronos-orange to-patronos-purple hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-patronos-accent disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-patronos-gradient hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-patronos-accent disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
             >
               {submitting ? 'Enviando...' : 'Enviar Feedback'}
             </button>

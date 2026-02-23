@@ -76,7 +76,7 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
                 <div className="divide-y divide-gray-200">
                   {/* Profile header with photo */}
                   <div className="pb-6">
-                    <div className="h-24 bg-gradient-to-r from-patronos-orange via-patronos-coral to-patronos-purple sm:h-20 lg:h-28" />
+                    <div className="h-24 bg-patronos-gradient sm:h-20 lg:h-28" />
                     <div className="-mt-12 flow-root px-4 sm:-mt-8 sm:flex sm:items-end sm:px-6 lg:-mt-16">
                       <div>
                         <div className="-m-1 flex">
@@ -88,7 +88,7 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
                                 className="h-24 w-24 shrink-0 bg-gray-100 object-cover sm:h-40 sm:w-40 lg:h-48 lg:w-48"
                               />
                             ) : (
-                              <div className="h-24 w-24 shrink-0 bg-gradient-to-br from-patronos-orange to-patronos-purple flex items-center justify-center text-white text-3xl font-bold sm:h-40 sm:w-40 lg:h-48 lg:w-48 sm:text-5xl">
+                              <div className="h-24 w-24 shrink-0 bg-patronos-gradient flex items-center justify-center text-white text-3xl font-bold sm:h-40 sm:w-40 lg:h-48 lg:w-48 sm:text-5xl">
                                 {mentor.name?.split(' ').map(n => n[0]).slice(0, 2).join('')}
                               </div>
                             )}

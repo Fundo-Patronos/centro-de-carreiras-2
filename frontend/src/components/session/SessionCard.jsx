@@ -117,7 +117,7 @@ export default function SessionCard({
       {/* Header with person info */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-patronos-orange to-patronos-purple text-lg font-semibold text-white">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-patronos-gradient text-lg font-semibold text-white">
             {personName?.split(' ').map(n => n[0]).slice(0, 2).join('')}
           </div>
           <div className="min-w-0">

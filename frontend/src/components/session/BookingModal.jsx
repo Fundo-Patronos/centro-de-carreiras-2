@@ -235,7 +235,7 @@ ${userProfile.displayName}`;
                         className="h-12 w-12 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-patronos-orange to-patronos-purple text-lg font-semibold text-white">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-patronos-gradient text-lg font-semibold text-white">
                         {mentor.name?.split(' ').map(n => n[0]).slice(0, 2).join('')}
                       </div>
                     )}

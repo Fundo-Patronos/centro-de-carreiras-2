@@ -40,7 +40,7 @@ function MentorCard({ mentor, onClick }) {
             className="w-14 h-14 rounded-full object-cover"
           />
         ) : (
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-patronos-orange to-patronos-purple flex items-center justify-center text-white text-lg font-semibold">
+          <div className="w-14 h-14 rounded-full bg-patronos-gradient flex items-center justify-center text-white text-lg font-semibold">
             {mentor.name?.split(' ').map(n => n[0]).slice(0, 2).join('')}
           </div>
         )}

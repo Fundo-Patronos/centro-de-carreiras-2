@@ -128,7 +128,7 @@ export default function ResendEmailModal({ session, isOpen, onClose, onSuccess }
                 <div className="px-6 py-4">
                   {/* Mentor info */}
                   <div className="mb-4 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-patronos-orange to-patronos-purple text-lg font-semibold text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-patronos-gradient text-lg font-semibold text-white">
                       {session.mentor_name?.split(' ').map(n => n[0]).slice(0, 2).join('')}
                     </div>
                     <div>

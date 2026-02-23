@@ -170,7 +170,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                 <div className="px-6 py-4">
                   {/* Person info */}
                   <div className="mb-6 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-patronos-orange to-patronos-purple text-lg font-semibold text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-patronos-gradient text-lg font-semibold text-white">
                       {otherPersonName?.split(' ').map(n => n[0]).slice(0, 2).join('')}
                     </div>
                     <div>
