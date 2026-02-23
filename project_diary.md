@@ -851,3 +851,133 @@ Added informational callouts to guide users during registration.
 | Mentor signup callout (approval process) | ✅ Done |
 
 ---
+
+### Session 8 - 2026-02-23
+
+**Session Tracking System with Status Management & Feedback**
+
+Implemented a comprehensive session tracking system allowing both students and mentors to manage session status, submit feedback, and resend emails.
+
+#### 1. Backend API Endpoints
+
+**New Endpoints:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| PATCH | `/sessions/{id}/status` | Toggle session status (pending/completed) |
+| POST | `/sessions/{id}/resend` | Resend session email to mentor (students only) |
+| POST | `/sessions/{id}/feedback` | Submit feedback with rating and comments |
+
+**New Models (`backend/app/models/session.py`):**
+
+| Model | Fields |
+|-------|--------|
+| `SessionStatusUpdate` | `status: Literal["pending", "completed"]` |
+| `SessionResendEmail` | `message: str` |
+| `SessionFeedback` | `rating: int` (1-5), `comments: str` |
+
+**Feedback Tracking Fields Added:**
+- `student_feedback_submitted: bool` - Tracks if student submitted feedback
+- `mentor_feedback_submitted: bool` - Tracks if mentor submitted feedback
+
+**Firestore Collections Updated:**
+- `sessions` - Added feedback tracking fields
+- `session_feedback` - Stores individual feedback submissions
+
+#### 2. Frontend Components
+
+**New Components Created:**
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `SessionCard.jsx` | `components/session/` | Session card with status toggle, feedback button, and menu |
+| `ResendEmailModal.jsx` | `components/session/` | Modal for editing and resending session emails |
+| `FeedbackModal.jsx` | `components/session/` | Modal with 5-star rating and comments textarea |
+
+**SessionCard Features:**
+- Displays mentor info (for students) or student info (for mentors)
+- "Marcar Concluida" / "Marcar Pendente" status toggle button
+- "Responder Feedback" / "Feedback Enviado" feedback button
+- Three-dot menu with "Reenviar Email" option (students only)
+
+**FeedbackModal Features:**
+- Interactive 5-star rating with hover effects
+- Rating labels: Muito ruim, Ruim, Regular, Bom, Excelente
+- Optional comments textarea
+- Individual per-user tracking (student and mentor submit separately)
+
+#### 3. MySessions Page Redesign
+
+**Changes to `pages/estudante/MySessions.jsx`:**
+- Works for both students and mentors (role-based display)
+- Added Quick Access section at top with role-specific cards
+- Integrated new SessionCard, ResendEmailModal, and FeedbackModal
+- Filter tabs: Todas, Pendentes, Concluidas
+
+**Quick Access Cards:**
+
+| Role | Cards |
+|------|-------|
+| Student | Mentores, Vagas, Meu Perfil |
+| Mentor | Disponibilidade, Meu Perfil |
+
+#### 4. Navigation Changes
+
+**Sidebar Updates (`components/layout/AppLayout.jsx`):**
+
+| Role | Old Order | New Order |
+|------|-----------|-----------|
+| Student | Inicio, Mentores, Minhas Sessoes, Vagas | Minhas Sessoes, Mentores, Vagas |
+| Mentor | Inicio, Minhas Sessoes, Disponibilidade, Meu Perfil | Minhas Sessoes, Disponibilidade, Meu Perfil |
+
+**Route Changes (`App.jsx`):**
+- `/estudante` now redirects to `/estudante/sessoes` (was `/estudante/dashboard`)
+- `/mentor` now redirects to `/mentor/sessoes` (was `/mentor/dashboard`)
+- Dashboard pages still accessible via direct URL
+
+#### 5. Analytics Events
+
+**Frontend Events Added (`services/analytics.js`):**
+
+| Event | Trigger |
+|-------|---------|
+| `SESSION_STATUS_UPDATED` | Status toggle button clicked |
+| `SESSION_FEEDBACK_SUBMITTED` | Feedback form submitted |
+| `SESSION_EMAIL_RESENT` | Email resend completed |
+| `RESEND_EMAIL_MODAL_OPENED` | Resend email menu item clicked |
+| `RESEND_EMAIL_MODAL_CLOSED` | Resend modal closed |
+| `FEEDBACK_MODAL_OPENED` | Feedback button clicked |
+| `FEEDBACK_MODAL_CLOSED` | Feedback modal closed |
+
+**Backend Events Added (`core/analytics.py`):**
+
+| Event | Trigger |
+|-------|---------|
+| `SESSION_STATUS_UPDATED` | PATCH /sessions/{id}/status |
+| `SESSION_EMAIL_RESENT` | POST /sessions/{id}/resend |
+| `SESSION_FEEDBACK_SUBMITTED` | POST /sessions/{id}/feedback |
+
+#### 6. Service Updates
+
+**Frontend Service (`services/sessionService.js`):**
+
+```javascript
+updateSessionStatus(sessionId, status)   // PATCH /sessions/{id}/status
+resendSessionEmail(sessionId, message)   // POST /sessions/{id}/resend
+submitFeedback(sessionId, feedback)      // POST /sessions/{id}/feedback
+```
+
+#### Files Changed Summary
+
+| Category | Files |
+|----------|-------|
+| **New Backend** | - |
+| **Modified Backend** | `sessions.py`, `session.py`, `analytics.py` |
+| **New Frontend** | `SessionCard.jsx`, `ResendEmailModal.jsx`, `FeedbackModal.jsx` |
+| **Modified Frontend** | `MySessions.jsx`, `AppLayout.jsx`, `App.jsx`, `sessionService.js`, `analytics.js` |
+
+#### Deployment
+
+Deployed to production via CI/CD (Cloud Build triggers on push to main).
+
+---
