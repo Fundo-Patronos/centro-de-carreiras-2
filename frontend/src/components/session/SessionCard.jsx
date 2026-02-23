@@ -67,6 +67,10 @@ export default function SessionCard({
     ? session.student_feedback_submitted
     : session.mentor_feedback_submitted;
 
+  // Feedback is only available for completed sessions
+  const isSessionCompleted = session.status === 'completed';
+  const canSubmitFeedback = isSessionCompleted && !hasFeedbackSubmitted;
+
   const handleStatusToggle = async () => {
     if (isUpdating) return;
 
@@ -213,14 +217,16 @@ export default function SessionCard({
           )}
         </button>
 
-        {/* Feedback button */}
+        {/* Feedback button - only active for completed sessions */}
         <button
           onClick={handleFeedbackClick}
-          disabled={hasFeedbackSubmitted}
+          disabled={!canSubmitFeedback}
           className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap ${
             hasFeedbackSubmitted
               ? 'bg-blue-50 text-blue-600 cursor-default'
-              : 'bg-patronos-accent text-white hover:bg-patronos-orange/90'
+              : !isSessionCompleted
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-patronos-accent text-white hover:bg-patronos-orange/90'
           }`}
         >
           {hasFeedbackSubmitted ? (
