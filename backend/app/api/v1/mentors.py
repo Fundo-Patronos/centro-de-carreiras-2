@@ -233,6 +233,7 @@ async def list_mentors(
             mentors.append(MentorPublicResponse(
                 id=doc.id,
                 name=user_data.get("displayName", ""),
+                email=user_data.get("email", ""),
                 title=mentor_profile.get("title", ""),
                 company=mentor_profile.get("company", ""),
                 bio=mentor_profile.get("bio", ""),
@@ -298,6 +299,7 @@ async def get_mentor(
         return MentorPublicResponse(
             id=user_doc.id,
             name=user_data.get("displayName", ""),
+            email=user_data.get("email", ""),
             title=mentor_profile.get("title", ""),
             company=mentor_profile.get("company", ""),
             bio=mentor_profile.get("bio", ""),

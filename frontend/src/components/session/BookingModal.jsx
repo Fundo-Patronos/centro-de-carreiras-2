@@ -78,7 +78,14 @@ ${userProfile.displayName}`;
       setSubmitState('success');
     } catch (err) {
       console.error('Error creating session:', err);
-      const errorMessage = err.response?.data?.detail || 'Erro ao enviar solicitacao. Tente novamente.';
+      // Handle FastAPI validation errors (detail is an array) vs regular errors (detail is a string)
+      let errorMessage = 'Erro ao enviar solicitacao. Tente novamente.';
+      const detail = err.response?.data?.detail;
+      if (typeof detail === 'string') {
+        errorMessage = detail;
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        errorMessage = detail.map(e => e.msg || e.message || String(e)).join(', ');
+      }
       setError(errorMessage);
       setSubmitState('error');
 
