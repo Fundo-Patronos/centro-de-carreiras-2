@@ -43,11 +43,34 @@ ${userProfile.displayName}`;
     }
   }, [isOpen, mentor, userProfile]);
 
+  // Validate mentor data before submission
+  const validateMentorData = () => {
+    const errors = [];
+    if (!mentor.id) errors.push('ID do mentor');
+    if (!mentor.name) errors.push('nome do mentor');
+    if (!mentor.email) errors.push('email do mentor');
+    if (!mentor.company) errors.push('empresa do mentor');
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!message.trim()) {
       setError('Por favor, escreva uma mensagem.');
+      return;
+    }
+
+    // Validate required mentor fields before API call
+    const missingFields = validateMentorData();
+    if (missingFields.length > 0) {
+      const errorMsg = `Dados incompletos do mentor: ${missingFields.join(', ')}. Por favor, tente novamente ou escolha outro mentor.`;
+      setError(errorMsg);
+      analytics.track(EVENTS.FORM_VALIDATION_ERROR, {
+        mentor_id: mentor.id,
+        missing_fields: missingFields,
+        form: 'booking_modal',
+      });
       return;
     }
 

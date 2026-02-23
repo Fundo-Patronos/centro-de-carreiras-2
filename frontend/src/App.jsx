@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 
 // Auth pages
@@ -31,18 +32,20 @@ import MeuPerfil from './pages/mentor/MeuPerfil';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Fully public routes (no Firebase auth needed) */}
-        <Route path="/feedback" element={<FeedbackForm />} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          {/* Fully public routes (no Firebase auth needed) */}
+          <Route path="/feedback" element={<FeedbackForm />} />
 
-        {/* Firebase auth action handler (handles /__/auth/action URLs) */}
-        <Route path="/__/auth/action" element={<FirebaseActionHandler />} />
+          {/* Firebase auth action handler (handles /__/auth/action URLs) */}
+          <Route path="/__/auth/action" element={<FirebaseActionHandler />} />
 
-        {/* Routes that need AuthProvider */}
-        <Route path="/*" element={<AuthenticatedRoutes />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Routes that need AuthProvider */}
+          <Route path="/*" element={<AuthenticatedRoutes />} />
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 
