@@ -34,6 +34,7 @@ function classNames(...classes) {
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
   const { userProfile } = useAuth();
   const navigate = useNavigate();
 
@@ -206,7 +207,7 @@ export default function AppLayout() {
   return (
     <div>
       {/* Beta banner - full width at very top */}
-      <BetaBanner />
+      {showBanner && <BetaBanner onDismiss={() => setShowBanner(false)} />}
 
       {/* Mobile sidebar */}
       <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
@@ -234,7 +235,10 @@ export default function AppLayout() {
       </Dialog>
 
       {/* Static sidebar for desktop */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+      <div className={classNames(
+        'hidden lg:fixed lg:bottom-0 lg:z-50 lg:flex lg:w-72 lg:flex-col',
+        showBanner ? 'lg:top-10' : 'lg:top-0'
+      )}>
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
           {/* Logo */}
           <div className="flex h-16 shrink-0 items-center gap-x-3">
@@ -362,9 +366,12 @@ export default function AppLayout() {
       </div>
 
       {/* Main content area */}
-      <div className="lg:pl-72">
+      <div className={classNames('lg:pl-72', showBanner && 'pt-10')}>
         {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className={classNames(
+          'sticky z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8',
+          showBanner ? 'top-10' : 'top-0'
+        )}>
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
