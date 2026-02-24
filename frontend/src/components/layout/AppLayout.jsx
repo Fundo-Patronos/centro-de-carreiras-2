@@ -205,6 +205,9 @@ export default function AppLayout() {
 
   return (
     <div>
+      {/* Beta banner - full width at very top */}
+      <BetaBanner />
+
       {/* Mobile sidebar */}
       <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
         <DialogBackdrop
@@ -425,9 +428,6 @@ export default function AppLayout() {
             </div>
           </div>
         </div>
-
-        {/* Beta banner */}
-        <BetaBanner />
 
         {/* Page content */}
         <main className="py-10">
