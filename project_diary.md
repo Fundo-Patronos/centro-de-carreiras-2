@@ -1020,3 +1020,110 @@ Deployed to production via CI/CD (Cloud Build triggers on push to main).
 | `0ea3847` | fix: Disable feedback button until session is completed |
 
 ---
+
+### Session 9 - 2026-02-24
+
+**Domain Consolidation & CI/CD Simplification**
+
+This session fixed a critical CORS issue affecting mentor access and consolidated the platform to a single domain.
+
+---
+
+## ⚠️ IMPORTANT: Single Domain Policy
+
+### `centro.patronos.org` is now the ONLY domain for Centro de Carreiras
+
+The platform previously had two domains:
+- `centro.patronos.org` (primary)
+- `carreiras.patronos.org` (secondary)
+
+**This caused recurring CORS issues** because the backend `FRONTEND_URL` environment variable needed to include both domains, and deployments often reset this configuration.
+
+### Solution: Domain Redirect
+
+All traffic to `carreiras.patronos.org` is now **automatically redirected** to `centro.patronos.org` via client-side JavaScript.
+
+**Redirect code in `frontend/src/main.jsx`:**
+```javascript
+// Redirect carreiras.patronos.org to centro.patronos.org (single domain)
+if (window.location.hostname === 'carreiras.patronos.org') {
+  window.location.replace(window.location.href.replace('carreiras.patronos.org', 'centro.patronos.org'));
+}
+```
+
+### For all future development:
+
+| ✅ DO | ❌ DON'T |
+|-------|----------|
+| Use `centro.patronos.org` everywhere | Reference `carreiras.patronos.org` in code |
+| Share `https://centro.patronos.org` links | Share `carreiras.patronos.org` links |
+| Configure CORS for `centro.patronos.org` only | Add `carreiras.patronos.org` to CORS configs |
+
+---
+
+#### 1. The Problem
+
+A mentor (matheus.gomes@patronos.org) reported errors when accessing "Minhas Sessões" page. Browser console showed:
+
+```
+Access to XMLHttpRequest at '.../api/v1/sessions' from origin 'https://carreiras.patronos.org'
+has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present
+```
+
+**Root Cause:** The Cloud Run backend's `FRONTEND_URL` environment variable only contained `https://centro.patronos.org`, not `carreiras.patronos.org`. This was verified by testing preflight requests:
+
+| Origin | Response | `Access-Control-Allow-Origin` |
+|--------|----------|------------------------------|
+| `centro.patronos.org` | 200 OK | ✅ Present |
+| `carreiras.patronos.org` | 400 Bad Request | ❌ Missing |
+
+#### 2. The Fix
+
+Instead of continuously fighting CORS configuration across deployments, we consolidated to a single domain with a JavaScript redirect.
+
+**File Modified:** `frontend/src/main.jsx`
+
+The redirect runs before React loads, ensuring immediate redirection.
+
+#### 3. CI/CD Simplification
+
+Previously, deployments used Cloud Build triggers with `cloudbuild.yaml` files. The trigger substitution variables often got out of sync with the yaml defaults.
+
+**New Setup:** Connected GitHub repository directly to Cloud Run using Developer Connect.
+
+| Service | Repository | Branch | Source Location |
+|---------|------------|--------|-----------------|
+| `centro-carreiras-api` | `Fundo-Patronos/centro-de-carreiras-2` | `main` | `/backend` |
+| `centro-carreiras-web` | `Fundo-Patronos/centro-de-carreiras-2` | `main` | `/frontend` |
+
+**Benefits:**
+- Simpler setup (no separate Cloud Build triggers)
+- Configuration stays with the service
+- Automatic deployments on push to main
+
+#### 4. Optional Future Cleanup
+
+These items are no longer necessary but can be cleaned up:
+
+| Item | Action | Status |
+|------|--------|--------|
+| `carreiras.patronos.org` Cloud Run domain mapping | Can be removed | Optional |
+| `carreiras.patronos.org` in Firebase Auth authorized domains | Can be removed | Optional |
+| `carreiras.patronos.org` in backend CORS config | Can be removed | Optional |
+| DNS record for `carreiras` | Can be changed to simple redirect | Optional |
+
+#### Files Changed
+
+| File | Change |
+|------|--------|
+| `frontend/src/main.jsx` | Added domain redirect |
+| `backend/README.md` | Trigger file for deployment |
+
+#### Commits
+
+| Hash | Description |
+|------|-------------|
+| `54a86af` | fix: Trigger backend deploy to fix CORS for carreiras.patronos.org |
+| `ae461c0` | fix: Redirect carreiras.patronos.org to centro.patronos.org |
+
+---
