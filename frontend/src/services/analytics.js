@@ -101,6 +101,7 @@ export const EVENTS = {
   USER_APPROVED: 'User Approved',
   USER_REJECTED: 'User Rejected',
   ADMIN_ACTION_ERROR: 'Admin Action Error',
+  PENDING_MENTOR_VIEWED: 'Pending Mentor Viewed',
 
   // ============================================
   // ERROR EVENTS

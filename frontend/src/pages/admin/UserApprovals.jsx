@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { adminService } from '../../services/adminService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import PendingMentorDrawer from '../../components/admin/PendingMentorDrawer';
 import analytics, { EVENTS } from '../../services/analytics';
 
 export default function UserApprovals() {
@@ -16,6 +17,7 @@ export default function UserApprovals() {
   const [filter, setFilter] = useState('all'); // 'all' | 'estudante' | 'mentor'
   const [actionLoading, setActionLoading] = useState(null); // uid of user being processed
   const [toast, setToast] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null); // user for drawer
 
   // Track page view on mount
   useEffect(() => {
@@ -52,6 +54,7 @@ export default function UserApprovals() {
       setActionLoading(uid);
       await adminService.approveUser(uid);
       setUsers(users.filter((u) => u.uid !== uid));
+      setSelectedUser(null); // Close drawer after approval
       showToast(`Usuario ${email} aprovado com sucesso`);
       analytics.track(EVENTS.USER_APPROVED, {
         approved_user_uid: uid,
@@ -81,6 +84,7 @@ export default function UserApprovals() {
       setActionLoading(uid);
       await adminService.rejectUser(uid);
       setUsers(users.filter((u) => u.uid !== uid));
+      setSelectedUser(null); // Close drawer after rejection
       showToast(`Usuario ${email} rejeitado`);
       analytics.track(EVENTS.USER_REJECTED, {
         rejected_user_uid: uid,
@@ -105,6 +109,17 @@ export default function UserApprovals() {
     analytics.track(EVENTS.ADMIN_FILTER_CHANGED, {
       filter_type: newFilter,
     });
+  };
+
+  const handleRowClick = (user) => {
+    // Only open drawer for mentors (they have more info to review)
+    if (user.role === 'mentor') {
+      setSelectedUser(user);
+      analytics.track(EVENTS.PENDING_MENTOR_VIEWED, {
+        mentor_uid: user.uid,
+        mentor_email: user.email,
+      });
+    }
   };
 
   const filteredUsers =
@@ -206,7 +221,11 @@ export default function UserApprovals() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsers.map((user) => (
-                <tr key={user.uid} className="hover:bg-gray-50">
+                <tr
+                  key={user.uid}
+                  onClick={() => handleRowClick(user)}
+                  className={`hover:bg-gray-50 ${user.role === 'mentor' ? 'cursor-pointer' : ''}`}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {user.photoURL ? (
@@ -225,19 +244,30 @@ export default function UserApprovals() {
                           {user.displayName}
                         </div>
                         <div className="text-sm text-gray-500">{user.email}</div>
+                        {/* Show company/title for mentors */}
+                        {user.role === 'mentor' && (user.title || user.company) && (
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            {user.title}{user.title && user.company ? ' @ ' : ''}{user.company}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        user.role === 'estudante'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      {user.role === 'estudante' ? 'Estudante' : 'Mentor'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          user.role === 'estudante'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}
+                      >
+                        {user.role === 'estudante' ? 'Estudante' : 'Mentor'}
+                      </span>
+                      {user.role === 'mentor' && (
+                        <span className="text-xs text-gray-400">Clique para detalhes</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(user.createdAt)}
@@ -245,7 +275,10 @@ export default function UserApprovals() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => handleApprove(user.uid, user.email)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleApprove(user.uid, user.email);
+                        }}
                         disabled={actionLoading === user.uid}
                         className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
@@ -253,7 +286,10 @@ export default function UserApprovals() {
                         Aprovar
                       </button>
                       <button
-                        onClick={() => handleReject(user.uid, user.email)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReject(user.uid, user.email);
+                        }}
                         disabled={actionLoading === user.uid}
                         className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
@@ -279,6 +315,16 @@ export default function UserApprovals() {
           {toast.message}
         </div>
       )}
+
+      {/* Mentor Detail Drawer */}
+      <PendingMentorDrawer
+        user={selectedUser}
+        isOpen={Boolean(selectedUser)}
+        onClose={() => setSelectedUser(null)}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        isLoading={actionLoading === selectedUser?.uid}
+      />
     </div>
   );
 }

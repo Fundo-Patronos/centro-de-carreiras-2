@@ -32,6 +32,11 @@ class PendingUserResponse(BaseModel):
     role: Literal["estudante", "mentor"]
     status: str
     createdAt: datetime | None = None
+    # Mentor-specific fields (populated during registration)
+    curso: str | None = None
+    company: str | None = None
+    title: str | None = None
+    linkedin: str | None = None
 
 
 class UserListResponse(BaseModel):
@@ -83,6 +88,11 @@ async def get_pending_users(
                     role=data.get("role", "estudante"),
                     status=data.get("status", "pending"),
                     createdAt=data.get("createdAt"),
+                    # Mentor-specific fields from registration
+                    curso=data.get("curso"),
+                    company=data.get("company"),
+                    title=data.get("title"),
+                    linkedin=data.get("linkedin"),
                 )
             )
 
