@@ -30,6 +30,9 @@ import MySessions from './pages/estudante/MySessions';
 import MentorDashboard from './pages/mentor/Dashboard';
 import MeuPerfil from './pages/mentor/MeuPerfil';
 
+// Settings pages
+import ChangePassword from './pages/settings/ChangePassword';
+
 // Shared pages - MySessions works for both roles
 const MentorSessions = MySessions;
 
@@ -111,6 +114,18 @@ function AuthenticatedRoutes() {
           <Route path="sessoes" element={<MentorSessions />} />
           <Route path="disponibilidade" element={<PlaceholderPage title="Disponibilidade" />} />
           <Route path="perfil" element={<MeuPerfil />} />
+        </Route>
+
+        {/* Settings routes - with sidebar layout (both roles) */}
+        <Route
+          path="/configuracoes"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="senha" element={<ChangePassword />} />
         </Route>
 
         {/* Catch-all redirect */}

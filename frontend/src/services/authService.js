@@ -8,6 +8,9 @@ import {
   sendPasswordResetEmail,
   signOut,
   updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 
@@ -137,6 +140,42 @@ export const authService = {
    */
   async sendPasswordReset(email) {
     await sendPasswordResetEmail(auth, email, passwordResetSettings);
+  },
+
+  /**
+   * Change password for logged-in user
+   * Requires re-authentication with current password
+   * @param {string} currentPassword
+   * @param {string} newPassword
+   */
+  async changePassword(currentPassword, newPassword) {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    if (!user.email) {
+      throw new Error('Usuário não possui email');
+    }
+
+    // Re-authenticate user with current password
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+
+    // Update password
+    await updatePassword(user, newPassword);
+  },
+
+  /**
+   * Get the auth provider for the current user
+   * @returns {string|null} Provider ID (e.g., 'password', 'google.com')
+   */
+  getAuthProvider() {
+    const user = auth.currentUser;
+    if (!user || !user.providerData || user.providerData.length === 0) {
+      return null;
+    }
+    return user.providerData[0].providerId;
   },
 
   // ==========================================

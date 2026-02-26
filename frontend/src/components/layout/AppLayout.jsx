@@ -21,6 +21,7 @@ import {
   ShieldCheckIcon,
   ChatBubbleLeftRightIcon,
   UserCircleIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { useAuth } from '../../contexts/AuthContext';
@@ -421,6 +422,15 @@ export default function AppLayout() {
                       {userProfile?.email}
                     </p>
                   </div>
+                  <MenuItem>
+                    <button
+                      onClick={() => navigate('/configuracoes/senha')}
+                      className="flex w-full items-center gap-x-2 px-3 py-2 text-sm text-gray-700 data-[focus]:bg-gray-50"
+                    >
+                      <KeyIcon className="h-4 w-4 text-gray-400" />
+                      Alterar Senha
+                    </button>
+                  </MenuItem>
                   <MenuItem>
                     <button
                       onClick={handleLogout}

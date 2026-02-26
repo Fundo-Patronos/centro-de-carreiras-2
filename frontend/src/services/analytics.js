@@ -26,6 +26,9 @@ export const EVENTS = {
   MAGIC_LINK_ERROR: 'Magic Link Error',
   PASSWORD_RESET_REQUESTED: 'Password Reset Requested',
   PASSWORD_RESET_COMPLETED: 'Password Reset Completed',
+  PASSWORD_CHANGE_STARTED: 'Password Change Started',
+  PASSWORD_CHANGE_COMPLETED: 'Password Change Completed',
+  PASSWORD_CHANGE_ERROR: 'Password Change Error',
   LOGOUT: 'Logout',
 
   // ============================================
@@ -126,6 +129,7 @@ export const EVENTS = {
 const MIXPANEL_TOKEN = import.meta.env.VITE_MIXPANEL_TOKEN;
 
 let isInitialized = false;
+let currentUserEmail = null;
 
 if (MIXPANEL_TOKEN) {
   mixpanel.init(MIXPANEL_TOKEN, {
@@ -148,6 +152,11 @@ export function identify(userId, userProperties = {}) {
 
   mixpanel.identify(userId);
 
+  // Store email for inclusion in all future events
+  if (userProperties.email) {
+    currentUserEmail = userProperties.email;
+  }
+
   if (Object.keys(userProperties).length > 0) {
     mixpanel.people.set(userProperties);
   }
@@ -163,6 +172,8 @@ export function track(eventName, properties = {}) {
 
   mixpanel.track(eventName, {
     ...properties,
+    // Automatically include email if available and not already provided
+    ...(currentUserEmail && !properties.email ? { email: currentUserEmail } : {}),
     timestamp: new Date().toISOString(),
   });
 }
@@ -173,6 +184,7 @@ export function track(eventName, properties = {}) {
 export function reset() {
   if (!isInitialized) return;
 
+  currentUserEmail = null;
   mixpanel.reset();
 }
 
@@ -198,6 +210,7 @@ export function trackPageView(pageName, properties = {}) {
     page_name: pageName,
     url: window.location.pathname,
     ...properties,
+    ...(currentUserEmail && !properties.email ? { email: currentUserEmail } : {}),
     timestamp: new Date().toISOString(),
   });
 }
@@ -214,6 +227,7 @@ export function trackClick(buttonName, properties = {}) {
     button_name: buttonName,
     page: window.location.pathname,
     ...properties,
+    ...(currentUserEmail && !properties.email ? { email: currentUserEmail } : {}),
     timestamp: new Date().toISOString(),
   });
 }
@@ -230,8 +244,25 @@ export function trackError(errorType, properties = {}) {
     error_type: errorType,
     page: window.location.pathname,
     ...properties,
+    ...(currentUserEmail && !properties.email ? { email: currentUserEmail } : {}),
     timestamp: new Date().toISOString(),
   });
+}
+
+/**
+ * Get the current user email (useful for manual inclusion in events before identify)
+ * @returns {string|null} Current user email or null
+ */
+export function getCurrentUserEmail() {
+  return currentUserEmail;
+}
+
+/**
+ * Set user email manually (useful for pre-auth events like login/signup)
+ * @param {string} email - User email address
+ */
+export function setCurrentUserEmail(email) {
+  currentUserEmail = email;
 }
 
 // Export default object for convenience
@@ -243,6 +274,8 @@ const analytics = {
   trackPageView,
   trackClick,
   trackError,
+  getCurrentUserEmail,
+  setCurrentUserEmail,
   EVENTS,
 };
 
