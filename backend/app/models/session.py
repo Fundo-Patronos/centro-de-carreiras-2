@@ -1,6 +1,6 @@
 """Session Pydantic models."""
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Literal
 from datetime import datetime
 
@@ -78,4 +78,11 @@ class SessionFeedback(BaseModel):
     """Data for submitting session feedback."""
 
     rating: int  # 1-5 stars
+    comments: str = ""
+
+
+class SessionCompleteWithFeedback(BaseModel):
+    """Data for completing a session with feedback in one operation."""
+
+    rating: int = Field(..., ge=1, le=5)  # Required 1-5 stars
     comments: str = ""

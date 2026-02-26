@@ -749,5 +749,160 @@ class EmailService:
         )
 
 
+def send_completion_feedback_request_to_student(
+        self,
+        student_name: str,
+        student_email: str,
+        mentor_name: str,
+        feedback_url: str,
+    ) -> dict:
+        """
+        Send feedback request to student when mentor marks session as completed.
+
+        Args:
+            student_name: Student's display name
+            student_email: Student's email address
+            mentor_name: Mentor's display name
+            feedback_url: URL to the feedback form in the platform
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        subject = f"Centro de Carreiras - {mentor_name} marcou a sessao como concluida"
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {student_name}!</h2>
+
+            <div style="background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(155,93,229,0.1) 100%); border-radius: 12px; padding: 20px; margin: 0 0 24px 0; text-align: center;">
+                <p style="color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0;">
+                    ✅ <strong>{mentor_name}</strong> marcou a sessao de mentoria como concluida
+                </p>
+            </div>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                Por favor, avalie sua experiencia com a sessao de mentoria. Seu feedback e muito importante para melhorarmos o programa!
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{feedback_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Avaliar Sessao
+                </a>
+            </div>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
+                <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
+                    O formulario leva menos de 1 minuto para responder. Acesse sua conta no Centro de Carreiras para avaliar a sessao.
+                </p>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        return self.send_email(
+            to=[student_email],
+            subject=subject,
+            html=html,
+        )
+
+    def send_completion_feedback_request_to_mentor(
+        self,
+        mentor_name: str,
+        mentor_email: str,
+        student_name: str,
+        feedback_url: str,
+    ) -> dict:
+        """
+        Send feedback request to mentor when student marks session as completed.
+
+        Args:
+            mentor_name: Mentor's display name
+            mentor_email: Mentor's email address
+            student_name: Student's display name
+            feedback_url: URL to the feedback form in the platform
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        subject = f"Centro de Carreiras - {student_name} marcou a sessao como concluida"
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {mentor_name}!</h2>
+
+            <div style="background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(155,93,229,0.1) 100%); border-radius: 12px; padding: 20px; margin: 0 0 24px 0; text-align: center;">
+                <p style="color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0;">
+                    ✅ O estudante <strong>{student_name}</strong> marcou a sessao de mentoria como concluida
+                </p>
+            </div>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                Por favor, avalie sua experiencia com a sessao de mentoria. Seu feedback e muito importante para acompanharmos o progresso do programa!
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{feedback_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Avaliar Sessao
+                </a>
+            </div>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
+                <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
+                    O formulario leva menos de 1 minuto para responder. Acesse sua conta no Centro de Carreiras para avaliar a sessao.
+                </p>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        return self.send_email(
+            to=[mentor_email],
+            subject=subject,
+            html=html,
+        )
+
+
 # Singleton instance
 email_service = EmailService()

@@ -71,6 +71,21 @@ export const sessionService = {
     const response = await api.post(`/sessions/${sessionId}/feedback`, feedback);
     return response.data;
   },
+
+  /**
+   * Complete a session with feedback (atomic operation)
+   * Marks session as completed and submits feedback in one request.
+   * Also sends email notification to the other party.
+   * @param {string} sessionId - Session ID
+   * @param {Object} data - Completion data
+   * @param {number} data.rating - Rating 1-5
+   * @param {string} [data.comments] - Optional comments
+   * @returns {Promise<Object>} Updated session
+   */
+  async completeSessionWithFeedback(sessionId, data) {
+    const response = await api.post(`/sessions/${sessionId}/complete`, data);
+    return response.data;
+  },
 };
 
 export default sessionService;

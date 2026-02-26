@@ -85,6 +85,7 @@ export default function MySessions() {
   // Modal states
   const [resendModalSession, setResendModalSession] = useState(null);
   const [feedbackModalSession, setFeedbackModalSession] = useState(null);
+  const [feedbackModalMode, setFeedbackModalMode] = useState('feedback');
 
   const viewerRole = userProfile?.role || 'estudante';
   const isStudent = viewerRole === 'estudante';
@@ -134,27 +135,34 @@ export default function MySessions() {
     });
   };
 
-  // Handle session status change
-  const handleStatusChange = (updatedSession) => {
-    setSessions(prev =>
-      prev.map(s => (s.id === updatedSession.id ? updatedSession : s))
-    );
+  // Handle opening feedback modal with specific mode
+  const handleOpenFeedbackModal = (session, mode = 'feedback') => {
+    setFeedbackModalSession(session);
+    setFeedbackModalMode(mode);
   };
 
-  // Handle feedback success
-  const handleFeedbackSuccess = (sessionId, role) => {
-    setSessions(prev =>
-      prev.map(s => {
-        if (s.id === sessionId) {
-          return {
-            ...s,
-            student_feedback_submitted: role === 'estudante' ? true : s.student_feedback_submitted,
-            mentor_feedback_submitted: role === 'mentor' ? true : s.mentor_feedback_submitted,
-          };
-        }
-        return s;
-      })
-    );
+  // Handle feedback/completion success
+  const handleFeedbackSuccess = (result, role, mode) => {
+    if (mode === 'complete') {
+      // Complete mode: result is the full updated session object
+      setSessions(prev =>
+        prev.map(s => (s.id === result.id ? result : s))
+      );
+    } else {
+      // Feedback mode: result is just the session ID
+      setSessions(prev =>
+        prev.map(s => {
+          if (s.id === result) {
+            return {
+              ...s,
+              student_feedback_submitted: role === 'estudante' ? true : s.student_feedback_submitted,
+              mentor_feedback_submitted: role === 'mentor' ? true : s.mentor_feedback_submitted,
+            };
+          }
+          return s;
+        })
+      );
+    }
   };
 
   // Filter sessions based on active filter
@@ -255,9 +263,8 @@ export default function MySessions() {
               key={session.id}
               session={session}
               viewerRole={viewerRole}
-              onStatusChange={handleStatusChange}
               onOpenResendModal={setResendModalSession}
-              onOpenFeedbackModal={setFeedbackModalSession}
+              onOpenFeedbackModal={handleOpenFeedbackModal}
             />
           ))}
         </div>
@@ -300,8 +307,12 @@ export default function MySessions() {
         session={feedbackModalSession}
         viewerRole={viewerRole}
         isOpen={Boolean(feedbackModalSession)}
-        onClose={() => setFeedbackModalSession(null)}
+        onClose={() => {
+          setFeedbackModalSession(null);
+          setFeedbackModalMode('feedback');
+        }}
         onSuccess={handleFeedbackSuccess}
+        mode={feedbackModalMode}
       />
     </div>
   );

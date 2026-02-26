@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { Fragment } from 'react';
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import {
   CalendarDaysIcon,
@@ -9,7 +9,6 @@ import {
   ChatBubbleLeftEllipsisIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
-import sessionService from '../../services/sessionService';
 import analytics, { EVENTS } from '../../services/analytics';
 
 // Status badge configuration
@@ -51,12 +50,9 @@ function formatDate(dateString) {
 export default function SessionCard({
   session,
   viewerRole, // 'estudante' or 'mentor'
-  onStatusChange,
   onOpenResendModal,
   onOpenFeedbackModal,
 }) {
-  const [isUpdating, setIsUpdating] = useState(false);
-
   // Determine which person's info to show
   const isStudent = viewerRole === 'estudante';
   const personName = isStudent ? session.mentor_name : session.student_name;
@@ -71,29 +67,14 @@ export default function SessionCard({
   const isSessionCompleted = session.status === 'completed';
   const canSubmitFeedback = isSessionCompleted && !hasFeedbackSubmitted;
 
-  const handleStatusToggle = async () => {
-    if (isUpdating) return;
-
-    const newStatus = session.status === 'pending' ? 'completed' : 'pending';
-    setIsUpdating(true);
-
-    try {
-      const updatedSession = await sessionService.updateSessionStatus(session.id, newStatus);
-
-      analytics.track(EVENTS.SESSION_STATUS_UPDATED, {
-        session_id: session.id,
-        old_status: session.status,
-        new_status: newStatus,
-        user_role: viewerRole,
-      });
-
-      if (onStatusChange) {
-        onStatusChange(updatedSession);
-      }
-    } catch (error) {
-      console.error('Error updating session status:', error);
-    } finally {
-      setIsUpdating(false);
+  const handleCompleteClick = () => {
+    // Open FeedbackModal in 'complete' mode
+    analytics.track(EVENTS.SESSION_COMPLETION_MODAL_OPENED, {
+      session_id: session.id,
+      user_role: viewerRole,
+    });
+    if (onOpenFeedbackModal) {
+      onOpenFeedbackModal(session, 'complete');
     }
   };
 
@@ -103,7 +84,7 @@ export default function SessionCard({
       user_role: viewerRole,
     });
     if (onOpenFeedbackModal) {
-      onOpenFeedbackModal(session);
+      onOpenFeedbackModal(session, 'feedback');
     }
   };
 
@@ -186,61 +167,44 @@ export default function SessionCard({
 
       {/* Action buttons */}
       <div className="mt-4 flex gap-3">
-        {/* Status toggle button */}
-        <button
-          onClick={handleStatusToggle}
-          disabled={isUpdating}
-          className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap ${
-            session.status === 'pending'
-              ? 'bg-patronos-coral text-white hover:bg-patronos-coral/90'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          {isUpdating ? (
-            <>
-              <svg className="animate-spin h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Atualizando...
-            </>
-          ) : session.status === 'pending' ? (
-            <>
-              <CheckCircleIcon className="h-4 w-4 flex-shrink-0" />
-              Concluida
-            </>
-          ) : (
-            <>
-              <ClockIcon className="h-4 w-4 flex-shrink-0" />
-              Pendente
-            </>
-          )}
-        </button>
-
-        {/* Feedback button - only active for completed sessions */}
-        <button
-          onClick={handleFeedbackClick}
-          disabled={!canSubmitFeedback}
-          className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap ${
-            hasFeedbackSubmitted
-              ? 'bg-blue-50 text-blue-600 cursor-default'
-              : !isSessionCompleted
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-patronos-accent text-white hover:bg-patronos-orange/90'
-          }`}
-        >
-          {hasFeedbackSubmitted ? (
-            <>
+        {session.status === 'pending' ? (
+          // Pending session: Show "Concluida" button that opens completion modal
+          <button
+            onClick={handleCompleteClick}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors bg-patronos-coral text-white hover:bg-patronos-coral/90 whitespace-nowrap"
+          >
+            <CheckCircleIcon className="h-4 w-4 flex-shrink-0" />
+            Concluida
+          </button>
+        ) : (
+          // Completed session: Show status indicator and possibly feedback button
+          <>
+            {/* Completed status indicator */}
+            <div className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-green-100 text-green-700 whitespace-nowrap">
               <CheckCircleSolidIcon className="h-4 w-4 flex-shrink-0" />
-              Enviado
-            </>
-          ) : (
-            <>
-              <ChatBubbleLeftEllipsisIcon className="h-4 w-4 flex-shrink-0" />
-              Feedback
-            </>
-          )}
-        </button>
+              Concluida
+            </div>
+
+            {/* Show feedback button if user hasn't submitted feedback yet */}
+            {!hasFeedbackSubmitted && (
+              <button
+                onClick={handleFeedbackClick}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-patronos-accent text-white hover:bg-patronos-orange/90 transition-colors whitespace-nowrap"
+              >
+                <ChatBubbleLeftEllipsisIcon className="h-4 w-4 flex-shrink-0" />
+                Feedback
+              </button>
+            )}
+
+            {/* Show "Enviado" indicator if feedback was submitted */}
+            {hasFeedbackSubmitted && (
+              <div className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-blue-50 text-blue-600 whitespace-nowrap">
+                <CheckCircleSolidIcon className="h-4 w-4 flex-shrink-0" />
+                Enviado
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

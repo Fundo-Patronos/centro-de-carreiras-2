@@ -34,7 +34,7 @@ function StarRating({ rating, onRatingChange, disabled }) {
   );
 }
 
-export default function FeedbackModal({ session, viewerRole, isOpen, onClose, onSuccess }) {
+export default function FeedbackModal({ session, viewerRole, isOpen, onClose, onSuccess, mode = 'feedback' }) {
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,26 +67,50 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
     setError('');
 
     try {
-      const result = await sessionService.submitFeedback(session.id, {
-        rating,
-        comments: comments.trim(),
-      });
+      let result;
 
-      analytics.track(EVENTS.SESSION_FEEDBACK_SUBMITTED, {
-        session_id: session.id,
-        rating,
-        has_comments: Boolean(comments.trim()),
-        user_role: viewerRole,
-      });
+      if (mode === 'complete') {
+        // Complete mode: mark session as completed + submit feedback
+        result = await sessionService.completeSessionWithFeedback(session.id, {
+          rating,
+          comments: comments.trim(),
+        });
 
-      if (result.success) {
+        analytics.track(EVENTS.SESSION_COMPLETED_WITH_FEEDBACK, {
+          session_id: session.id,
+          rating,
+          has_comments: Boolean(comments.trim()),
+          user_role: viewerRole,
+        });
+
         setSubmitState('success');
         if (onSuccess) {
-          onSuccess(session.id, viewerRole);
+          // Pass the full updated session object for complete mode
+          onSuccess(result, viewerRole, mode);
         }
       } else {
-        setError(result.message || 'Falha ao enviar feedback');
-        setSubmitState('error');
+        // Feedback mode: just submit feedback (session already completed)
+        result = await sessionService.submitFeedback(session.id, {
+          rating,
+          comments: comments.trim(),
+        });
+
+        analytics.track(EVENTS.SESSION_FEEDBACK_SUBMITTED, {
+          session_id: session.id,
+          rating,
+          has_comments: Boolean(comments.trim()),
+          user_role: viewerRole,
+        });
+
+        if (result.success) {
+          setSubmitState('success');
+          if (onSuccess) {
+            onSuccess(session.id, viewerRole, mode);
+          }
+        } else {
+          setError(result.message || 'Falha ao enviar feedback');
+          setSubmitState('error');
+        }
       }
     } catch (err) {
       console.error('Error submitting feedback:', err);
@@ -127,7 +151,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
             <div className="border-b border-gray-200 px-6 py-4">
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-lg font-semibold text-gray-900">
-                  Avaliar Sessao
+                  {mode === 'complete' ? 'Marcar Sessao como Concluida' : 'Avaliar Sessao'}
                 </DialogTitle>
                 <button
                   type="button"
@@ -148,11 +172,19 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                   <CheckCircleIcon className="h-10 w-10 text-green-600" />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-gray-900">
-                  Feedback enviado!
+                  {mode === 'complete' ? 'Sessao concluida!' : 'Feedback enviado!'}
                 </h3>
                 <p className="mt-2 text-sm text-gray-600">
-                  Obrigado por avaliar sua sessao com <strong>{otherPersonName}</strong>.
-                  Seu feedback nos ajuda a melhorar o programa.
+                  {mode === 'complete' ? (
+                    <>
+                      Sessao marcada como concluida! Um email foi enviado para <strong>{otherPersonName}</strong> solicitando a avaliacao.
+                    </>
+                  ) : (
+                    <>
+                      Obrigado por avaliar sua sessao com <strong>{otherPersonName}</strong>.
+                      Seu feedback nos ajuda a melhorar o programa.
+                    </>
+                  )}
                 </p>
                 <div className="mt-6">
                   <button
@@ -180,6 +212,15 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                       </p>
                     </div>
                   </div>
+
+                  {/* Info banner for complete mode */}
+                  {mode === 'complete' && (
+                    <div className="mb-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
+                      <p>
+                        Ao marcar como concluida, sua avaliacao sera enviada e <strong>{otherPersonName}</strong> recebera um email para tambem avaliar a sessao.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Error message */}
                   {error && (
@@ -249,10 +290,10 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
-                        Enviando...
+                        {mode === 'complete' ? 'Concluindo...' : 'Enviando...'}
                       </>
                     ) : (
-                      'Enviar Feedback'
+                      mode === 'complete' ? 'Concluir Sessao' : 'Enviar Feedback'
                     )}
                   </button>
                 </div>

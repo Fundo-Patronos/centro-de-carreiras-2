@@ -17,7 +17,9 @@ from ...models.session import (
     SessionStatusUpdate,
     SessionResendEmail,
     SessionFeedback,
+    SessionCompleteWithFeedback,
 )
+from ...core.config import settings
 from ...models.user import UserInDB
 from ..deps import get_current_user, get_current_estudante
 
@@ -345,6 +347,13 @@ async def update_session_status(
                 detail="Access denied",
             )
 
+        # Prevent reverting completed sessions back to pending
+        if data["status"] == "completed" and status_update.status == "pending":
+            raise HTTPException(
+                status_code=400,
+                detail="Sessoes concluidas nao podem voltar para pendente",
+            )
+
         # Update status and timestamp
         now = datetime.utcnow()
         update_data = {
@@ -552,4 +561,162 @@ async def submit_session_feedback(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to submit feedback: {str(e)}",
+        )
+
+
+@router.post("/{session_id}/complete", response_model=SessionResponse)
+async def complete_session_with_feedback(
+    session_id: str,
+    data: SessionCompleteWithFeedback,
+    current_user: UserInDB = Depends(get_current_user),
+):
+    """
+    Complete a session and submit feedback in one atomic operation.
+
+    - Only allowed if session status is 'pending'
+    - Completion is irreversible
+    - Sends email notification to the other party prompting feedback
+    """
+    try:
+        doc_ref = db.collection("sessions").document(session_id)
+        doc = doc_ref.get()
+
+        if not doc.exists:
+            raise HTTPException(
+                status_code=404,
+                detail="Session not found",
+            )
+
+        session_data = doc.to_dict()
+
+        # Check access permission
+        is_student = session_data["student_uid"] == current_user.uid
+        is_mentor = session_data["mentor_email"] == current_user.email
+
+        if not is_student and not is_mentor:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied",
+            )
+
+        # Validate session is pending (can only complete pending sessions)
+        if session_data["status"] != "pending":
+            raise HTTPException(
+                status_code=400,
+                detail="Apenas sessoes pendentes podem ser marcadas como concluidas",
+            )
+
+        # Store feedback in session_feedback collection
+        now = datetime.utcnow()
+        feedback_doc = {
+            "session_id": session_id,
+            "user_uid": current_user.uid,
+            "user_email": current_user.email,
+            "user_role": current_user.role,
+            "rating": data.rating,
+            "comments": data.comments,
+            "created_at": now,
+        }
+
+        feedback_ref = db.collection("session_feedback")
+        feedback_ref.add(feedback_doc)
+
+        # Determine which feedback flag to set
+        feedback_field = "student_feedback_submitted" if is_student else "mentor_feedback_submitted"
+
+        # Update session document: status to completed + feedback flag
+        update_data = {
+            "status": "completed",
+            feedback_field: True,
+            "updated_at": now,
+            "completed_by": "student" if is_student else "mentor",
+            "completed_at": now,
+        }
+        doc_ref.update(update_data)
+
+        # Send email notification to the OTHER party
+        feedback_url = f"{settings.FRONTEND_URL}/minhas-sessoes"
+
+        if is_student:
+            # Student completed - notify mentor
+            email_result = email_service.send_completion_feedback_request_to_mentor(
+                mentor_name=session_data["mentor_name"],
+                mentor_email=session_data["mentor_email"],
+                student_name=session_data["student_name"],
+                feedback_url=feedback_url,
+            )
+            email_recipient = "mentor"
+        else:
+            # Mentor completed - notify student
+            email_result = email_service.send_completion_feedback_request_to_student(
+                student_name=session_data["student_name"],
+                student_email=session_data["student_email"],
+                mentor_name=session_data["mentor_name"],
+                feedback_url=feedback_url,
+            )
+            email_recipient = "student"
+
+        # Track email result
+        if email_result.get("success", False):
+            track_event(
+                user_id=current_user.uid,
+                event_name=Events.EMAIL_FEEDBACK_PROMPT_SENT,
+                properties={
+                    "session_id": session_id,
+                    "recipient": email_recipient,
+                },
+            )
+        else:
+            track_event(
+                user_id=current_user.uid,
+                event_name=Events.EMAIL_FEEDBACK_PROMPT_FAILED,
+                properties={
+                    "session_id": session_id,
+                    "recipient": email_recipient,
+                    "error": email_result.get("error", "Unknown error"),
+                },
+            )
+
+        # Track session completion
+        track_event(
+            user_id=current_user.uid,
+            event_name=Events.SESSION_COMPLETED_WITH_FEEDBACK,
+            properties={
+                "session_id": session_id,
+                "rating": data.rating,
+                "user_role": current_user.role,
+                "is_student": is_student,
+                "is_mentor": is_mentor,
+                "has_comments": bool(data.comments),
+            },
+        )
+
+        # Return updated session
+        session_data["status"] = "completed"
+        session_data[feedback_field] = True
+        session_data["updated_at"] = now
+
+        return SessionResponse(
+            id=session_data["id"],
+            student_uid=session_data["student_uid"],
+            student_name=session_data["student_name"],
+            student_email=session_data["student_email"],
+            mentor_id=session_data["mentor_id"],
+            mentor_name=session_data["mentor_name"],
+            mentor_email=session_data["mentor_email"],
+            mentor_company=session_data["mentor_company"],
+            message=session_data["message"],
+            status=session_data["status"],
+            created_at=session_data.get("created_at"),
+            updated_at=session_data.get("updated_at"),
+            student_feedback_submitted=session_data.get("student_feedback_submitted", False),
+            mentor_feedback_submitted=session_data.get("mentor_feedback_submitted", False),
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to complete session: {str(e)}",
         )

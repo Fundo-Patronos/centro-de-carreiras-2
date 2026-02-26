@@ -93,6 +93,8 @@ export const EVENTS = {
   RESEND_EMAIL_MODAL_CLOSED: 'Resend Email Modal Closed',
   FEEDBACK_MODAL_OPENED: 'Feedback Modal Opened',
   FEEDBACK_MODAL_CLOSED: 'Feedback Modal Closed',
+  SESSION_COMPLETED_WITH_FEEDBACK: 'Session Completed With Feedback',
+  SESSION_COMPLETION_MODAL_OPENED: 'Session Completion Modal Opened',
 
   // ============================================
   // ADMIN EVENTS

@@ -54,6 +54,7 @@ class Events:
     SESSION_STATUS_UPDATED = "API: Session Status Updated"
     SESSION_EMAIL_RESENT = "API: Session Email Resent"
     SESSION_FEEDBACK_SUBMITTED = "API: Session Feedback Submitted"
+    SESSION_COMPLETED_WITH_FEEDBACK = "API: Session Completed With Feedback"
 
     # ============================================
     # EMAIL EVENTS
@@ -64,6 +65,8 @@ class Events:
     EMAIL_STUDENT_CONFIRMATION_FAILED = "API: Student Confirmation Email Failed"
     EMAIL_APPROVAL_CONFIRMATION_SENT = "API: Approval Confirmation Email Sent"
     EMAIL_APPROVAL_CONFIRMATION_FAILED = "API: Approval Confirmation Email Failed"
+    EMAIL_FEEDBACK_PROMPT_SENT = "API: Feedback Prompt Email Sent"
+    EMAIL_FEEDBACK_PROMPT_FAILED = "API: Feedback Prompt Email Failed"
 
     # ============================================
     # ADMIN API EVENTS
@@ -98,6 +101,7 @@ def track_event(
     user_id: str,
     event_name: str,
     properties: Optional[dict] = None,
+    email: Optional[str] = None,
 ) -> None:
     """
     Track an event in Mixpanel.
@@ -106,6 +110,7 @@ def track_event(
         user_id: The user's unique identifier (Firebase UID)
         event_name: Name of the event (use Events constants)
         properties: Additional event properties
+        email: User's email address (automatically included in event properties)
     """
     if not _mp:
         return
@@ -116,6 +121,9 @@ def track_event(
             "source": "api",
             **(properties or {}),
         }
+        # Include email if provided and not already in properties
+        if email and "email" not in event_properties:
+            event_properties["email"] = email
         _mp.track(user_id, event_name, event_properties)
         logger.debug(f"Tracked event: {event_name} for user {user_id}")
     except Exception as e:
