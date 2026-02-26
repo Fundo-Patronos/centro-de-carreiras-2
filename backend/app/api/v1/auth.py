@@ -3,12 +3,13 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from firebase_admin import auth as firebase_auth
 
 from ..deps import get_current_user
 from ...models.user import UserInDB
 from ...core.firebase import verify_id_token, db
+from ...core.config import settings
 from ...core.verification import (
     create_verification_token,
     verify_token,
@@ -54,6 +55,82 @@ class VerifyTokenRequest(BaseModel):
     """Request body for email token verification."""
 
     token: str
+
+
+class PasswordResetRequest(BaseModel):
+    """Request body for password reset."""
+
+    email: EmailStr
+
+
+@router.post("/request-password-reset")
+async def request_password_reset(request: PasswordResetRequest):
+    """
+    Request a password reset email.
+
+    Public endpoint - no authentication required.
+    Generates a Firebase password reset link and sends a custom email via Resend.
+    """
+    email = request.email.lower()
+
+    try:
+        # Check if user exists in Firebase Auth
+        try:
+            user = firebase_auth.get_user_by_email(email)
+        except firebase_auth.UserNotFoundError:
+            # Don't reveal if email exists or not for security
+            logger.info(f"Password reset requested for non-existent email: {email}")
+            return {"message": "Se o email estiver cadastrado, voce recebera um link para redefinir sua senha."}
+
+        # Get user profile from Firestore for display name
+        user_ref = db.collection("users").document(user.uid)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            user_name = user_data.get("displayName", email.split("@")[0])
+        else:
+            user_name = email.split("@")[0]
+
+        # Get the primary frontend URL (first one if multiple)
+        frontend_url = settings.FRONTEND_URL.split(",")[0].strip()
+
+        # Generate password reset link using Firebase Admin SDK
+        action_code_settings = firebase_auth.ActionCodeSettings(
+            url=f"{frontend_url}/auth/action",
+            handle_code_in_app=True,
+        )
+
+        reset_link = firebase_auth.generate_password_reset_link(
+            email,
+            action_code_settings=action_code_settings,
+        )
+
+        # Send custom email via Resend
+        result = email_service.send_password_reset_email(
+            user_name=user_name,
+            user_email=email,
+            reset_url=reset_link,
+        )
+
+        if not result.get("success"):
+            logger.error(f"Failed to send password reset email to {email}: {result.get('error')}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro ao enviar email de redefinicao de senha",
+            )
+
+        logger.info(f"Password reset email sent to {email}")
+        return {"message": "Se o email estiver cadastrado, voce recebera um link para redefinir sua senha."}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing password reset request: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao processar solicitacao",
+        )
 
 
 @router.post("/send-verification-email")

@@ -104,7 +104,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = f"Nova solicitacao de mentoria - {student_name}"
+        subject = f"Centro de Carreiras - Nova solicitacao de mentoria de {student_name}"
 
         html = f"""
 <!DOCTYPE html>
@@ -185,7 +185,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = f"Solicitacao de mentoria enviada - {mentor_name}"
+        subject = f"Centro de Carreiras - Solicitacao enviada para {mentor_name}"
 
         html = f"""
 <!DOCTYPE html>
@@ -261,7 +261,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = "Verifique seu email - Centro de Carreiras"
+        subject = "Centro de Carreiras - Verifique seu email"
 
         html = f"""
 <!DOCTYPE html>
@@ -339,7 +339,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = f"Como foi sua mentoria com {mentor_name}?"
+        subject = f"Centro de Carreiras - Como foi sua mentoria com {mentor_name}?"
 
         html = f"""
 <!DOCTYPE html>
@@ -412,7 +412,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = "Bem-vindo ao Centro de Carreiras - Configure sua senha"
+        subject = "Centro de Carreiras - Bem-vindo! Configure sua senha"
 
         html = f"""
 <!DOCTYPE html>
@@ -498,7 +498,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = f"Como foi sua mentoria com {student_name}?"
+        subject = f"Centro de Carreiras - Como foi sua mentoria com {student_name}?"
 
         html = f"""
 <!DOCTYPE html>
@@ -554,6 +554,82 @@ class EmailService:
             html=html,
         )
 
+    def send_password_reset_email(
+        self,
+        user_name: str,
+        user_email: str,
+        reset_url: str,
+    ) -> dict:
+        """
+        Send password reset email to user.
+
+        Args:
+            user_name: User's display name
+            user_email: User's email address
+            reset_url: Firebase password reset URL
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        subject = "Fundo Patronos - Redefina sua senha do Centro de Carreiras"
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {user_name}!</h2>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                Voce solicitou a redefinicao de senha da sua conta no Centro de Carreiras. Clique no botao abaixo para criar uma nova senha:
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{reset_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Redefinir Senha
+                </a>
+            </div>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0;">
+                <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
+                    <strong>Importante:</strong> Este link expira em 1 hora. Se voce nao solicitou esta redefinicao, pode ignorar este email com seguranca - sua senha permanecera inalterada.
+                </p>
+            </div>
+
+            <p style="color: #6a6a6a; line-height: 1.6; margin: 24px 0 0 0; font-size: 14px;">
+                Se voce nao conseguir clicar no botao, copie e cole o link abaixo no seu navegador:
+            </p>
+            <p style="color: #9B5DE5; line-height: 1.6; margin: 8px 0 0 0; font-size: 13px; word-break: break-all;">
+                {reset_url}
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        return self.send_email(
+            to=[user_email],
+            subject=subject,
+            html=html,
+        )
+
     def send_approval_confirmation_email(
         self,
         user_name: str,
@@ -573,7 +649,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = "Sua conta foi aprovada - Centro de Carreiras"
+        subject = "Centro de Carreiras - Sua conta foi aprovada!"
 
         # Role-specific content
         if role == "estudante":

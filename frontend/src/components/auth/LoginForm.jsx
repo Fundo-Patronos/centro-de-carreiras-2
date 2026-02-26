@@ -92,16 +92,8 @@ export default function LoginForm() {
       analytics.track(EVENTS.PASSWORD_RESET_REQUESTED, { email: resetEmail });
     } catch (err) {
       console.error('Password reset error:', err);
-
-      if (err.code === 'auth/user-not-found') {
-        setResetError('Email nao cadastrado');
-      } else if (err.code === 'auth/invalid-email') {
-        setResetError('Email invalido');
-      } else if (err.code === 'auth/too-many-requests') {
-        setResetError('Muitas tentativas. Tente novamente mais tarde.');
-      } else {
-        setResetError('Erro ao enviar email. Tente novamente.');
-      }
+      // Show generic error message (backend doesn't reveal if email exists for security)
+      setResetError(err.message || 'Erro ao enviar email. Tente novamente.');
     } finally {
       setResetLoading(false);
     }

@@ -38,17 +38,13 @@ export default function ChangePassword() {
       console.error('Error sending password reset email:', err);
       setStatus('error');
 
-      let errorMessage = 'Erro ao enviar email. Tente novamente.';
-
-      if (err.code === 'auth/too-many-requests') {
-        errorMessage = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
-      }
+      let errorMessage = err.message || 'Erro ao enviar email. Tente novamente.';
 
       setError(errorMessage);
 
       analytics.track(EVENTS.PASSWORD_CHANGE_ERROR, {
         user_role: userProfile?.role,
-        error_code: err.code,
+        error_message: err.message,
       });
     }
   };

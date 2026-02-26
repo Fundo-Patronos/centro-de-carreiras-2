@@ -135,10 +135,32 @@ export const authService = {
   // ==========================================
 
   /**
-   * Send password reset email
+   * Send password reset email via backend (custom email template)
    * @param {string} email
    */
   async sendPasswordReset(email) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const response = await fetch(`${apiUrl}/auth/request-password-reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Erro ao enviar email de redefinição de senha');
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Send password reset email via Firebase (fallback)
+   * @param {string} email
+   */
+  async sendPasswordResetFirebase(email) {
     await sendPasswordResetEmail(auth, email, passwordResetSettings);
   },
 
