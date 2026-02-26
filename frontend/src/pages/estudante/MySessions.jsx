@@ -6,6 +6,7 @@ import {
   BriefcaseIcon,
   Cog6ToothIcon,
   UserCircleIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import sessionService from '../../services/sessionService';
@@ -43,10 +44,10 @@ const studentQuickAccess = [
     iconColor: 'text-blue-600',
   },
   {
-    name: 'Meu Perfil',
-    href: '/estudante/dashboard',
-    icon: UserCircleIcon,
-    description: 'Ver meu perfil',
+    name: 'Alterar Senha',
+    href: '/configuracoes/senha',
+    icon: KeyIcon,
+    description: 'Atualizar minha senha',
     bgColor: 'bg-orange-100',
     hoverColor: 'group-hover:bg-orange-200',
     iconColor: 'text-orange-600',
