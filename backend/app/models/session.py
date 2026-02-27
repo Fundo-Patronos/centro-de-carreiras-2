@@ -8,7 +8,7 @@ from datetime import datetime
 class SessionCreate(BaseModel):
     """Data required to create a new session request."""
 
-    mentor_id: str  # Airtable record ID
+    mentor_id: str  # Firestore user ID
     mentor_name: str
     mentor_email: EmailStr
     mentor_company: str
@@ -22,7 +22,7 @@ class SessionInDB(BaseModel):
     student_uid: str  # Firebase UID
     student_name: str
     student_email: EmailStr
-    mentor_id: str  # Airtable record ID
+    mentor_id: str  # Firestore user ID
     mentor_name: str
     mentor_email: EmailStr
     mentor_company: str

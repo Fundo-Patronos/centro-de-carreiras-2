@@ -16,7 +16,7 @@ python-dotenv==1.0.0
 # CORS and security
 python-multipart==0.0.6
 
-# HTTP client for Airtable
+# HTTP client for external API calls
 httpx==0.27.0
 
 # Analytics

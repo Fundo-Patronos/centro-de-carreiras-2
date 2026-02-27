@@ -16,11 +16,6 @@ class Settings(BaseSettings):
     FIREBASE_PROJECT_ID: str = ""
     FIREBASE_SERVICE_ACCOUNT_PATH: str = "firebase-service-account.json"
 
-    # Airtable
-    AIRTABLE_API_TOKEN: str = ""
-    AIRTABLE_BASE_ID: str = ""
-    AIRTABLE_MENTORS_TABLE: str = "mentores_residentes_prod"
-
     # Mixpanel Analytics
     MIXPANEL_TOKEN: str = ""
 
