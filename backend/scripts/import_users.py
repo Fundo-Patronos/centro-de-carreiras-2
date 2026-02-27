@@ -186,6 +186,11 @@ def create_firestore_profile(
             return True, None
 
         # Create profile
+        # Convert graduation_year to int if possible
+        grad_year_int = None
+        if graduation_year and graduation_year.isdigit():
+            grad_year_int = int(graduation_year)
+
         profile_data = {
             "email": email,
             "displayName": name,
@@ -196,7 +201,7 @@ def create_firestore_profile(
             "language": "pt-BR",
             "profile": {
                 "course": course,
-                "graduationYear": graduation_year,
+                "graduationYear": grad_year_int,
                 "linkedIn": linkedin,
             },
             "createdAt": SERVER_TIMESTAMP,
