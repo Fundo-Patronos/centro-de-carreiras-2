@@ -31,6 +31,16 @@ export const adminService = {
   },
 
   /**
+   * Resend verification email to a user with pending_verification status
+   * @param {string} uid - User's Firebase UID
+   * @returns {Promise<{success: boolean, message: string, uid: string}>}
+   */
+  async resendVerificationEmail(uid) {
+    const response = await api.post(`/admin/users/${uid}/resend-verification`);
+    return response.data;
+  },
+
+  /**
    * Get all mentors for admin management
    * @returns {Promise<{mentors: Array, total: number}>}
    */

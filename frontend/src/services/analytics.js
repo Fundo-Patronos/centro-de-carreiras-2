@@ -109,6 +109,7 @@ export const EVENTS = {
   // ERROR EVENTS
   // ============================================
   API_ERROR: 'API Error',
+  API_RETRY: 'API Retry',
   FORM_VALIDATION_ERROR: 'Form Validation Error',
   PAGE_LOAD_ERROR: 'Page Load Error',
 

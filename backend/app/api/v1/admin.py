@@ -11,6 +11,11 @@ from ...core.firebase import db
 from ...core.analytics import track_event, Events
 from ...core.email import email_service
 from ...core.config import settings
+from ...core.verification import (
+    create_verification_token,
+    get_verification_url,
+    invalidate_user_tokens,
+)
 from ...models.user import UserInDB
 from ...models.mentor import MentorProfile
 from ...models.feedback import (
@@ -66,18 +71,21 @@ async def get_pending_users(
     admin: UserInDB = Depends(get_current_admin),
 ):
     """
-    List all users with pending status.
+    List all users with pending or pending_verification status.
 
     Requires admin privileges.
+
+    Returns users that need either:
+    - Admin approval (status: "pending")
+    - Email verification (status: "pending_verification")
     """
     try:
-        # Query Firestore for pending users
         users_ref = db.collection("users")
-        pending_query = users_ref.where("status", "==", "pending")
-        docs = pending_query.stream()
-
         pending_users = []
-        for doc in docs:
+
+        # Query for "pending" status (needs admin approval)
+        pending_query = users_ref.where("status", "==", "pending")
+        for doc in pending_query.stream():
             data = doc.to_dict()
             pending_users.append(
                 PendingUserResponse(
@@ -88,7 +96,26 @@ async def get_pending_users(
                     role=data.get("role", "estudante"),
                     status=data.get("status", "pending"),
                     createdAt=data.get("createdAt"),
-                    # Mentor-specific fields from registration
+                    curso=data.get("curso"),
+                    company=data.get("company"),
+                    title=data.get("title"),
+                    linkedin=data.get("linkedin"),
+                )
+            )
+
+        # Query for "pending_verification" status (needs email verification)
+        verification_query = users_ref.where("status", "==", "pending_verification")
+        for doc in verification_query.stream():
+            data = doc.to_dict()
+            pending_users.append(
+                PendingUserResponse(
+                    uid=doc.id,
+                    email=data.get("email", ""),
+                    displayName=data.get("displayName", ""),
+                    photoURL=data.get("photoURL"),
+                    role=data.get("role", "estudante"),
+                    status=data.get("status", "pending_verification"),
+                    createdAt=data.get("createdAt"),
                     curso=data.get("curso"),
                     company=data.get("company"),
                     title=data.get("title"),
@@ -255,6 +282,92 @@ async def reject_user(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao rejeitar usuário: {str(e)}",
+        )
+
+
+class ResendVerificationResponse(BaseModel):
+    """Response model for resend verification action."""
+
+    success: bool
+    message: str
+    uid: str
+
+
+@router.post("/users/{uid}/resend-verification", response_model=ResendVerificationResponse)
+async def resend_verification_email(
+    uid: str,
+    admin: UserInDB = Depends(get_current_admin),
+):
+    """
+    Resend verification email to a user with pending_verification status.
+
+    Requires admin privileges.
+    """
+    try:
+        user_ref = db.collection("users").document(uid)
+        user_doc = user_ref.get()
+
+        if not user_doc.exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Usuário não encontrado",
+            )
+
+        user_data = user_doc.to_dict()
+
+        if user_data.get("status") != "pending_verification":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Usuário não está aguardando verificação de email (status atual: {user_data.get('status')})",
+            )
+
+        # Invalidate any existing tokens
+        await invalidate_user_tokens(uid)
+
+        # Create new verification token
+        verification_token = await create_verification_token(
+            uid=uid,
+            email=user_data["email"],
+            role=user_data["role"],
+        )
+
+        # Send verification email
+        verification_url = get_verification_url(verification_token)
+        result = email_service.send_verification_email(
+            user_name=user_data.get("displayName", user_data["email"].split("@")[0]),
+            user_email=user_data["email"],
+            verification_url=verification_url,
+        )
+
+        if not result.get("success"):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro ao enviar email de verificação",
+            )
+
+        # Track event
+        track_event(
+            admin.uid,
+            "Admin: Verification Email Resent",
+            {
+                "user_uid": uid,
+                "user_email": user_data.get("email"),
+                "user_role": user_data.get("role"),
+            },
+        )
+
+        return ResendVerificationResponse(
+            success=True,
+            message=f"Email de verificação enviado para {user_data['email']}",
+            uid=uid,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao reenviar email de verificação: {str(e)}",
         )
 
 

@@ -400,6 +400,8 @@ class EmailService:
         user_name: str,
         user_email: str,
         password_reset_url: str,
+        cc: Optional[list[str]] = None,
+        bcc: Optional[list[str]] = None,
     ) -> dict:
         """
         Send welcome email to imported users with password setup link.
@@ -408,6 +410,8 @@ class EmailService:
             user_name: User's display name
             user_email: User's email address
             password_reset_url: Firebase password reset URL
+            cc: Optional list of CC recipients
+            bcc: Optional list of BCC recipients
 
         Returns:
             dict with 'success' and 'id' or 'error'
@@ -477,6 +481,8 @@ class EmailService:
             to=[user_email],
             subject=subject,
             html=html,
+            cc=cc,
+            bcc=bcc,
         )
 
     def send_feedback_request_to_mentor(
@@ -749,7 +755,7 @@ class EmailService:
         )
 
 
-def send_completion_feedback_request_to_student(
+    def send_completion_feedback_request_to_student(
         self,
         student_name: str,
         student_email: str,

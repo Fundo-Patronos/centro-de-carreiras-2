@@ -4,6 +4,7 @@ import {
   XCircleIcon,
   UserGroupIcon,
   FunnelIcon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import { adminService } from '../../services/adminService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -104,6 +105,28 @@ export default function UserApprovals() {
     }
   };
 
+  const handleResendVerification = async (uid, email) => {
+    try {
+      setActionLoading(uid);
+      await adminService.resendVerificationEmail(uid);
+      showToast(`Email de verificacao reenviado para ${email}`);
+      analytics.track(EVENTS.VERIFICATION_EMAIL_RESENT, {
+        user_uid: uid,
+        user_email: email,
+      });
+    } catch (err) {
+      showToast('Erro ao reenviar email de verificacao', 'error');
+      console.error(err);
+      analytics.track(EVENTS.ADMIN_ACTION_ERROR, {
+        action: 'resend_verification',
+        user_uid: uid,
+        error: err.message,
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
     analytics.track(EVENTS.ADMIN_FILTER_CHANGED, {
@@ -112,8 +135,9 @@ export default function UserApprovals() {
   };
 
   const handleRowClick = (user) => {
-    // Only open drawer for mentors (they have more info to review)
-    if (user.role === 'mentor') {
+    // Only open drawer for mentors with pending status (they need approval review)
+    // Don't open for pending_verification users
+    if (user.role === 'mentor' && user.status === 'pending') {
       setSelectedUser(user);
       analytics.track(EVENTS.PENDING_MENTOR_VIEWED, {
         mentor_uid: user.uid,
@@ -122,8 +146,12 @@ export default function UserApprovals() {
     }
   };
 
-  const filteredUsers =
-    filter === 'all' ? users : users.filter((u) => u.role === filter);
+  const filteredUsers = users.filter((u) => {
+    if (filter === 'all') return true;
+    if (filter === 'estudante' || filter === 'mentor') return u.role === filter;
+    if (filter === 'pending' || filter === 'pending_verification') return u.status === filter;
+    return true;
+  });
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
@@ -167,6 +195,8 @@ export default function UserApprovals() {
             <option value="all">Todos</option>
             <option value="estudante">Estudantes</option>
             <option value="mentor">Mentores</option>
+            <option value="pending">Aguardando aprovacao</option>
+            <option value="pending_verification">Aguardando verificacao</option>
           </select>
         </div>
       </div>
@@ -224,7 +254,7 @@ export default function UserApprovals() {
                 <tr
                   key={user.uid}
                   onClick={() => handleRowClick(user)}
-                  className={`hover:bg-gray-50 ${user.role === 'mentor' ? 'cursor-pointer' : ''}`}
+                  className={`hover:bg-gray-50 ${user.role === 'mentor' && user.status === 'pending' ? 'cursor-pointer' : ''}`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -254,19 +284,33 @@ export default function UserApprovals() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            user.role === 'estudante'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {user.role === 'estudante' ? 'Estudante' : 'Mentor'}
+                        </span>
+                        {user.role === 'mentor' && user.status === 'pending' && (
+                          <span className="text-xs text-gray-400">Clique para detalhes</span>
+                        )}
+                      </div>
+                      {/* Status indicator */}
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          user.role === 'estudante'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-green-100 text-green-800'
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                          user.status === 'pending_verification'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-orange-100 text-orange-800'
                         }`}
                       >
-                        {user.role === 'estudante' ? 'Estudante' : 'Mentor'}
+                        {user.status === 'pending_verification'
+                          ? 'Verificacao pendente'
+                          : 'Aprovacao pendente'}
                       </span>
-                      {user.role === 'mentor' && (
-                        <span className="text-xs text-gray-400">Clique para detalhes</span>
-                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -274,28 +318,46 @@ export default function UserApprovals() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleApprove(user.uid, user.email);
-                        }}
-                        disabled={actionLoading === user.uid}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <CheckCircleIcon className="h-4 w-4" />
-                        Aprovar
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleReject(user.uid, user.email);
-                        }}
-                        disabled={actionLoading === user.uid}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <XCircleIcon className="h-4 w-4" />
-                        Rejeitar
-                      </button>
+                      {user.status === 'pending_verification' ? (
+                        /* Pending verification - show resend button */
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleResendVerification(user.uid, user.email);
+                          }}
+                          disabled={actionLoading === user.uid}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-patronos-accent text-white rounded-lg hover:bg-patronos-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <EnvelopeIcon className="h-4 w-4" />
+                          Reenviar Verificacao
+                        </button>
+                      ) : (
+                        /* Pending approval - show approve/reject buttons */
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleApprove(user.uid, user.email);
+                            }}
+                            disabled={actionLoading === user.uid}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <CheckCircleIcon className="h-4 w-4" />
+                            Aprovar
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReject(user.uid, user.email);
+                            }}
+                            disabled={actionLoading === user.uid}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <XCircleIcon className="h-4 w-4" />
+                            Rejeitar
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
