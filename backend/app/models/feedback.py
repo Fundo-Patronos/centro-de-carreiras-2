@@ -1,6 +1,6 @@
 """Feedback Pydantic models for post-session feedback collection."""
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Optional, Literal
 from datetime import datetime
 
@@ -9,6 +9,8 @@ from datetime import datetime
 
 class FeedbackRequestInDB(BaseModel):
     """Feedback request data as stored in Firestore."""
+
+    model_config = ConfigDict(extra='ignore')
 
     id: str
     session_id: str
@@ -46,6 +48,8 @@ class FeedbackSubmit(BaseModel):
 
 class FeedbackInDB(BaseModel):
     """Feedback data as stored in session_feedback collection."""
+
+    model_config = ConfigDict(extra='ignore')
 
     id: str
     session_id: str

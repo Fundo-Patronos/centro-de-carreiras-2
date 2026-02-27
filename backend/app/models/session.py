@@ -1,6 +1,6 @@
 """Session Pydantic models."""
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Optional, Literal
 from datetime import datetime
 
@@ -17,6 +17,8 @@ class SessionCreate(BaseModel):
 
 class SessionInDB(BaseModel):
     """Session data as stored in Firestore."""
+
+    model_config = ConfigDict(extra='ignore')
 
     id: str  # 8-char unique ID
     student_uid: str  # Firebase UID

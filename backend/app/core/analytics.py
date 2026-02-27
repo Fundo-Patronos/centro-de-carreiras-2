@@ -80,6 +80,10 @@ class Events:
     # ============================================
     API_ERROR = "API: Error"
     SESSION_CREATION_FAILED = "API: Session Creation Failed"
+    USER_VALIDATION_ERROR = "API: User Validation Error"
+    AUTH_TOKEN_ERROR = "API: Auth Token Error"
+    AUTH_USER_NOT_FOUND = "API: Auth User Not Found"
+    AUTH_USER_STATUS_BLOCKED = "API: Auth User Status Blocked"
 
 
 # Initialize Mixpanel client

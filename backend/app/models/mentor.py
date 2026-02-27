@@ -1,11 +1,13 @@
 """Mentor profile Pydantic models."""
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, ConfigDict, HttpUrl
 from typing import Optional
 
 
 class MentorProfile(BaseModel):
     """Mentor profile data (nested in user document)."""
+
+    model_config = ConfigDict(extra='ignore')
 
     title: Optional[str] = None
     company: Optional[str] = None

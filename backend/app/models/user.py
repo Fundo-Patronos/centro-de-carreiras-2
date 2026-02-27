@@ -1,6 +1,6 @@
 """User Pydantic models."""
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 from typing import Optional, Literal, Union
 from datetime import datetime
 
@@ -9,6 +9,8 @@ from .mentor import MentorProfile
 
 class UserProfile(BaseModel):
     """User profile data (nested in user document)."""
+
+    model_config = ConfigDict(extra='ignore')
 
     phone: Optional[str] = None
     linkedIn: Optional[str] = None
@@ -49,6 +51,8 @@ class UserBase(BaseModel):
 
 class UserInDB(UserBase):
     """User data as stored in Firestore."""
+
+    model_config = ConfigDict(extra='ignore')
 
     uid: str
     status: Literal["active", "pending", "pending_verification", "suspended"] = "active"
