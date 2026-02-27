@@ -1,7 +1,7 @@
 """User Pydantic models."""
 
-from pydantic import BaseModel, EmailStr
-from typing import Optional, Literal
+from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional, Literal, Union
 from datetime import datetime
 
 from .mentor import MentorProfile
@@ -18,7 +18,19 @@ class UserProfile(BaseModel):
     course: Optional[str] = None
 
     # Estudante-specific fields
-    graduationYear: Optional[int] = None
+    graduationYear: Optional[Union[int, str]] = None
+
+    @field_validator('graduationYear', mode='before')
+    @classmethod
+    def coerce_graduation_year(cls, v):
+        """Convert string graduation year to int if possible."""
+        if v is None:
+            return None
+        if isinstance(v, int):
+            return v
+        if isinstance(v, str) and v.isdigit():
+            return int(v)
+        return v  # Return as-is if can't convert
 
     # Mentor-specific fields
     company: Optional[str] = None
@@ -40,7 +52,7 @@ class UserInDB(UserBase):
 
     uid: str
     status: Literal["active", "pending", "pending_verification", "suspended"] = "active"
-    authProvider: Literal["email", "google", "magic_link"]
+    authProvider: Literal["email", "google", "magic_link", "imported"]
     profile: UserProfile = UserProfile()
     mentorProfile: Optional[MentorProfile] = None  # Only for mentors
     emailNotifications: bool = True
