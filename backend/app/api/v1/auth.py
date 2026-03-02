@@ -1,6 +1,7 @@
 """Authentication endpoints."""
 
 import logging
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
@@ -17,6 +18,7 @@ from ...core.verification import (
     get_verification_url,
 )
 from ...core.email import email_service
+from ...core.analytics import track_event
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -252,3 +254,62 @@ async def verify_email_token(request: VerifyTokenRequest):
         "email": result["email"],
         "role": result["role"],
     }
+
+
+class NotifyAdminRequest(BaseModel):
+    """Request body for admin notification about pending user."""
+
+    uid: str
+    email: EmailStr
+    displayName: str
+    role: Literal["estudante", "mentor"]
+    company: Optional[str] = None
+    title: Optional[str] = None
+
+
+@router.post("/notify-pending-user")
+async def notify_admin_pending_user(request: NotifyAdminRequest):
+    """
+    Notify admins about a new user registration that requires approval.
+
+    This is called by the frontend after creating a user with "pending" status.
+    Public endpoint - called during signup before user has a valid session.
+    """
+    try:
+        # Get the primary frontend URL
+        frontend_url = settings.FRONTEND_URL.split(",")[0].strip()
+        admin_url = f"{frontend_url}/admin/aprovacoes"
+
+        # Send notification email to admins
+        result = email_service.send_admin_pending_user_notification(
+            user_name=request.displayName,
+            user_email=request.email,
+            role=request.role,
+            admin_url=admin_url,
+            company=request.company,
+            title=request.title,
+        )
+
+        if not result.get("success"):
+            logger.error(f"Failed to send admin notification for {request.email}: {result.get('error')}")
+            # Don't fail the signup - just log the error
+            return {"success": False, "message": "Erro ao enviar notificacao"}
+
+        logger.info(f"Admin notification sent for pending user: {request.email}")
+
+        # Track analytics event
+        track_event(
+            request.uid,
+            "Admin Notification: Pending User",
+            {
+                "user_email": request.email,
+                "user_role": request.role,
+            },
+        )
+
+        return {"success": True, "message": "Notificacao enviada aos administradores"}
+
+    except Exception as e:
+        logger.error(f"Error sending admin notification: {e}")
+        # Don't fail the signup - just return error
+        return {"success": False, "message": "Erro ao enviar notificacao"}

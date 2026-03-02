@@ -910,5 +910,119 @@ class EmailService:
         )
 
 
+    def send_admin_pending_user_notification(
+        self,
+        user_name: str,
+        user_email: str,
+        role: Literal["estudante", "mentor"],
+        admin_url: str,
+        company: Optional[str] = None,
+        title: Optional[str] = None,
+    ) -> dict:
+        """
+        Send notification to admins when a new user registers and needs approval.
+
+        Args:
+            user_name: User's display name
+            user_email: User's email address
+            role: User's role (estudante or mentor)
+            admin_url: URL to the admin approvals page
+            company: Mentor's company (optional, for mentors)
+            title: Mentor's job title (optional, for mentors)
+
+        Returns:
+            dict with 'success' and 'id' or 'error'
+        """
+        role_display = "Estudante" if role == "estudante" else "Mentor"
+        subject = f"Centro de Carreiras - Novo {role_display.lower()} aguardando aprovacao"
+
+        # Build mentor info section if applicable
+        mentor_info = ""
+        if role == "mentor" and (company or title):
+            mentor_info = f"""
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 16px 0;">
+                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0;">Informacoes Profissionais</p>
+                <p style="color: #1a1a1a; margin: 0;">
+                    {f'<strong>Cargo:</strong> {title}<br/>' if title else ''}
+                    {f'<strong>Empresa:</strong> {company}' if company else ''}
+                </p>
+            </div>
+            """
+
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Centro de Carreiras</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Fundo Patronos da Unicamp</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="background: #FFF3E0; border-left: 4px solid #FF6B35; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+                <p style="color: #1a1a1a; font-weight: 600; margin: 0;">
+                    🔔 Novo cadastro aguardando aprovacao
+                </p>
+            </div>
+
+            <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
+                Um novo usuario se cadastrou no Centro de Carreiras e precisa de aprovacao manual.
+            </p>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 16px 0;">
+                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0;">Novo Usuario</p>
+                <p style="color: #1a1a1a; font-weight: 600; margin: 0 0 4px 0; font-size: 16px;">{user_name}</p>
+                <p style="color: #4a4a4a; margin: 0 0 8px 0;">
+                    <a href="mailto:{user_email}" style="color: #9B5DE5; text-decoration: none;">{user_email}</a>
+                </p>
+                <span style="display: inline-block; background: {'#E3F2FD' if role == 'estudante' else '#E8F5E9'}; color: {'#1976D2' if role == 'estudante' else '#388E3C'}; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 500;">
+                    {role_display}
+                </span>
+            </div>
+
+            {mentor_info}
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{admin_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Revisar Cadastro
+                </a>
+            </div>
+
+            <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
+                <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
+                    Acesse o painel administrativo para aprovar ou rejeitar este cadastro.
+                </p>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0;">
+            <p style="color: #9a9a9a; font-size: 12px; margin: 0;">
+                Este email foi enviado pelo Centro de Carreiras do Fundo Patronos da Unicamp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        # Send to all admin emails
+        admin_emails = [
+            "matheus.gomes@patronos.org",
+            "gabriel.aquino@patronos.org",
+            "gustavo.beltrami@patronos.org",
+        ]
+
+        return self.send_email(
+            to=admin_emails,
+            subject=subject,
+            html=html,
+        )
+
+
 # Singleton instance
 email_service = EmailService()

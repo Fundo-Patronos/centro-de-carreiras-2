@@ -6,6 +6,7 @@ import {
   serverTimestamp,
   onSnapshot,
 } from 'firebase/firestore';
+import axios from 'axios';
 import { db } from '../config/firebase';
 
 // Auto-approved domains by role (must match backend/app/core/approval.py)
@@ -111,6 +112,25 @@ export const userService = {
     }
 
     await setDoc(userRef, profileData);
+
+    // If user is pending approval, notify admins
+    if (status === 'pending') {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+        await axios.post(`${apiUrl}/auth/notify-pending-user`, {
+          uid,
+          email: userData.email,
+          displayName: userData.displayName,
+          role: userData.role,
+          company: userData.company || null,
+          title: userData.title || null,
+        });
+        console.log('Admin notification sent for pending user');
+      } catch (error) {
+        // Don't fail signup if notification fails
+        console.error('Failed to send admin notification:', error);
+      }
+    }
   },
 
   /**
