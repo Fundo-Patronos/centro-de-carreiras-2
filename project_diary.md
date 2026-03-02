@@ -415,80 +415,47 @@ Added admin privileges via `scripts/set_admin.py`:
 | SSL certificate provisioned | ✅ Done |
 | CORS configured for custom domains | ✅ Done |
 | Platform tested and working | ✅ Done |
-| Batch 1 execution | ⏳ Pending |
-| Batch 2 execution | ⏳ Pending |
-| Batch 3 execution | ⏳ Pending |
-| Batch 4 execution | ⏳ Pending |
+| Batch 1 execution | ✅ Done |
+| Batch 2 execution | ✅ Done |
+| Batch 3 execution | ✅ Done |
+| Batch 4 execution | ✅ Done |
 
 #### Batch Schedule
 
 | Batch | Users | Count | Status |
 |-------|-------|-------|--------|
-| 1 | 1-80 | 80 | Pending |
-| 2 | 81-160 | 80 | Pending |
-| 3 | 161-240 | 80 | Pending |
-| 4 | 241-294 | 54 | Pending |
+| 1 | 1-80 | 80 | ✅ Complete |
+| 2 | 81-160 | 80 | ✅ Complete |
+| 3 | 161-240 | 80 | ✅ Complete |
+| 4 | 241-294 | 54 | ✅ Complete |
 
-**Total:** 294 verified students
+**Total:** 295 users imported (0 errors)
 
 ---
 
-## NEXT STEPS (For Future Sessions)
+## User Import Migration - COMPLETED
 
-### Step 1: Run Import Batches
+All 295 users from v1 have been successfully migrated to Firebase Auth + Firestore.
 
-Execute **one batch per day** (Resend 80 emails/day limit):
+**Final Status (verified 2026-03-01):**
+- Total imported: 295
+- Auth created: 295
+- Firestore created: 295
+- Emails sent: 295
+- Errors: 0
+
+**Useful Commands:**
 
 ```bash
 cd backend
 source venv/bin/activate
 
-# Ensure RESEND_API_KEY is in .env (or fetch from Secret Manager)
-# Already configured in current .env
-
-# Day 1 - Batch 1
-python scripts/import_users.py --batch 1
-
-# Day 2 - Batch 2
-python scripts/import_users.py --batch 2
-
-# Day 3 - Batch 3
-python scripts/import_users.py --batch 3
-
-# Day 4 - Batch 4
-python scripts/import_users.py --batch 4
-```
-
-### Step 3: Monitor Progress
-
-After each batch:
-
-```bash
+# Check import status
 python scripts/import_users.py --status
-```
 
-**Also check Firebase Console:**
-- **Authentication** → Users should appear
-- **Firestore** → `users` collection for profiles
-- **Firestore** → `user_imports` collection for tracking
-
-### Step 4: Handle Any Failures
-
-If emails fail to send for some users:
-
-```bash
-# Re-send emails for a specific batch (skips auth/firestore)
+# Re-send emails if needed (skips auth/firestore)
 python scripts/import_users.py --batch 1 --email-only
 ```
-
-The script is **idempotent** - tracks each step per user in `user_imports` collection.
-
-### Step 5: Post-Import Verification
-
-After all batches complete:
-1. Run `--status` to confirm all 294 users processed
-2. Test login with an imported user (use password reset link)
-3. Verify Firestore profiles have correct data (course, graduation year, etc.)
 
 ---
 
@@ -1125,5 +1092,184 @@ These items are no longer necessary but can be cleaned up:
 |------|-------------|
 | `54a86af` | fix: Trigger backend deploy to fix CORS for carreiras.patronos.org |
 | `ae461c0` | fix: Redirect carreiras.patronos.org to centro.patronos.org |
+
+---
+
+### Session 10 - 2026-02-24
+
+**Beta Banner Redesign - Full-Width Dark Header**
+
+This session focused on redesigning the beta banner from an orange warning-style banner to a professional full-width dark header that spans the entire viewport.
+
+#### 1. New Beta Banner Design
+
+Completely redesigned the beta banner with a modern dark header approach.
+
+**Previous Design:**
+- Orange background warning banner
+- Positioned below sidebar
+- Static positioning within main content area
+- No dismiss functionality
+
+**New Design:**
+- Full-width dark header at the very top of viewport
+- Spans across entire page width (including above sidebar)
+- Fixed positioning with z-60 (above all content)
+- Dismissable with X button
+- Clean dark background with white text
+- mailto link to contato@patronos.org
+
+**Visual Features:**
+- Dark background (#1f2937 / gray-800)
+- White megaphone icon
+- Message: "Plataforma em versão beta - Seu feedback é importante!"
+- Email link with underline hover effect
+- Close button (X) on the right side
+
+#### 2. Dynamic Layout Adjustment
+
+Implemented smart layout adjustment when banner is dismissed.
+
+**Layout Behavior:**
+
+| Banner State | Sidebar Top Position | Main Content Top Position |
+|--------------|---------------------|---------------------------|
+| Visible | `top-10` (40px) | `top-10` (40px) |
+| Dismissed | `top-0` (0px) | `top-0` (0px) |
+
+**How It Works:**
+- Banner state stored in AppLayout component state
+- When dismissed, banner sets `onDismiss()` callback
+- Layout recalculates sidebar and main content positioning
+- Smooth transition via Tailwind CSS classes
+
+#### 3. Banner State Management
+
+**Component Structure:**
+
+```jsx
+// AppLayout.jsx
+const [showBanner, setShowBanner] = useState(true);
+
+<BetaBanner onDismiss={() => setShowBanner(false)} />
+<Sidebar className={showBanner ? 'top-10' : 'top-0'} />
+<MainContent className={showBanner ? 'top-10' : 'top-0'} />
+```
+
+**BetaBanner.jsx:**
+- `onDismiss` prop for parent communication
+- Fixed positioning with `fixed top-0 left-0 right-0`
+- Z-index 60 to appear above all content
+- 40px height (h-10)
+
+#### 4. Technical Implementation
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `frontend/src/components/layout/BetaBanner.jsx` | Complete rewrite with new design |
+| `frontend/src/components/layout/AppLayout.jsx` | Added banner state management and conditional positioning |
+
+**Key CSS Classes:**
+- Banner: `fixed top-0 left-0 right-0 z-60 h-10 bg-gray-800 text-white`
+- Sidebar: Dynamic `top-10` or `top-0` based on banner state
+- Main content: Dynamic `top-10` or `top-0` based on banner state
+- Transitions: Smooth via Tailwind's transition utilities
+
+#### Files Changed Summary
+
+| Category | Files |
+|----------|-------|
+| **Modified Frontend** | `BetaBanner.jsx`, `AppLayout.jsx` |
+
+#### Commits
+
+| Hash | Description |
+|------|-------------|
+| `66105e7` | style: Redesign beta banner with full-width dark header |
+| `3f5183c` | fix: Make beta banner span full viewport width above sidebar |
+
+---
+
+### Session 11 - 2026-03-02
+
+**Admin CSV Export & Pending User Notifications**
+
+This session added two features: CSV export functionality for the admin panel and automatic email notifications when users register and need approval.
+
+#### 1. CSV Export for Admin Panel
+
+Added export buttons to download user and mentor data as CSV files.
+
+**Backend Endpoints:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/admin/users/export` | Export all users to CSV |
+| GET | `/admin/mentors/export` | Export all mentors to CSV |
+
+**User CSV Columns:**
+- uid, email, displayName, role, status, authProvider, isAdmin
+- emailNotifications, language, createdAt, updatedAt, lastLoginAt
+- profile_phone, profile_linkedIn, profile_bio, profile_course
+- profile_graduationYear, profile_company, profile_position, profile_expertise
+
+**Mentor CSV Columns:**
+- uid, email, displayName, status, authProvider, isAdmin
+- createdAt, updatedAt, lastLoginAt
+- title, company, bio, linkedin, photoURL
+- tags, expertise (semicolon-separated)
+- course, graduationYear, isUnicampAlumni, unicampDegreeLevel
+- alternativeUniversity, patronosRelation, isActive, isProfileComplete
+
+**Frontend Changes:**
+- Added "Exportar Usuarios" button to UserApprovals page
+- Added "Exportar Mentores" button to MentorManagement page
+- Export service methods in adminService.js
+
+#### 2. Admin Notification for Pending Users
+
+When a new user registers with an email domain that requires manual approval (not `@dac.unicamp.br` or `@patronos.org`), an email notification is automatically sent to admins.
+
+**Recipients:**
+- matheus.gomes@patronos.org
+- gabriel.aquino@patronos.org
+- gustavo.beltrami@patronos.org
+
+**Implementation:**
+
+| Component | Change |
+|-----------|--------|
+| `backend/app/core/email.py` | Added `send_admin_pending_user_notification()` method |
+| `backend/app/api/v1/auth.py` | Added `POST /auth/notify-pending-user` endpoint |
+| `frontend/src/services/userService.js` | Calls notification endpoint after creating pending user |
+
+**Email Content:**
+- User name and email
+- Role badge (Estudante or Mentor)
+- Company/Title info (for mentors)
+- Direct "Revisar Cadastro" button linking to admin approvals page
+
+**Trigger Flow:**
+1. User completes registration form
+2. Frontend creates user in Firestore with status = "pending"
+3. Frontend calls `/auth/notify-pending-user` endpoint
+4. Backend sends email to all admin addresses
+5. Admins receive notification and can approve/reject via admin panel
+
+#### Files Changed Summary
+
+| Category | Files |
+|----------|-------|
+| **Backend** | `admin.py` (+223 lines), `auth.py` (+55 lines), `email.py` (+95 lines) |
+| **Frontend** | `adminService.js` (+60 lines), `UserApprovals.jsx`, `MentorManagement.jsx`, `userService.js` |
+
+#### Commits
+
+| Hash | Description |
+|------|-------------|
+| `3172ac2` | feat: Add CSV export for users and mentors in admin panel |
+| `632e3d5` | feat: Send email notification to admins when user needs approval |
 
 ---
