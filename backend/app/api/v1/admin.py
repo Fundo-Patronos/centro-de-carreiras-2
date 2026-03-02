@@ -1,6 +1,9 @@
 """Admin endpoints for user management and feedback viewing."""
 
+import csv
+import io
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Literal, Optional
 from datetime import datetime
@@ -690,4 +693,224 @@ async def update_mentor_visibility(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao atualizar visibilidade do mentor: {str(e)}",
+        )
+
+
+# ==================== Export Endpoints ====================
+
+
+def format_datetime_for_csv(dt) -> str:
+    """Format datetime for CSV export."""
+    if dt is None:
+        return ""
+    if isinstance(dt, datetime):
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+    return str(dt)
+
+
+def list_to_csv_string(items: list) -> str:
+    """Convert a list to a comma-separated string for CSV."""
+    if not items:
+        return ""
+    return "; ".join(str(item) for item in items)
+
+
+@router.get("/users/export")
+async def export_users_csv(
+    admin: UserInDB = Depends(get_current_admin),
+):
+    """
+    Export all users to CSV file.
+    Requires admin privileges.
+    """
+    try:
+        users_ref = db.collection("users")
+        all_users = list(users_ref.stream())
+
+        # Define CSV columns
+        fieldnames = [
+            "uid",
+            "email",
+            "displayName",
+            "role",
+            "status",
+            "authProvider",
+            "isAdmin",
+            "emailNotifications",
+            "language",
+            "createdAt",
+            "updatedAt",
+            "lastLoginAt",
+            # Profile fields
+            "profile_phone",
+            "profile_linkedIn",
+            "profile_bio",
+            "profile_course",
+            "profile_graduationYear",
+            "profile_company",
+            "profile_position",
+            "profile_expertise",
+        ]
+
+        # Create CSV in memory
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for doc in all_users:
+            data = doc.to_dict()
+            profile = data.get("profile", {}) or {}
+
+            row = {
+                "uid": doc.id,
+                "email": data.get("email", ""),
+                "displayName": data.get("displayName", ""),
+                "role": data.get("role", ""),
+                "status": data.get("status", ""),
+                "authProvider": data.get("authProvider", ""),
+                "isAdmin": data.get("isAdmin", False),
+                "emailNotifications": data.get("emailNotifications", True),
+                "language": data.get("language", "pt-BR"),
+                "createdAt": format_datetime_for_csv(data.get("createdAt")),
+                "updatedAt": format_datetime_for_csv(data.get("updatedAt")),
+                "lastLoginAt": format_datetime_for_csv(data.get("lastLoginAt")),
+                # Profile fields
+                "profile_phone": profile.get("phone", ""),
+                "profile_linkedIn": profile.get("linkedIn", ""),
+                "profile_bio": profile.get("bio", ""),
+                "profile_course": profile.get("course", ""),
+                "profile_graduationYear": profile.get("graduationYear", ""),
+                "profile_company": profile.get("company", ""),
+                "profile_position": profile.get("position", ""),
+                "profile_expertise": list_to_csv_string(profile.get("expertise", [])),
+            }
+            writer.writerow(row)
+
+        # Track export event
+        track_event(
+            admin.uid,
+            "Admin: Users Exported",
+            {"total_users": len(all_users)},
+        )
+
+        # Return CSV as downloadable file
+        output.seek(0)
+        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        filename = f"usuarios_{timestamp}.csv"
+
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao exportar usuarios: {str(e)}",
+        )
+
+
+@router.get("/mentors/export")
+async def export_mentors_csv(
+    admin: UserInDB = Depends(get_current_admin),
+):
+    """
+    Export all mentors to CSV file with full mentor profile data.
+    Requires admin privileges.
+    """
+    try:
+        users_ref = db.collection("users")
+        query = users_ref.where("role", "==", "mentor")
+        all_mentors = list(query.stream())
+
+        # Define CSV columns for mentors
+        fieldnames = [
+            "uid",
+            "email",
+            "displayName",
+            "status",
+            "authProvider",
+            "isAdmin",
+            "createdAt",
+            "updatedAt",
+            "lastLoginAt",
+            # Mentor profile fields
+            "title",
+            "company",
+            "bio",
+            "linkedin",
+            "photoURL",
+            "tags",
+            "expertise",
+            "course",
+            "graduationYear",
+            "isUnicampAlumni",
+            "unicampDegreeLevel",
+            "alternativeUniversity",
+            "patronosRelation",
+            "isActive",
+            "isProfileComplete",
+        ]
+
+        # Create CSV in memory
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for doc in all_mentors:
+            data = doc.to_dict()
+            mentor_profile = data.get("mentorProfile", {}) or {}
+
+            row = {
+                "uid": doc.id,
+                "email": data.get("email", ""),
+                "displayName": data.get("displayName", ""),
+                "status": data.get("status", ""),
+                "authProvider": data.get("authProvider", ""),
+                "isAdmin": data.get("isAdmin", False),
+                "createdAt": format_datetime_for_csv(data.get("createdAt")),
+                "updatedAt": format_datetime_for_csv(data.get("updatedAt")),
+                "lastLoginAt": format_datetime_for_csv(data.get("lastLoginAt")),
+                # Mentor profile fields
+                "title": mentor_profile.get("title", ""),
+                "company": mentor_profile.get("company", ""),
+                "bio": mentor_profile.get("bio", ""),
+                "linkedin": mentor_profile.get("linkedin", ""),
+                "photoURL": mentor_profile.get("photoURL") or data.get("photoURL", ""),
+                "tags": list_to_csv_string(mentor_profile.get("tags", [])),
+                "expertise": list_to_csv_string(mentor_profile.get("expertise", [])),
+                "course": mentor_profile.get("course", ""),
+                "graduationYear": mentor_profile.get("graduationYear", ""),
+                "isUnicampAlumni": mentor_profile.get("isUnicampAlumni", ""),
+                "unicampDegreeLevel": mentor_profile.get("unicampDegreeLevel", ""),
+                "alternativeUniversity": mentor_profile.get("alternativeUniversity", ""),
+                "patronosRelation": mentor_profile.get("patronosRelation", ""),
+                "isActive": mentor_profile.get("isActive", True),
+                "isProfileComplete": mentor_profile.get("isProfileComplete", False),
+            }
+            writer.writerow(row)
+
+        # Track export event
+        track_event(
+            admin.uid,
+            "Admin: Mentors Exported",
+            {"total_mentors": len(all_mentors)},
+        )
+
+        # Return CSV as downloadable file
+        output.seek(0)
+        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        filename = f"mentores_{timestamp}.csv"
+
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao exportar mentores: {str(e)}",
         )

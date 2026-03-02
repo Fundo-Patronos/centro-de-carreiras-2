@@ -5,6 +5,7 @@ import {
   UserGroupIcon,
   FunnelIcon,
   EnvelopeIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { adminService } from '../../services/adminService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -19,6 +20,7 @@ export default function UserApprovals() {
   const [actionLoading, setActionLoading] = useState(null); // uid of user being processed
   const [toast, setToast] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null); // user for drawer
+  const [exportLoading, setExportLoading] = useState(false);
 
   // Track page view on mount
   useEffect(() => {
@@ -146,6 +148,20 @@ export default function UserApprovals() {
     }
   };
 
+  const handleExportUsers = async () => {
+    try {
+      setExportLoading(true);
+      await adminService.exportUsersCSV();
+      showToast('Exportacao concluida com sucesso');
+      analytics.track('Admin: Users Export Clicked');
+    } catch (err) {
+      showToast('Erro ao exportar usuarios', 'error');
+      console.error(err);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   const filteredUsers = users.filter((u) => {
     if (filter === 'all') return true;
     if (filter === 'estudante' || filter === 'mentor') return u.role === filter;
@@ -184,20 +200,37 @@ export default function UserApprovals() {
           </p>
         </div>
 
-        {/* Filter */}
-        <div className="flex items-center gap-2">
-          <FunnelIcon className="h-5 w-5 text-gray-400" />
-          <select
-            value={filter}
-            onChange={(e) => handleFilterChange(e.target.value)}
-            className="rounded-lg border-gray-300 text-sm focus:border-patronos-accent focus:ring-patronos-accent"
+        {/* Filter and Export */}
+        <div className="flex items-center gap-4">
+          {/* Export Button */}
+          <button
+            onClick={handleExportUsers}
+            disabled={exportLoading}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
           >
-            <option value="all">Todos</option>
-            <option value="estudante">Estudantes</option>
-            <option value="mentor">Mentores</option>
-            <option value="pending">Aguardando aprovacao</option>
-            <option value="pending_verification">Aguardando verificacao</option>
-          </select>
+            {exportLoading ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+            ) : (
+              <ArrowDownTrayIcon className="h-4 w-4" />
+            )}
+            Exportar Usuarios
+          </button>
+
+          {/* Filter */}
+          <div className="flex items-center gap-2">
+            <FunnelIcon className="h-5 w-5 text-gray-400" />
+            <select
+              value={filter}
+              onChange={(e) => handleFilterChange(e.target.value)}
+              className="rounded-lg border-gray-300 text-sm focus:border-patronos-accent focus:ring-patronos-accent"
+            >
+              <option value="all">Todos</option>
+              <option value="estudante">Estudantes</option>
+              <option value="mentor">Mentores</option>
+              <option value="pending">Aguardando aprovacao</option>
+              <option value="pending_verification">Aguardando verificacao</option>
+            </select>
+          </div>
         </div>
       </div>
 

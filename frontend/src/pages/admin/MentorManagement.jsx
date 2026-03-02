@@ -4,6 +4,7 @@ import {
   EyeSlashIcon,
   UserGroupIcon,
   MagnifyingGlassIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { adminService } from '../../services/adminService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -17,6 +18,7 @@ export default function MentorManagement() {
   const [filter, setFilter] = useState('all'); // 'all' | 'visible' | 'hidden'
   const [actionLoading, setActionLoading] = useState(null);
   const [toast, setToast] = useState(null);
+  const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
     analytics.track('Admin Mentors Viewed');
@@ -100,6 +102,20 @@ export default function MentorManagement() {
   const visibleCount = mentors.filter((m) => m.isActive).length;
   const hiddenCount = mentors.filter((m) => !m.isActive).length;
 
+  const handleExportMentors = async () => {
+    try {
+      setExportLoading(true);
+      await adminService.exportMentorsCSV();
+      showToast('Exportacao concluida com sucesso');
+      analytics.track('Admin: Mentors Export Clicked');
+    } catch (err) {
+      showToast('Erro ao exportar mentores', 'error');
+      console.error(err);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 lg:p-8">
@@ -119,15 +135,32 @@ export default function MentorManagement() {
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-4 text-sm">
-          <div className="flex items-center gap-1.5">
-            <EyeIcon className="h-4 w-4 text-green-600" />
-            <span className="text-gray-600">{visibleCount} visiveis</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <EyeSlashIcon className="h-4 w-4 text-gray-400" />
-            <span className="text-gray-600">{hiddenCount} ocultos</span>
+        {/* Stats and Export */}
+        <div className="flex items-center gap-4">
+          {/* Export Button */}
+          <button
+            onClick={handleExportMentors}
+            disabled={exportLoading}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          >
+            {exportLoading ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+            ) : (
+              <ArrowDownTrayIcon className="h-4 w-4" />
+            )}
+            Exportar Mentores
+          </button>
+
+          {/* Stats */}
+          <div className="flex gap-4 text-sm">
+            <div className="flex items-center gap-1.5">
+              <EyeIcon className="h-4 w-4 text-green-600" />
+              <span className="text-gray-600">{visibleCount} visiveis</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <EyeSlashIcon className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-600">{hiddenCount} ocultos</span>
+            </div>
           </div>
         </div>
       </div>

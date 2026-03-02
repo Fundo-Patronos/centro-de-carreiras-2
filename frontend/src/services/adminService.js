@@ -59,6 +59,66 @@ export const adminService = {
     const response = await api.patch(`/admin/mentors/${uid}/visibility`, { isActive });
     return response.data;
   },
+
+  /**
+   * Export all users to CSV
+   * Downloads the CSV file directly
+   */
+  async exportUsersCSV() {
+    const response = await api.get('/admin/users/export', {
+      responseType: 'blob',
+    });
+
+    // Extract filename from Content-Disposition header or use default
+    const contentDisposition = response.headers['content-disposition'];
+    let filename = 'usuarios.csv';
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename=(.+)/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  /**
+   * Export all mentors to CSV
+   * Downloads the CSV file directly
+   */
+  async exportMentorsCSV() {
+    const response = await api.get('/admin/mentors/export', {
+      responseType: 'blob',
+    });
+
+    // Extract filename from Content-Disposition header or use default
+    const contentDisposition = response.headers['content-disposition'];
+    let filename = 'mentores.csv';
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename=(.+)/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
 };
 
 export default adminService;
