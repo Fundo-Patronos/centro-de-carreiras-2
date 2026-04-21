@@ -17,6 +17,10 @@ export default function SignupForm() {
     confirmPassword: '',
     role: '',
     curso: '',
+    // Student-specific fields
+    ra: '',
+    emailAlternativo: '',
+    whatsapp: '',
     // Mentor-specific fields
     company: '',
     title: '',
@@ -43,6 +47,27 @@ export default function SignupForm() {
 
     if (!formData.curso.trim()) {
       newErrors.curso = 'Curso e obrigatorio';
+    }
+
+    // Student-specific validation
+    if (formData.role === 'estudante') {
+      if (!formData.ra.trim()) {
+        newErrors.ra = 'RA e obrigatorio';
+      }
+
+      // Email alternativo is optional, but validate format if provided
+      if (formData.emailAlternativo.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAlternativo)) {
+        newErrors.emailAlternativo = 'Email alternativo invalido';
+      }
+
+      if (!formData.whatsapp.trim()) {
+        newErrors.whatsapp = 'WhatsApp e obrigatorio';
+      } else {
+        const cleanedPhone = formData.whatsapp.replace(/[\s()+-]/g, '');
+        if (!/^\d{10,13}$/.test(cleanedPhone)) {
+          newErrors.whatsapp = 'WhatsApp invalido (use formato brasileiro)';
+        }
+      }
     }
 
     // Mentor-specific validation
@@ -111,6 +136,12 @@ export default function SignupForm() {
         role: formData.role,
         authProvider: 'email',
         curso: formData.curso,
+        // Student-specific fields
+        ...(formData.role === 'estudante' && {
+          ra: formData.ra.trim(),
+          emailAlternativo: formData.emailAlternativo.trim() || null,
+          whatsapp: formData.whatsapp.trim(),
+        }),
         // Mentor-specific fields
         ...(formData.role === 'mentor' && {
           company: formData.company,
@@ -226,15 +257,6 @@ export default function SignupForm() {
         <span className="text-sm text-gray-500">Preencha seus dados</span>
       </div>
 
-      {/* Student email callout */}
-      {formData.role === 'estudante' && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-sm text-blue-800">
-            <strong>Dica:</strong> Use seu email Unicamp (<span className="font-mono">@dac.unicamp.br</span>) para ter acesso imediato à plataforma. Cadastros com outros emails precisam ser aprovados pela equipe Patronos.
-          </p>
-        </div>
-      )}
-
       {/* Mentor approval callout */}
       {formData.role === 'mentor' && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
@@ -252,7 +274,7 @@ export default function SignupForm() {
 
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          Nome completo
+          Nome completo <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -273,7 +295,7 @@ export default function SignupForm() {
 
       <div>
         <label htmlFor="curso" className="block text-sm font-medium text-gray-700">
-          Curso
+          Curso <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -292,12 +314,59 @@ export default function SignupForm() {
         )}
       </div>
 
+      {/* Student-specific fields: RA and WhatsApp */}
+      {formData.role === 'estudante' && (
+        <>
+          <div>
+            <label htmlFor="ra" className="block text-sm font-medium text-gray-700">
+              RA (Registro Academico) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="ra"
+              value={formData.ra}
+              onChange={(e) => handleChange('ra', e.target.value)}
+              className={`
+                mt-1 block w-full rounded-lg border px-3 py-2 shadow-sm
+                focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
+                ${errors.ra ? 'border-red-300' : 'border-gray-300'}
+              `}
+              placeholder="Ex: 123456"
+            />
+            {errors.ra && (
+              <p className="mt-1 text-sm text-red-600">{errors.ra}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">
+              WhatsApp <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="tel"
+              id="whatsapp"
+              value={formData.whatsapp}
+              onChange={(e) => handleChange('whatsapp', e.target.value)}
+              className={`
+                mt-1 block w-full rounded-lg border px-3 py-2 shadow-sm
+                focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
+                ${errors.whatsapp ? 'border-red-300' : 'border-gray-300'}
+              `}
+              placeholder="(11) 99999-9999"
+            />
+            {errors.whatsapp && (
+              <p className="mt-1 text-sm text-red-600">{errors.whatsapp}</p>
+            )}
+          </div>
+        </>
+      )}
+
       {/* Mentor-specific fields */}
       {formData.role === 'mentor' && (
         <>
           <div>
             <label htmlFor="company" className="block text-sm font-medium text-gray-700">
-              Empresa
+              Empresa <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -318,7 +387,7 @@ export default function SignupForm() {
 
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-              Cargo
+              Cargo <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -359,7 +428,7 @@ export default function SignupForm() {
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email
+          Email <span className="text-red-500">*</span>
         </label>
         <input
           type="email"
@@ -371,16 +440,45 @@ export default function SignupForm() {
             focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
             ${errors.email ? 'border-red-300' : 'border-gray-300'}
           `}
-          placeholder="seu@email.com"
+          placeholder={formData.role === 'estudante' ? 'ra123456@dac.unicamp.br' : 'seu@email.com'}
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">{errors.email}</p>
         )}
+        {formData.role === 'estudante' && (
+          <p className="mt-1 text-xs text-gray-500">
+            Use seu email Unicamp (<span className="font-mono">@dac.unicamp.br</span>) para acesso imediato
+          </p>
+        )}
       </div>
+
+      {/* Email alternativo - students only */}
+      {formData.role === 'estudante' && (
+        <div>
+          <label htmlFor="emailAlternativo" className="block text-sm font-medium text-gray-700">
+            Email alternativo <span className="text-gray-400 font-normal">(opcional)</span>
+          </label>
+          <input
+            type="email"
+            id="emailAlternativo"
+            value={formData.emailAlternativo}
+            onChange={(e) => handleChange('emailAlternativo', e.target.value)}
+            className={`
+              mt-1 block w-full rounded-lg border px-3 py-2 shadow-sm
+              focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
+              ${errors.emailAlternativo ? 'border-red-300' : 'border-gray-300'}
+            `}
+            placeholder="seu@gmail.com"
+          />
+          {errors.emailAlternativo && (
+            <p className="mt-1 text-sm text-red-600">{errors.emailAlternativo}</p>
+          )}
+        </div>
+      )}
 
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Senha
+          Senha <span className="text-red-500">*</span>
         </label>
         <input
           type="password"
@@ -401,7 +499,7 @@ export default function SignupForm() {
 
       <div>
         <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-          Confirmar senha
+          Confirmar senha <span className="text-red-500">*</span>
         </label>
         <input
           type="password"

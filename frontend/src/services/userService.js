@@ -54,6 +54,9 @@ export const userService = {
    * @param {string} userData.role - 'estudante' or 'mentor'
    * @param {string} userData.authProvider - 'email', 'google', or 'magic_link'
    * @param {string} [userData.curso] - User's course/major
+   * @param {string} [userData.ra] - Student's RA (estudante only)
+   * @param {string} [userData.emailAlternativo] - Student's alternative email (estudante only)
+   * @param {string} [userData.whatsapp] - Student's WhatsApp number (estudante only)
    * @param {string} [userData.company] - Mentor's company (mentor only)
    * @param {string} [userData.title] - Mentor's job title (mentor only)
    * @param {string} [userData.linkedin] - Mentor's LinkedIn URL (mentor only)
@@ -71,13 +74,15 @@ export const userService = {
       status,
       authProvider: userData.authProvider,
       profile: {
-        phone: null,
+        phone: userData.whatsapp || null,
         linkedIn: userData.linkedin || null,
         bio: null,
         // Shared field
         course: userData.curso || null,
         // Estudante fields
         graduationYear: null,
+        ra: userData.ra || null,
+        emailAlternativo: userData.emailAlternativo || null,
         // Mentor fields
         company: userData.company || null,
         position: userData.title || null,

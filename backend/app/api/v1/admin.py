@@ -30,6 +30,15 @@ from ...models.feedback import (
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
+class PendingUserProfile(BaseModel):
+    """Nested profile data for pending user."""
+
+    course: str | None = None
+    ra: str | None = None
+    phone: str | None = None
+    emailAlternativo: str | None = None
+
+
 class PendingUserResponse(BaseModel):
     """Response model for pending user data."""
 
@@ -40,6 +49,8 @@ class PendingUserResponse(BaseModel):
     role: Literal["estudante", "mentor"]
     status: str
     createdAt: datetime | None = None
+    # Profile with student fields
+    profile: PendingUserProfile | None = None
     # Mentor-specific fields (populated during registration)
     curso: str | None = None
     company: str | None = None
@@ -86,6 +97,18 @@ async def get_pending_users(
         users_ref = db.collection("users")
         pending_users = []
 
+        # Helper to build profile from data
+        def build_profile(data: dict) -> PendingUserProfile | None:
+            profile_data = data.get("profile", {})
+            if not profile_data:
+                return None
+            return PendingUserProfile(
+                course=profile_data.get("course"),
+                ra=profile_data.get("ra"),
+                phone=profile_data.get("phone"),
+                emailAlternativo=profile_data.get("emailAlternativo"),
+            )
+
         # Query for "pending" status (needs admin approval)
         pending_query = users_ref.where("status", "==", "pending")
         for doc in pending_query.stream():
@@ -99,6 +122,7 @@ async def get_pending_users(
                     role=data.get("role", "estudante"),
                     status=data.get("status", "pending"),
                     createdAt=data.get("createdAt"),
+                    profile=build_profile(data),
                     curso=data.get("curso"),
                     company=data.get("company"),
                     title=data.get("title"),
@@ -119,6 +143,7 @@ async def get_pending_users(
                     role=data.get("role", "estudante"),
                     status=data.get("status", "pending_verification"),
                     createdAt=data.get("createdAt"),
+                    profile=build_profile(data),
                     curso=data.get("curso"),
                     company=data.get("company"),
                     title=data.get("title"),

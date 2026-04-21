@@ -21,6 +21,8 @@ class UserProfile(BaseModel):
 
     # Estudante-specific fields
     graduationYear: Optional[Union[int, str]] = None
+    ra: Optional[str] = None
+    emailAlternativo: Optional[str] = None
 
     @field_validator('graduationYear', mode='before')
     @classmethod

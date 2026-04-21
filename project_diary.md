@@ -1273,3 +1273,52 @@ When a new user registers with an email domain that requires manual approval (no
 | `632e3d5` | feat: Send email notification to admins when user needs approval |
 
 ---
+
+### Session 12 - 2026-04-20
+
+**Student Signup Form Enhancement - Additional Data Collection**
+
+Added new required fields to the student signup form to collect more information during registration.
+
+#### New Student Signup Fields
+
+| Field | Required | Validation | Storage Location |
+|-------|----------|------------|------------------|
+| RA (Registro Academico) | Yes | Non-empty string | `profile.ra` |
+| WhatsApp | Yes | Brazilian phone format (10-13 digits) | `profile.phone` |
+| Email alternativo | No | Valid email format if provided | `profile.emailAlternativo` |
+
+#### Form UX Improvements
+
+- Added red asterisk (`*`) to all required field labels
+- Reorganized field order: Name, Curso, RA, WhatsApp, Email, Email alternativo, Senha
+- Email field now has inline helper text for students: "Use seu email Unicamp (@dac.unicamp.br) para acesso imediato"
+- Removed the blue callout box (info moved to email field helper)
+- Email alternativo marked as "(opcional)" in label
+
+#### Admin Panel Updates
+
+Updated the user approvals page to display student-specific information:
+- Shows RA, WhatsApp, and Email alternativo under student entries
+- Similar to how mentor info (Title @ Company) is displayed
+
+#### Files Changed
+
+| Category | Files |
+|----------|-------|
+| **Frontend** | `SignupForm.jsx`, `userService.js`, `UserApprovals.jsx` |
+| **Backend** | `models/user.py`, `api/v1/admin.py` |
+
+#### Backend Model Updates
+
+**UserProfile (`models/user.py`):**
+```python
+ra: Optional[str] = None
+emailAlternativo: Optional[str] = None
+```
+
+**PendingUserResponse (`api/v1/admin.py`):**
+- Added `PendingUserProfile` model with `course`, `ra`, `phone`, `emailAlternativo`
+- Added `profile` field to include student data in admin API responses
+
+---

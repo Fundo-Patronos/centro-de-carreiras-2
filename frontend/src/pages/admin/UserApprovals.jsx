@@ -313,6 +313,20 @@ export default function UserApprovals() {
                             {user.title}{user.title && user.company ? ' @ ' : ''}{user.company}
                           </div>
                         )}
+                        {/* Show RA/WhatsApp/Email alternativo for students */}
+                        {user.role === 'estudante' && (
+                          <div className="text-xs text-gray-400 mt-0.5 space-y-0.5">
+                            {user.profile?.ra && (
+                              <div>RA: {user.profile.ra}</div>
+                            )}
+                            {user.profile?.phone && (
+                              <div>WhatsApp: {user.profile.phone}</div>
+                            )}
+                            {user.profile?.emailAlternativo && (
+                              <div>Email alt: {user.profile.emailAlternativo}</div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
