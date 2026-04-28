@@ -12,11 +12,13 @@ Centro de Carreiras da Unicamp v2.0 - Digital platform connecting Unicamp studen
 ```bash
 cd frontend
 npm install
-npm run dev          # Development server
-npm run build        # Production build
-npm run lint         # ESLint
-npm run test         # Vitest (watch mode)
-npm run test:run     # Vitest (single run)
+npm run dev                              # Development server
+npm run build                            # Production build
+npm run lint                             # ESLint
+npm run test                             # Vitest (watch mode)
+npm run test:run                         # Vitest (single run, all files)
+npm run test:run -- path/to/file.test.js # Run a single test file
+npm run test:coverage                    # Vitest with coverage report
 ```
 
 ### Backend (FastAPI + Python)
@@ -25,7 +27,9 @@ cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload   # Development server (port 8000)
+uvicorn app.main:app --reload          # Development server (port 8000)
+python -m scripts.import_users         # Run a script (must use module form from backend/)
+python -m scripts.set_admin            # Scripts import from `app.*`, so cwd matters
 ```
 
 ### Deployment
@@ -57,6 +61,8 @@ Firestore
 - **Database**: Firestore (user profiles, sessions, feedback)
 - **Analytics**: Mixpanel (frontend + backend)
 - **Email**: Resend
+
+**Airtable status**: mentor data was migrated to Firestore via `scripts/migrate_mentors.py` and Airtable is now read-only/legacy reference. Do not introduce new Airtable writes.
 
 ### User Roles
 - `estudante` - Unicamp students seeking mentorship
@@ -138,6 +144,8 @@ from ...core.analytics import track_event, Events
 track_event(user_id=current_user.uid, event_name=Events.YOUR_EVENT, properties={...})
 ```
 
+The canonical event lexicon lives in `docs/MIXPANEL_EVENTS.md`. Reuse existing event names and property shapes from that file before defining new ones.
+
 ## Firestore Collections
 
 | Collection | Purpose |
@@ -147,6 +155,10 @@ track_event(user_id=current_user.uid, event_name=Events.YOUR_EVENT, properties={
 | `feedback_requests` | Feedback email tracking |
 | `session_feedback` | Submitted feedback responses |
 | `user_imports` | Import tracking (for batch migrations) |
+
+### Security rules constraints
+
+`firestore.rules` enforces immutability of `role`, `uid`, and `email` on `users` document updates. When patching a user profile from the client, omit those fields from the payload — including them (even unchanged) will be rejected by the rule's `affectedKeys()` check. Server-side updates via Firebase Admin SDK bypass these rules.
 
 ## Design System
 
