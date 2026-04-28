@@ -9,6 +9,10 @@ const RETRY_CONFIG = {
   retryableMethods: ['get', 'head', 'options'], // Only retry idempotent read operations
 };
 
+// POST endpoints that are server-side idempotent and safe to retry on network errors.
+// Network errors mean the request never reached the server, so retry won't double-execute.
+const RETRYABLE_NETWORK_ERROR_POSTS = ['/auth/verify-email-token'];
+
 /**
  * Sleep for a given number of milliseconds
  */
@@ -26,11 +30,19 @@ const isNetworkError = (error) => {
 };
 
 /**
- * Check if the request method is retryable
+ * Check if the request is retryable for the given error.
+ * GET/HEAD/OPTIONS are retryable for any network error.
+ * POSTs in RETRYABLE_NETWORK_ERROR_POSTS are retryable only on network errors
+ * (not HTTP errors), since a network error means the server never received the request.
  */
-const isRetryableMethod = (config) => {
+const isRetryable = (config, error) => {
   const method = config?.method?.toLowerCase();
-  return RETRY_CONFIG.retryableMethods.includes(method);
+  if (RETRY_CONFIG.retryableMethods.includes(method)) return true;
+  if (method === 'post' && isNetworkError(error)) {
+    const url = config?.url || '';
+    return RETRYABLE_NETWORK_ERROR_POSTS.some((endpoint) => url.endsWith(endpoint));
+  }
+  return false;
 };
 
 /**
@@ -44,13 +56,13 @@ const retryRequest = async (error, retryCount = 0) => {
     return Promise.reject(error);
   }
 
-  // Don't retry non-retryable methods
-  if (!isRetryableMethod(config)) {
+  // Don't retry if it's not a network error
+  if (!isNetworkError(error)) {
     return Promise.reject(error);
   }
 
-  // Don't retry if it's not a network error
-  if (!isNetworkError(error)) {
+  // Don't retry non-retryable requests
+  if (!isRetryable(config, error)) {
     return Promise.reject(error);
   }
 
@@ -123,8 +135,8 @@ api.interceptors.response.use(
     const method = config?.method?.toUpperCase();
     const retryCount = config?.__retryCount || 0;
 
-    // For network errors on retryable methods, attempt retry
-    if (isNetworkError(error) && isRetryableMethod(config) && retryCount === 0) {
+    // For network errors on retryable requests, attempt retry
+    if (isNetworkError(error) && isRetryable(config, error) && retryCount === 0) {
       return retryRequest(error, 0);
     }
 

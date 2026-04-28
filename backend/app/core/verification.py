@@ -27,7 +27,9 @@ def generate_verification_token() -> str:
 
 def get_verification_url(token: str) -> str:
     """Build the full verification URL for the frontend."""
-    return f"{settings.FRONTEND_URL}/auth/verify-email?token={token}"
+    # FRONTEND_URL may be a comma-separated list (used for CORS); pick the primary.
+    primary_url = settings.FRONTEND_URL.split(",")[0].strip()
+    return f"{primary_url}/auth/verify-email?token={token}"
 
 
 async def create_verification_token(uid: str, email: str, role: str) -> str:
