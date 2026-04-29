@@ -26,12 +26,15 @@ security = HTTPBearer()
 
 
 @router.get("/verify")
-async def verify_token(current_user: UserInDB = Depends(get_current_user)):
+async def check_auth_session(current_user: UserInDB = Depends(get_current_user)):
     """
     Verify that the current token is valid.
 
     Returns basic user info if valid.
     Used by frontend to check authentication status.
+
+    NOTE: Do NOT name this `verify_token` — it would shadow the imported
+    `verify_token` from `core.verification` and break /auth/verify-email-token.
     """
     return {
         "valid": True,
