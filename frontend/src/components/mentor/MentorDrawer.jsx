@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CalendarDaysIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import analytics, { EVENTS } from '../../services/analytics';
+import sessionService from '../../services/sessionService';
 import BookingModal from '../session/BookingModal';
 
 function getTagColor(tag) {
@@ -19,6 +20,12 @@ function getTagColor(tag) {
 
 export default function MentorDrawer({ mentor, isOpen, onClose }) {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  // Track which mentor was just scheduled, so the confirmation only shows for
+  // the current mentor (avoids leaking across mentors in this reused drawer).
+  const [scheduledMentorId, setScheduledMentorId] = useState(null);
+
+  const hasSchedulingLink = Boolean(mentor?.schedulingLink);
+  const externalScheduled = scheduledMentorId === mentor?.id;
 
   // Track LinkedIn clicks
   const handleLinkedInClick = () => {
@@ -28,13 +35,51 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
     });
   };
 
-  // Track book session clicks and open modal
+  // Track book session clicks and open modal (email flow)
   const handleBookSessionClick = () => {
     analytics.track(EVENTS.BOOK_SESSION_CLICKED, {
       mentor_id: mentor?.id,
       mentor_name: mentor?.name,
+      booking_method: 'email',
     });
     setIsBookingModalOpen(true);
+  };
+
+  // Scheduling-link flow: open the mentor's external agenda and record the session
+  const handleExternalSchedule = () => {
+    analytics.track(EVENTS.BOOK_SESSION_CLICKED, {
+      mentor_id: mentor?.id,
+      mentor_name: mentor?.name,
+      booking_method: 'scheduling_link',
+    });
+
+    // Open the link synchronously (within the click gesture) to avoid popup blockers
+    window.open(mentor.schedulingLink, '_blank', 'noopener,noreferrer');
+
+    analytics.track(EVENTS.SCHEDULING_LINK_CLICKED, {
+      mentor_id: mentor?.id,
+      mentor_name: mentor?.name,
+    });
+
+    // Record the session so it shows in both dashboards (no email is sent)
+    sessionService
+      .createSession({
+        mentor_id: mentor.id,
+        mentor_name: mentor.name,
+        mentor_email: mentor.email,
+        mentor_company: mentor.company,
+        booking_method: 'scheduling_link',
+      })
+      .then(() => {
+        setScheduledMentorId(mentor.id);
+        analytics.track(EVENTS.SESSION_SCHEDULED_VIA_LINK, {
+          mentor_id: mentor?.id,
+          mentor_name: mentor?.name,
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to record scheduling-link session:', err);
+      });
   };
 
   if (!mentor) return null;
@@ -105,24 +150,48 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
                             {mentor.company}
                           </p>
                         </div>
-                        <div className="mt-5 flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            onClick={handleBookSessionClick}
-                            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-orange/90 focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:ring-offset-2"
-                          >
-                            Agendar Mentoria
-                          </button>
-                          {mentor.linkedin && (
-                            <a
-                              href={mentor.linkedin}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={handleLinkedInClick}
-                              className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                            >
-                              Ver LinkedIn
-                            </a>
+                        <div className="mt-5">
+                          <div className="flex flex-wrap gap-3">
+                            {hasSchedulingLink ? (
+                              <button
+                                type="button"
+                                onClick={handleExternalSchedule}
+                                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-orange/90 focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:ring-offset-2"
+                              >
+                                <CalendarDaysIcon className="h-4 w-4" />
+                                Agendar Mentoria
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={handleBookSessionClick}
+                                className="inline-flex shrink-0 items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-orange/90 focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:ring-offset-2"
+                              >
+                                Agendar Mentoria
+                              </button>
+                            )}
+                            {mentor.linkedin && (
+                              <a
+                                href={mentor.linkedin}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={handleLinkedInClick}
+                                className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                              >
+                                Ver LinkedIn
+                              </a>
+                            )}
+                          </div>
+                          {hasSchedulingLink && !externalScheduled && (
+                            <p className="mt-2 text-xs text-gray-500">
+                              Voce sera direcionado para a agenda do mentor para escolher um horario.
+                            </p>
+                          )}
+                          {externalScheduled && (
+                            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-green-700">
+                              <CheckCircleIcon className="h-4 w-4" />
+                              Sessao registrada em Minhas Sessoes. Conclua a marcacao na aba que abrimos.
+                            </p>
                           )}
                         </div>
                       </div>

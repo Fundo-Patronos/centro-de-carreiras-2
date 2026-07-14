@@ -8,7 +8,8 @@ export const sessionService = {
    * @param {string} data.mentor_name - Mentor's name
    * @param {string} data.mentor_email - Mentor's email
    * @param {string} data.mentor_company - Mentor's company
-   * @param {string} data.message - Student's message
+   * @param {string} [data.message] - Student's message (email flow only)
+   * @param {string} [data.booking_method] - "email" (default) or "scheduling_link"
    * @returns {Promise<Object>} Created session
    */
   async createSession(data) {

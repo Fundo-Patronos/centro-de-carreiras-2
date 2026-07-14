@@ -95,6 +95,22 @@ This document describes all analytics events tracked in the Centro de Carreiras 
 
 ---
 
+## Scheduling Link Events
+
+For mentors who provide an external scheduling link (Google Agenda / Microsoft Bookings), students book directly on the mentor's agenda instead of the email flow.
+
+| Event Name | Trigger | Properties |
+|------------|---------|------------|
+| `Scheduling Link Clicked` | Student opens the mentor's scheduling link | `mentor_id`, `mentor_name` |
+| `Session Scheduled Via Link` | Session record created after link booking | `mentor_id`, `mentor_name` |
+| `Scheduling Tutorial Toggled` | Mentor expands/collapses the "how to create a link" tutorial | `open` |
+| `Scheduling Doc Clicked` | Mentor opens a Google/Outlook support doc | `provider` (`google` \| `outlook`) |
+| `API: Session Scheduling Link Booked` | *(backend)* Session recorded for a scheduling-link booking; no email sent | `session_id`, `mentor_id`, `mentor_name`, `mentor_company` |
+
+Note: `Book Session Clicked` and `API: Session Created` now also carry a `booking_method` property (`email` \| `scheduling_link`).
+
+---
+
 ## Admin Events
 
 | Event Name | Trigger | Properties |

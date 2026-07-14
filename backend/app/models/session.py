@@ -12,7 +12,11 @@ class SessionCreate(BaseModel):
     mentor_name: str
     mentor_email: EmailStr
     mentor_company: str
-    message: str
+    message: str = ""
+    # "email" = student sends a message, mentor is emailed.
+    # "scheduling_link" = student books via the mentor's external scheduling
+    # link; no email is sent, we only record the session.
+    booking_method: Literal["email", "scheduling_link"] = "email"
 
 
 class SessionInDB(BaseModel):
@@ -30,6 +34,7 @@ class SessionInDB(BaseModel):
     mentor_company: str
     message: str
     status: Literal["pending", "confirmed", "completed", "cancelled"] = "pending"
+    booking_method: Literal["email", "scheduling_link"] = "email"
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     mentor_email_sent: bool = False
@@ -51,6 +56,7 @@ class SessionResponse(BaseModel):
     mentor_company: str
     message: str
     status: str
+    booking_method: str = "email"
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     student_feedback_submitted: bool = False

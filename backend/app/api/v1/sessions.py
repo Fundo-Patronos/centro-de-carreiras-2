@@ -45,6 +45,17 @@ async def create_session(
         # Generate unique session ID
         session_id = generate_session_id()
 
+        booking_method = session_data.booking_method
+
+        # For scheduling-link bookings the student doesn't write a message;
+        # store a placeholder so the session card has meaningful text.
+        message = session_data.message.strip() if session_data.message else ""
+        if not message and booking_method == "scheduling_link":
+            message = (
+                "Agendamento iniciado pelo link de agendamento do mentor "
+                "(Google Agenda / Outlook)."
+            )
+
         # Prepare session document
         now = datetime.utcnow()
         session_doc = {
@@ -56,8 +67,9 @@ async def create_session(
             "mentor_name": session_data.mentor_name,
             "mentor_email": session_data.mentor_email,
             "mentor_company": session_data.mentor_company,
-            "message": session_data.message,
+            "message": message,
             "status": "pending",
+            "booking_method": booking_method,
             "created_at": now,
             "updated_at": now,
             "mentor_email_sent": False,
@@ -68,72 +80,91 @@ async def create_session(
         sessions_ref = db.collection("sessions")
         sessions_ref.document(session_id).set(session_doc)
 
-        # Send emails
-        mentor_email_result = email_service.send_session_request_to_mentor(
-            mentor_name=session_data.mentor_name,
-            mentor_email=session_data.mentor_email,
-            student_name=current_user.displayName,
-            student_email=current_user.email,
-            message=session_data.message,
-        )
+        mentor_email_sent = False
+        student_email_sent = False
 
-        # Track mentor email result
-        if mentor_email_result.get("success", False):
+        if booking_method == "scheduling_link":
+            # Student books directly on the mentor's external scheduling link —
+            # no emails are sent, we only record the session for both dashboards.
             track_event(
                 user_id=current_user.uid,
-                event_name=Events.EMAIL_MENTOR_REQUEST_SENT,
+                event_name=Events.SESSION_SCHEDULING_LINK_BOOKED,
                 properties={
                     "session_id": session_id,
-                    "mentor_email": session_data.mentor_email,
+                    "mentor_id": session_data.mentor_id,
                     "mentor_name": session_data.mentor_name,
+                    "mentor_company": session_data.mentor_company,
                 },
             )
         else:
-            track_event(
-                user_id=current_user.uid,
-                event_name=Events.EMAIL_MENTOR_REQUEST_FAILED,
-                properties={
-                    "session_id": session_id,
-                    "mentor_email": session_data.mentor_email,
-                    "error": mentor_email_result.get("error", "Unknown error"),
-                },
+            # Send emails (default email flow)
+            mentor_email_result = email_service.send_session_request_to_mentor(
+                mentor_name=session_data.mentor_name,
+                mentor_email=session_data.mentor_email,
+                student_name=current_user.displayName,
+                student_email=current_user.email,
+                message=message,
             )
 
-        student_email_result = email_service.send_session_confirmation_to_student(
-            student_name=current_user.displayName,
-            student_email=current_user.email,
-            mentor_name=session_data.mentor_name,
-            mentor_company=session_data.mentor_company,
-            message=session_data.message,
-        )
+            # Track mentor email result
+            if mentor_email_result.get("success", False):
+                track_event(
+                    user_id=current_user.uid,
+                    event_name=Events.EMAIL_MENTOR_REQUEST_SENT,
+                    properties={
+                        "session_id": session_id,
+                        "mentor_email": session_data.mentor_email,
+                        "mentor_name": session_data.mentor_name,
+                    },
+                )
+            else:
+                track_event(
+                    user_id=current_user.uid,
+                    event_name=Events.EMAIL_MENTOR_REQUEST_FAILED,
+                    properties={
+                        "session_id": session_id,
+                        "mentor_email": session_data.mentor_email,
+                        "error": mentor_email_result.get("error", "Unknown error"),
+                    },
+                )
 
-        # Track student email result
-        if student_email_result.get("success", False):
-            track_event(
-                user_id=current_user.uid,
-                event_name=Events.EMAIL_STUDENT_CONFIRMATION_SENT,
-                properties={
-                    "session_id": session_id,
-                    "student_email": current_user.email,
-                },
-            )
-        else:
-            track_event(
-                user_id=current_user.uid,
-                event_name=Events.EMAIL_STUDENT_CONFIRMATION_FAILED,
-                properties={
-                    "session_id": session_id,
-                    "student_email": current_user.email,
-                    "error": student_email_result.get("error", "Unknown error"),
-                },
+            student_email_result = email_service.send_session_confirmation_to_student(
+                student_name=current_user.displayName,
+                student_email=current_user.email,
+                mentor_name=session_data.mentor_name,
+                mentor_company=session_data.mentor_company,
+                message=message,
             )
 
-        # Update email status in Firestore
-        update_data = {
-            "mentor_email_sent": mentor_email_result.get("success", False),
-            "student_email_sent": student_email_result.get("success", False),
-        }
-        sessions_ref.document(session_id).update(update_data)
+            # Track student email result
+            if student_email_result.get("success", False):
+                track_event(
+                    user_id=current_user.uid,
+                    event_name=Events.EMAIL_STUDENT_CONFIRMATION_SENT,
+                    properties={
+                        "session_id": session_id,
+                        "student_email": current_user.email,
+                    },
+                )
+            else:
+                track_event(
+                    user_id=current_user.uid,
+                    event_name=Events.EMAIL_STUDENT_CONFIRMATION_FAILED,
+                    properties={
+                        "session_id": session_id,
+                        "student_email": current_user.email,
+                        "error": student_email_result.get("error", "Unknown error"),
+                    },
+                )
+
+            mentor_email_sent = mentor_email_result.get("success", False)
+            student_email_sent = student_email_result.get("success", False)
+
+            # Update email status in Firestore
+            sessions_ref.document(session_id).update({
+                "mentor_email_sent": mentor_email_sent,
+                "student_email_sent": student_email_sent,
+            })
 
         # Track session created
         track_event(
@@ -144,8 +175,9 @@ async def create_session(
                 "mentor_id": session_data.mentor_id,
                 "mentor_name": session_data.mentor_name,
                 "mentor_company": session_data.mentor_company,
-                "mentor_email_sent": mentor_email_result.get("success", False),
-                "student_email_sent": student_email_result.get("success", False),
+                "booking_method": booking_method,
+                "mentor_email_sent": mentor_email_sent,
+                "student_email_sent": student_email_sent,
             },
         )
 
@@ -159,8 +191,9 @@ async def create_session(
             mentor_name=session_data.mentor_name,
             mentor_email=session_data.mentor_email,
             mentor_company=session_data.mentor_company,
-            message=session_data.message,
+            message=message,
             status="pending",
+            booking_method=booking_method,
             created_at=now,
             updated_at=now,
             student_feedback_submitted=False,
@@ -300,6 +333,7 @@ async def get_session(
             mentor_company=data["mentor_company"],
             message=data["message"],
             status=data["status"],
+            booking_method=data.get("booking_method", "email"),
             created_at=data.get("created_at"),
             updated_at=data.get("updated_at"),
             student_feedback_submitted=data.get("student_feedback_submitted", False),
@@ -390,6 +424,7 @@ async def update_session_status(
             mentor_company=data["mentor_company"],
             message=data["message"],
             status=data["status"],
+            booking_method=data.get("booking_method", "email"),
             created_at=data.get("created_at"),
             updated_at=data.get("updated_at"),
             student_feedback_submitted=data.get("student_feedback_submitted", False),
@@ -707,6 +742,7 @@ async def complete_session_with_feedback(
             mentor_company=session_data["mentor_company"],
             message=session_data["message"],
             status=session_data["status"],
+            booking_method=session_data.get("booking_method", "email"),
             created_at=session_data.get("created_at"),
             updated_at=session_data.get("updated_at"),
             student_feedback_submitted=session_data.get("student_feedback_submitted", False),

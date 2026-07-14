@@ -21,6 +21,7 @@ class MentorProfile(BaseModel):
     unicampDegreeLevel: Optional[str] = None
     alternativeUniversity: Optional[str] = None
     patronosRelation: Optional[str] = None
+    schedulingLink: Optional[str] = None
     photoURL: Optional[str] = None
     isActive: bool = True
     isProfileComplete: bool = False
@@ -41,6 +42,7 @@ class MentorProfileUpdate(BaseModel):
     unicampDegreeLevel: Optional[str] = None
     alternativeUniversity: Optional[str] = None
     patronosRelation: Optional[str] = None
+    schedulingLink: Optional[str] = None
     photoURL: Optional[str] = None
     isActive: Optional[bool] = None
 
@@ -59,6 +61,7 @@ class MentorPublicResponse(BaseModel):
     expertise: list[str] = []
     linkedin: str = ""
     course: str = ""
+    schedulingLink: str = ""
 
 
 class MentorListResponse(BaseModel):

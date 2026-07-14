@@ -49,6 +49,7 @@ class Events:
     # ============================================
     SESSION_REQUESTED = "API: Session Requested"
     SESSION_CREATED = "API: Session Created"
+    SESSION_SCHEDULING_LINK_BOOKED = "API: Session Scheduling Link Booked"
     SESSIONS_LISTED = "API: Sessions Listed"
     SESSION_DETAIL_FETCHED = "API: Session Detail Fetched"
     SESSION_STATUS_UPDATED = "API: Session Status Updated"

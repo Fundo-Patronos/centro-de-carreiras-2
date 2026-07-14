@@ -163,6 +163,12 @@ export default function SessionCard({
           <CalendarDaysIcon className="h-4 w-4" />
           <span>Solicitado em {formatDate(session.created_at)}</span>
         </div>
+        {session.booking_method === 'scheduling_link' && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+            <CalendarDaysIcon className="h-3.5 w-3.5" />
+            Agendado pelo link
+          </span>
+        )}
       </div>
 
       {/* Action buttons */}

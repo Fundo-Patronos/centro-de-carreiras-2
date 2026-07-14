@@ -97,6 +97,14 @@ export const EVENTS = {
   SESSION_COMPLETION_MODAL_OPENED: 'Session Completion Modal Opened',
 
   // ============================================
+  // SCHEDULING LINK EVENTS
+  // ============================================
+  SCHEDULING_LINK_CLICKED: 'Scheduling Link Clicked',
+  SESSION_SCHEDULED_VIA_LINK: 'Session Scheduled Via Link',
+  SCHEDULING_TUTORIAL_TOGGLED: 'Scheduling Tutorial Toggled',
+  SCHEDULING_DOC_CLICKED: 'Scheduling Doc Clicked',
+
+  // ============================================
   // ADMIN EVENTS
   // ============================================
   ADMIN_FILTER_CHANGED: 'Admin Filter Changed',

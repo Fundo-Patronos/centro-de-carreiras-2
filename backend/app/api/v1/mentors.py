@@ -242,6 +242,7 @@ async def list_mentors(
                 expertise=mentor_profile.get("expertise", []),
                 linkedin=mentor_profile.get("linkedin", ""),
                 course=mentor_profile.get("course", ""),
+                schedulingLink=mentor_profile.get("schedulingLink", ""),
             ))
 
         # Track analytics
@@ -308,6 +309,7 @@ async def get_mentor(
             expertise=mentor_profile.get("expertise", []),
             linkedin=mentor_profile.get("linkedin", ""),
             course=mentor_profile.get("course", ""),
+            schedulingLink=mentor_profile.get("schedulingLink", ""),
         )
     except HTTPException:
         raise
