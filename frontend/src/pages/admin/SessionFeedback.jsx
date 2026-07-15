@@ -30,7 +30,7 @@ function MeetingStatusBadge({ status }) {
   const config = {
     happened: { label: 'Aconteceu', className: 'bg-green-100 text-green-800' },
     scheduled: { label: 'Agendado', className: 'bg-blue-100 text-blue-800' },
-    not_happened: { label: 'Nao aconteceu', className: 'bg-red-100 text-red-800' },
+    not_happened: { label: 'Não aconteceu', className: 'bg-red-100 text-red-800' },
   };
 
   const { label, className } = config[status] || { label: status, className: 'bg-gray-100 text-gray-800' };
@@ -64,7 +64,7 @@ function FeedbackCard({ feedback, type }) {
       )}
       {feedback.additional_feedback && (
         <p className="text-sm text-gray-600">
-          <span className="font-medium">Comentario:</span> {feedback.additional_feedback}
+          <span className="font-medium">Comentário:</span> {feedback.additional_feedback}
         </p>
       )}
     </div>
@@ -91,7 +91,7 @@ export default function SessionFeedback() {
       const data = await feedbackService.getAllFeedback();
       setSessions(data.sessions);
     } catch (err) {
-      setError('Erro ao carregar feedback das sessoes');
+      setError('Erro ao carregar feedback das sessões');
       console.error(err);
     } finally {
       setLoading(false);
@@ -148,7 +148,7 @@ export default function SessionFeedback() {
     if (studentSent || mentorSent) {
       return { label: 'Aguardando', className: 'bg-blue-100 text-blue-800', icon: ClockIcon };
     }
-    return { label: 'Nao enviado', className: 'bg-gray-100 text-gray-800', icon: XCircleIcon };
+    return { label: 'Não enviado', className: 'bg-gray-100 text-gray-800', icon: XCircleIcon };
   };
 
   if (loading) {
@@ -164,13 +164,13 @@ export default function SessionFeedback() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Feedback das Sessoes</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Feedback das Sessões</h1>
           <p className="mt-1 text-gray-600">
             Acompanhe o feedback das mentorias realizadas
           </p>
         </div>
         <div className="text-sm text-gray-500">
-          {sessions.length} {sessions.length === 1 ? 'sessao' : 'sessoes'}
+          {sessions.length} {sessions.length === 1 ? 'sessão' : 'sessões'}
         </div>
       </div>
 
@@ -192,10 +192,10 @@ export default function SessionFeedback() {
         <div className="text-center py-12">
           <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-4 text-lg font-medium text-gray-900">
-            Nenhuma sessao encontrada
+            Nenhuma sessão encontrada
           </h3>
           <p className="mt-2 text-gray-600">
-            Ainda nao ha sessoes de mentoria registradas.
+            Ainda não há sessões de mentoria registradas.
           </p>
         </div>
       )}
@@ -207,7 +207,7 @@ export default function SessionFeedback() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sessao
+                  Sessão
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Data
@@ -222,7 +222,7 @@ export default function SessionFeedback() {
                   Mentor
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acoes
+                  Ações
                 </th>
               </tr>
             </thead>

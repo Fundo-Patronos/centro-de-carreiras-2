@@ -155,7 +155,7 @@ async def get_feedback_request_info(token: str):
         if not docs:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Token invalido ou expirado",
+                detail="Token inválido ou expirado",
             )
 
         request_data = docs[0].to_dict()
@@ -175,7 +175,7 @@ async def get_feedback_request_info(token: str):
         if not session_doc.exists:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sessao nao encontrada",
+                detail="Sessão não encontrada",
             )
 
         session_data = session_doc.to_dict()
@@ -199,7 +199,7 @@ async def get_feedback_request_info(token: str):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao buscar informacoes: {str(e)}",
+            detail=f"Erro ao buscar informações: {str(e)}",
         )
 
 
@@ -217,7 +217,7 @@ async def submit_feedback(feedback: FeedbackSubmit):
         if not docs:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Token invalido ou expirado",
+                detail="Token inválido ou expirado",
             )
 
         request_doc = docs[0]
@@ -227,7 +227,7 @@ async def submit_feedback(feedback: FeedbackSubmit):
         if request_data.get("submitted", False):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Feedback ja foi enviado para esta solicitacao",
+                detail="Feedback já foi enviado para esta solicitação",
             )
 
         # Validate required fields based on meeting_status
@@ -235,13 +235,13 @@ async def submit_feedback(feedback: FeedbackSubmit):
             if feedback.rating is None:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Avaliacao e obrigatoria quando o encontro aconteceu",
+                    detail="Avaliação é obrigatória quando o encontro aconteceu",
                 )
         elif feedback.meeting_status == "not_happened":
             if not feedback.no_meeting_reason or not feedback.no_meeting_reason.strip():
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Motivo e obrigatorio quando o encontro nao aconteceu",
+                    detail="Motivo é obrigatório quando o encontro não aconteceu",
                 )
 
         # Create feedback document
@@ -304,7 +304,7 @@ async def send_feedback_emails(
         if not session_doc.exists:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sessao nao encontrada",
+                detail="Sessão não encontrada",
             )
 
         session_data = session_doc.to_dict()
@@ -421,5 +421,5 @@ async def process_pending_feedback_requests():
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao processar sessoes pendentes: {str(e)}",
+            detail=f"Erro ao processar sessões pendentes: {str(e)}",
         )

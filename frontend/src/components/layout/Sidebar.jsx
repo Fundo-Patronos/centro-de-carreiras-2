@@ -114,7 +114,7 @@ export default function Sidebar() {
           {isAdmin && (
             <li>
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Administracao
+                Administração
               </div>
               <ul role="list" className="mt-2 -mx-2 space-y-1">
                 <li>
@@ -131,7 +131,7 @@ export default function Sidebar() {
                     }
                   >
                     <ShieldCheckIcon aria-hidden="true" className="h-6 w-6 shrink-0" />
-                    Aprovacoes
+                    Aprovações
                   </NavLink>
                 </li>
                 <li>

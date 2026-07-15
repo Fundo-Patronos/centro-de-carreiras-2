@@ -20,14 +20,14 @@ export default function BookingModal({ mentor, isOpen, onClose }) {
   // Generate default message template when modal opens
   useEffect(() => {
     if (isOpen && mentor && userProfile) {
-      const defaultMessage = `Ola ${mentor.name},
+      const defaultMessage = `Olá ${mentor.name},
 
-Meu nome e ${userProfile.displayName} e sou estudante da Unicamp.
-Gostaria de agendar uma sessao de mentoria com voce para conversar sobre minha carreira.
+Meu nome é ${userProfile.displayName} e sou estudante da Unicamp.
+Gostaria de agendar uma sessão de mentoria com você para conversar sobre minha carreira.
 
-Tenho interesse em aprender mais sobre sua trajetoria profissional e receber orientacoes sobre proximos passos.
+Tenho interesse em aprender mais sobre sua trajetória profissional e receber orientações sobre próximos passos.
 
-Fico a disposicao para agendarmos um horario que seja conveniente para voce.
+Fico à disposição para agendarmos um horário que seja conveniente para você.
 
 Atenciosamente,
 ${userProfile.displayName}`;
@@ -121,7 +121,7 @@ ${userProfile.displayName}`;
     } catch (err) {
       console.error('Error creating session:', err);
       // Handle FastAPI validation errors (detail is an array) vs regular errors (detail is a string)
-      let errorMessage = 'Erro ao enviar solicitacao. Tente novamente.';
+      let errorMessage = 'Erro ao enviar solicitação. Tente novamente.';
       const detail = err.response?.data?.detail;
       if (typeof detail === 'string') {
         errorMessage = detail;
@@ -199,11 +199,11 @@ ${userProfile.displayName}`;
                   <CheckCircleIcon className="h-10 w-10 text-green-600" />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-gray-900">
-                  Solicitacao enviada!
+                  Solicitação enviada!
                 </h3>
                 <p className="mt-2 text-sm text-gray-600">
                   Sua mensagem foi enviada para <strong>{mentor.name}</strong>.
-                  Voce recebera uma confirmacao por email e o mentor entrara em contato em breve.
+                  Você receberá uma confirmação por email e o mentor entrará em contato em breve.
                 </p>
                 <div className="mt-6 flex gap-3 justify-center">
                   <button
@@ -211,7 +211,7 @@ ${userProfile.displayName}`;
                     onClick={handleGoToSessions}
                     className="inline-flex items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-orange/90"
                   >
-                    Ver Minhas Sessoes
+                    Ver Minhas Sessões
                   </button>
                   <button
                     type="button"
@@ -268,7 +268,7 @@ ${userProfile.displayName}`;
                       placeholder="Escreva sua mensagem para o mentor..."
                     />
                     <p className="mt-1.5 text-xs text-gray-500">
-                      Esta mensagem sera enviada por email para o mentor e uma copia sera enviada para voce.
+                      Esta mensagem será enviada por email para o mentor e uma cópia será enviada para você.
                     </p>
                   </div>
                 </div>
@@ -297,7 +297,7 @@ ${userProfile.displayName}`;
                         Enviando...
                       </>
                     ) : (
-                      'Enviar Solicitacao'
+                      'Enviar Solicitação'
                     )}
                   </button>
                 </div>

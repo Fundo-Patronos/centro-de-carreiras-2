@@ -78,7 +78,7 @@ describe('BookingModal', () => {
       renderModal(mockMentorComplete)
 
       const textarea = screen.getByRole('textbox')
-      expect(textarea.value).toContain(`Ola ${mockMentorComplete.name}`)
+      expect(textarea.value).toContain(`Olá ${mockMentorComplete.name}`)
       expect(textarea.value).toContain(mockStudentProfile.displayName)
     })
   })
@@ -92,7 +92,7 @@ describe('BookingModal', () => {
       fireEvent.change(textarea, { target: { value: '' } })
 
       // Submit button should be disabled
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       expect(submitButton).toBeDisabled()
       expect(sessionService.createSession).not.toHaveBeenCalled()
     })
@@ -105,7 +105,7 @@ describe('BookingModal', () => {
       fireEvent.change(textarea, { target: { value: '   ' } })
 
       // Submit button should still be disabled
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       expect(submitButton).toBeDisabled()
       expect(sessionService.createSession).not.toHaveBeenCalled()
     })
@@ -113,7 +113,7 @@ describe('BookingModal', () => {
     it('shows error when mentor email is missing', async () => {
       renderModal(mockMentorMissingEmail)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
@@ -134,7 +134,7 @@ describe('BookingModal', () => {
     it('shows error when multiple mentor fields are missing', async () => {
       renderModal(mockMentorIncomplete)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
@@ -151,7 +151,7 @@ describe('BookingModal', () => {
 
       renderModal(mockMentorComplete)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
@@ -166,7 +166,7 @@ describe('BookingModal', () => {
 
       // Should show success state
       await waitFor(() => {
-        expect(screen.getByText('Solicitacao enviada!')).toBeInTheDocument()
+        expect(screen.getByText('Solicitação enviada!')).toBeInTheDocument()
       })
     })
 
@@ -175,7 +175,7 @@ describe('BookingModal', () => {
 
       renderModal(mockMentorComplete)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
@@ -203,7 +203,7 @@ describe('BookingModal', () => {
 
       renderModal(mockMentorComplete)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
@@ -225,7 +225,7 @@ describe('BookingModal', () => {
 
       renderModal(mockMentorComplete)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
@@ -238,11 +238,11 @@ describe('BookingModal', () => {
 
       renderModal(mockMentorComplete)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(screen.getByText(/erro ao enviar solicitacao/i)).toBeInTheDocument()
+        expect(screen.getByText(/erro ao enviar solicitação/i)).toBeInTheDocument()
       })
     })
 
@@ -256,7 +256,7 @@ describe('BookingModal', () => {
 
       renderModal(mockMentorComplete)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
@@ -276,7 +276,7 @@ describe('BookingModal', () => {
 
       renderModal(mockMentorComplete)
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitacao/i })
+      const submitButton = screen.getByRole('button', { name: /enviar solicitação/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {

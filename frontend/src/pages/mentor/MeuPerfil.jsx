@@ -238,7 +238,7 @@ export default function MeuPerfil() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Meu Perfil</h1>
         <p className="mt-1 text-gray-600">
-          Atualize suas informacoes para que os estudantes possam conhecer voce melhor.
+          Atualize suas informações para que os estudantes possam conhecer você melhor.
         </p>
       </div>
 
@@ -261,7 +261,7 @@ export default function MeuPerfil() {
         {/* Section 1: Photo & Basic Info */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Informacoes Basicas
+            Informações Básicas
           </h2>
 
           <div className="space-y-6">
@@ -285,14 +285,14 @@ export default function MeuPerfil() {
                 className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-500"
               />
               <p className="mt-1 text-xs text-gray-500">
-                O nome e gerenciado pela sua conta.
+                O nome é gerenciado pela sua conta.
               </p>
             </div>
 
             {/* Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Titulo / Cargo
+                Título / Cargo
               </label>
               <input
                 type="text"
@@ -336,7 +336,7 @@ export default function MeuPerfil() {
         {/* Section 2: Bio */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Sobre Voce
+            Sobre Você
           </h2>
 
           <div>
@@ -346,7 +346,7 @@ export default function MeuPerfil() {
             <textarea
               value={formData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
-              placeholder="Conte um pouco sobre sua trajetoria profissional e o que te motiva a ser mentor..."
+              placeholder="Conte um pouco sobre sua trajetória profissional e o que te motiva a ser mentor..."
               rows={5}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-patronos-accent focus:ring-1 focus:ring-patronos-accent resize-none"
             />
@@ -359,12 +359,12 @@ export default function MeuPerfil() {
         {/* Section 3: Career Areas */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Areas de Atuacao
+            Áreas de Atuação
           </h2>
 
           <div className="space-y-6">
             <TagInput
-              label="Areas de Carreira"
+              label="Áreas de Carreira"
               value={formData.tags}
               onChange={(tags) => handleInputChange('tags', tags)}
               suggestions={TAG_SUGGESTIONS}
@@ -377,7 +377,7 @@ export default function MeuPerfil() {
               value={formData.expertise}
               onChange={(expertise) => handleInputChange('expertise', expertise)}
               suggestions={EXPERTISE_SUGGESTIONS}
-              placeholder="Ex: Transicao de carreira, Curriculo"
+              placeholder="Ex: Transição de carreira, Currículo"
               maxTags={5}
             />
           </div>
@@ -386,14 +386,14 @@ export default function MeuPerfil() {
         {/* Section 4: Education */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Formacao Academica
+            Formação Acadêmica
           </h2>
 
           <div className="space-y-6">
             {/* Unicamp Alumni */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Voce e ex-aluno(a) da Unicamp?
+                Você é ex-aluno(a) da Unicamp?
               </label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -414,7 +414,7 @@ export default function MeuPerfil() {
                     onChange={() => handleInputChange('isUnicampAlumni', false)}
                     className="h-4 w-4 text-patronos-accent focus:ring-patronos-accent"
                   />
-                  <span className="text-sm text-gray-700">Nao</span>
+                  <span className="text-sm text-gray-700">Não</span>
                 </label>
               </div>
             </div>
@@ -423,7 +423,7 @@ export default function MeuPerfil() {
             {formData.isUnicampAlumni === true && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nivel do Curso na Unicamp
+                  Nível do Curso na Unicamp
                 </label>
                 <select
                   value={formData.unicampDegreeLevel}
@@ -444,7 +444,7 @@ export default function MeuPerfil() {
             {formData.isUnicampAlumni === false && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Universidade de Formacao
+                  Universidade de Formação
                 </label>
                 <input
                   type="text"
@@ -465,7 +465,7 @@ export default function MeuPerfil() {
                 type="text"
                 value={formData.course}
                 onChange={(e) => handleInputChange('course', e.target.value)}
-                placeholder="Ex: Engenharia de Computacao, Administracao"
+                placeholder="Ex: Engenharia de Computação, Administração"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-patronos-accent focus:ring-1 focus:ring-patronos-accent"
               />
             </div>
@@ -491,12 +491,12 @@ export default function MeuPerfil() {
         {/* Section 5: Patronos Relationship */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Relacao com Patronos
+            Relação com Patronos
           </h2>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Qual sua relacao com o Fundo Patronos?
+              Qual sua relação com o Fundo Patronos?
             </label>
             <select
               value={formData.patronosRelation}
@@ -527,7 +527,7 @@ export default function MeuPerfil() {
               ${isSaving ? 'opacity-50 cursor-wait' : ''}
             `}
           >
-            {isSaving ? 'Salvando...' : 'Salvar Alteracoes'}
+            {isSaving ? 'Salvando...' : 'Salvar Alterações'}
           </button>
         </div>
       </div>

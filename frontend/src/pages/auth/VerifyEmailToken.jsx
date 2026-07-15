@@ -20,7 +20,7 @@ export default function VerifyEmailToken() {
   useEffect(() => {
     const verifyToken = async () => {
       if (!token) {
-        setError('Token de verificacao nao encontrado');
+        setError('Token de verificação não encontrado');
         setVerifying(false);
         analytics.track(EVENTS.VERIFICATION_TOKEN_MISSING);
         return;
@@ -36,7 +36,7 @@ export default function VerifyEmailToken() {
         });
       } catch (err) {
         console.error('Error verifying token:', err);
-        setError(err.response?.data?.detail || 'Token invalido ou expirado');
+        setError(err.response?.data?.detail || 'Token inválido ou expirado');
         analytics.track(EVENTS.VERIFICATION_TOKEN_ERROR, {
           error: err.response?.data?.detail || err.message,
         });
@@ -97,7 +97,7 @@ export default function VerifyEmailToken() {
               </h2>
 
               <p className="mt-4 text-gray-600">
-                Sua conta foi ativada com sucesso. Voce sera redirecionado para o painel em instantes...
+                Sua conta foi ativada com sucesso. Você será redirecionado para o painel em instantes...
               </p>
 
               {verifiedData && (
@@ -125,7 +125,7 @@ export default function VerifyEmailToken() {
               </div>
 
               <h2 className="mt-6 text-xl font-semibold text-gray-900">
-                Verificacao Falhou
+                Verificação Falhou
               </h2>
 
               <p className="mt-4 text-gray-600">
@@ -134,7 +134,7 @@ export default function VerifyEmailToken() {
 
               <div className="mt-6 text-sm text-gray-500">
                 <p>
-                  O link pode ter expirado ou ja foi utilizado. Faca login para solicitar um novo email de verificacao.
+                  O link pode ter expirado ou já foi utilizado. Faça login para solicitar um novo email de verificação.
                 </p>
               </div>
 

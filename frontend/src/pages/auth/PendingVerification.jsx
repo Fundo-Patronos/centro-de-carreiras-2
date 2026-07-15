@@ -108,7 +108,7 @@ export default function PendingVerification() {
           </h2>
 
           <p className="mt-4 text-gray-600">
-            Enviamos um link de verificacao para o seu email.
+            Enviamos um link de verificação para o seu email.
             Clique no link para ativar sua conta.
           </p>
 
@@ -169,7 +169,7 @@ export default function PendingVerification() {
 
           <div className="mt-6 text-sm text-gray-500">
             <p>
-              Nao recebeu o email? Verifique sua caixa de spam ou clique em "Reenviar Email".
+              Não recebeu o email? Verifique sua caixa de spam ou clique em "Reenviar Email".
             </p>
           </div>
         </div>

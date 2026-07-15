@@ -20,7 +20,7 @@ import analytics, { EVENTS } from '../../services/analytics';
 const filterTabs = [
   { key: null, label: 'Todas' },
   { key: 'pending', label: 'Pendentes' },
-  { key: 'completed', label: 'Concluidas' },
+  { key: 'completed', label: 'Concluídas' },
 ];
 
 // Quick Access cards configuration
@@ -59,7 +59,7 @@ const mentorQuickAccess = [
     name: 'Disponibilidade',
     href: '/mentor/disponibilidade',
     icon: Cog6ToothIcon,
-    description: 'Gerenciar horarios',
+    description: 'Gerenciar horários',
     bgColor: 'bg-patronos-accent/10',
     hoverColor: 'group-hover:bg-patronos-accent/20',
     iconColor: 'text-patronos-accent',
@@ -108,7 +108,7 @@ export default function MySessions() {
         setError(null);
       } catch (err) {
         console.error('Error fetching sessions:', err);
-        setError('Nao foi possivel carregar suas sessoes. Tente novamente.');
+        setError('Não foi possível carregar suas sessões. Tente novamente.');
         analytics.trackError('load_sessions', { error: err.message });
       } finally {
         setLoading(false);
@@ -184,7 +184,7 @@ export default function MySessions() {
         <div className="text-center py-12">
           <CalendarDaysIcon className="mx-auto h-12 w-12 text-red-300" />
           <h3 className="mt-4 text-lg font-medium text-gray-900">
-            Erro ao carregar sessoes
+            Erro ao carregar sessões
           </h3>
           <p className="mt-1 text-gray-500">{error}</p>
           <button
@@ -203,7 +203,7 @@ export default function MySessions() {
       {/* Quick Access Section */}
       <div className="mb-8">
         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
-          Acesso Rapido
+          Acesso Rápido
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {quickAccessItems.map((item) => (
@@ -225,11 +225,11 @@ export default function MySessions() {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Minhas Sessoes</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Minhas Sessões</h1>
         <p className="mt-1 text-gray-600">
           {isStudent
-            ? 'Acompanhe suas solicitacoes de mentoria'
-            : 'Gerencie as sessoes solicitadas por estudantes'}
+            ? 'Acompanhe suas solicitações de mentoria'
+            : 'Gerencie as sessões solicitadas por estudantes'}
         </p>
       </div>
 
@@ -252,7 +252,7 @@ export default function MySessions() {
 
       {/* Results count */}
       <p className="text-sm text-gray-500 mb-4">
-        Mostrando {filteredSessions.length} {filteredSessions.length === 1 ? 'sessao' : 'sessoes'}
+        Mostrando {filteredSessions.length} {filteredSessions.length === 1 ? 'sessão' : 'sessões'}
       </p>
 
       {/* Sessions grid */}
@@ -272,14 +272,14 @@ export default function MySessions() {
         <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
           <UserCircleIcon className="mx-auto h-12 w-12 text-gray-300" />
           <h3 className="mt-4 text-lg font-medium text-gray-900">
-            {activeFilter ? 'Nenhuma sessao encontrada' : 'Voce ainda nao tem sessoes'}
+            {activeFilter ? 'Nenhuma sessão encontrada' : 'Você ainda não tem sessões'}
           </h3>
           <p className="mt-1 text-gray-500 max-w-sm mx-auto">
             {activeFilter
-              ? 'Tente ajustar o filtro para ver outras sessoes.'
+              ? 'Tente ajustar o filtro para ver outras sessões.'
               : isStudent
-                ? 'Encontre um mentor e agende sua primeira sessao de mentoria.'
-                : 'Quando estudantes solicitarem mentorias, elas aparecerao aqui.'}
+                ? 'Encontre um mentor e agende sua primeira sessão de mentoria.'
+                : 'Quando estudantes solicitarem mentorias, elas aparecerão aqui.'}
           </p>
           {!activeFilter && isStudent && (
             <Link

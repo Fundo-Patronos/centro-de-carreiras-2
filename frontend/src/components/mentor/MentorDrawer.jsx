@@ -184,13 +184,13 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
                           </div>
                           {hasSchedulingLink && !externalScheduled && (
                             <p className="mt-2 text-xs text-gray-500">
-                              Voce sera direcionado para a agenda do mentor para escolher um horario.
+                              Você será direcionado para a agenda do mentor para escolher um horário.
                             </p>
                           )}
                           {externalScheduled && (
                             <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-green-700">
                               <CheckCircleIcon className="h-4 w-4" />
-                              Sessao registrada em Minhas Sessoes. Conclua a marcacao na aba que abrimos.
+                              Sessão registrada em Minhas Sessões. Conclua a marcação na aba que abrimos.
                             </p>
                           )}
                         </div>

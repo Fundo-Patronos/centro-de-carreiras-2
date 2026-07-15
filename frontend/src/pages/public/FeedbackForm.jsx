@@ -6,8 +6,8 @@ import { feedbackService } from '../../services/feedbackService';
 
 const MEETING_STATUS_OPTIONS = [
   { value: 'happened', label: 'Sim, o encontro aconteceu' },
-  { value: 'scheduled', label: 'Ainda nao, mas esta agendado' },
-  { value: 'not_happened', label: 'Nao, o encontro nao aconteceu' },
+  { value: 'scheduled', label: 'Ainda não, mas está agendado' },
+  { value: 'not_happened', label: 'Não, o encontro não aconteceu' },
 ];
 
 function StarRating({ rating, onRate, disabled = false }) {
@@ -54,7 +54,7 @@ export default function FeedbackForm() {
 
   useEffect(() => {
     if (!token) {
-      setError('Token nao fornecido');
+      setError('Token não fornecido');
       setLoading(false);
       return;
     }
@@ -74,9 +74,9 @@ export default function FeedbackForm() {
       }
     } catch (err) {
       if (err.response?.status === 404) {
-        setError('Link invalido ou expirado');
+        setError('Link inválido ou expirado');
       } else {
-        setError('Erro ao carregar formulario');
+        setError('Erro ao carregar formulário');
       }
       console.error(err);
     } finally {
@@ -99,7 +99,7 @@ export default function FeedbackForm() {
     }
 
     if (meetingStatus === 'not_happened' && !noMeetingReason.trim()) {
-      setError('Por favor, explique por que o encontro nao aconteceu');
+      setError('Por favor, explique por que o encontro não aconteceu');
       return;
     }
 
@@ -151,7 +151,7 @@ export default function FeedbackForm() {
             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
               <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
             </div>
-            <h2 className="mt-6 text-xl font-semibold text-gray-900">Link Invalido</h2>
+            <h2 className="mt-6 text-xl font-semibold text-gray-900">Link Inválido</h2>
             <p className="mt-4 text-gray-600">{error}</p>
             <p className="mt-6 text-center text-xs text-gray-500">
               Fundo Patronos da Unicamp
@@ -177,11 +177,11 @@ export default function FeedbackForm() {
               <CheckCircleIcon className="h-8 w-8 text-green-600" />
             </div>
             <h2 className="mt-6 text-xl font-semibold text-gray-900">
-              {requestInfo?.already_submitted ? 'Feedback ja Enviado' : 'Obrigado pelo Feedback!'}
+              {requestInfo?.already_submitted ? 'Feedback já Enviado' : 'Obrigado pelo Feedback!'}
             </h2>
             <p className="mt-4 text-gray-600">
               {requestInfo?.already_submitted
-                ? 'Voce ja respondeu este formulario anteriormente.'
+                ? 'Você já respondeu este formulário anteriormente.'
                 : 'Sua resposta foi registrada com sucesso. Obrigado por ajudar a melhorar o programa de mentorias!'}
             </p>
             <p className="mt-6 text-center text-xs text-gray-500">
@@ -211,12 +211,12 @@ export default function FeedbackForm() {
         <div className="bg-white py-8 px-6 shadow-lg rounded-2xl sm:px-10">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
-              Ola, {requestInfo?.recipient_name}!
+              Olá, {requestInfo?.recipient_name}!
             </h2>
             <p className="mt-2 text-gray-600">
               {isStudent
-                ? `Como foi sua experiencia de mentoria com ${requestInfo?.other_party_name}?`
-                : `Como foi sua sessao de mentoria com ${requestInfo?.other_party_name}?`}
+                ? `Como foi sua experiência de mentoria com ${requestInfo?.other_party_name}?`
+                : `Como foi sua sessão de mentoria com ${requestInfo?.other_party_name}?`}
             </p>
           </div>
 
@@ -254,7 +254,7 @@ export default function FeedbackForm() {
             {meetingStatus === 'not_happened' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Por que o encontro nao aconteceu? *
+                  Por que o encontro não aconteceu? *
                 </label>
                 <textarea
                   value={noMeetingReason}
@@ -271,7 +271,7 @@ export default function FeedbackForm() {
             {meetingStatus === 'happened' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Como voce avalia o encontro? *
+                  Como você avalia o encontro? *
                 </label>
                 <div className="flex items-center gap-4">
                   <StarRating rating={rating} onRate={setRating} />
@@ -299,10 +299,10 @@ export default function FeedbackForm() {
                   onChange={(e) => setAdditionalFeedback(e.target.value)}
                   rows={3}
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-patronos-accent focus:ring-patronos-accent"
-                  placeholder="Compartilhe sugestoes, elogios ou criticas..."
+                  placeholder="Compartilhe sugestões, elogios ou críticas..."
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Suas respostas sao confidenciais e visiveis apenas para a equipe Patronos.
+                  Suas respostas são confidenciais e visíveis apenas para a equipe Patronos.
                 </p>
               </div>
             )}
@@ -326,7 +326,7 @@ export default function FeedbackForm() {
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-500">
-          Este formulario e confidencial e suas respostas serao usadas apenas para melhorar o programa.
+          Este formulário é confidencial e suas respostas serão usadas apenas para melhorar o programa.
         </p>
       </div>
     </div>

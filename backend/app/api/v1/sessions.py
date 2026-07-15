@@ -385,7 +385,7 @@ async def update_session_status(
         if data["status"] == "completed" and status_update.status == "pending":
             raise HTTPException(
                 status_code=400,
-                detail="Sessoes concluidas nao podem voltar para pendente",
+                detail="Sessões concluídas não podem voltar para pendente",
             )
 
         # Update status and timestamp
@@ -638,7 +638,7 @@ async def complete_session_with_feedback(
         if session_data["status"] != "pending":
             raise HTTPException(
                 status_code=400,
-                detail="Apenas sessoes pendentes podem ser marcadas como concluidas",
+                detail="Apenas sessões pendentes podem ser marcadas como concluídas",
             )
 
         # Store feedback in session_feedback collection

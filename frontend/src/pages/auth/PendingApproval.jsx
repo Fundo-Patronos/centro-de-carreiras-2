@@ -55,12 +55,12 @@ export default function PendingApproval() {
           </div>
 
           <h2 className="mt-6 text-xl font-semibold text-gray-900">
-            Aguardando Aprovacao
+            Aguardando Aprovação
           </h2>
 
           <p className="mt-4 text-gray-600">
-            Sua conta esta aguardando aprovacao de um administrador.
-            Voce recebera um e-mail quando sua conta for aprovada.
+            Sua conta está aguardando aprovação de um administrador.
+            Você receberá um e-mail quando sua conta for aprovada.
           </p>
 
           <div className="mt-6 bg-gray-50 rounded-lg p-4">
@@ -78,8 +78,8 @@ export default function PendingApproval() {
 
           <div className="mt-6 text-sm text-gray-500">
             <p>
-              O processo de aprovacao pode levar ate 48 horas uteis.
-              Agradecemos sua paciencia.
+              O processo de aprovação pode levar até 48 horas úteis.
+              Agradecemos sua paciência.
             </p>
           </div>
 

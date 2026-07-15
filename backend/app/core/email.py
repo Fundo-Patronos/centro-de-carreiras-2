@@ -104,7 +104,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = f"Centro de Carreiras - Nova solicitacao de mentoria de {student_name}"
+        subject = f"Centro de Carreiras - Nova solicitação de mentoria de {student_name}"
 
         html = f"""
 <!DOCTYPE html>
@@ -121,10 +121,10 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {mentor_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {mentor_name}!</h2>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Voce recebeu uma nova solicitacao de mentoria de um estudante da Unicamp.
+                Você recebeu uma nova solicitação de mentoria de um estudante da Unicamp.
             </p>
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -141,7 +141,7 @@ class EmailService:
             </div>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 24px 0 0 0;">
-                Responda diretamente a este email para entrar em contato com {student_name} e agendar sua sessao de mentoria.
+                Responda diretamente a este email para entrar em contato com {student_name} e agendar sua sessão de mentoria.
             </p>
         </div>
 
@@ -185,7 +185,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = f"Centro de Carreiras - Solicitacao enviada para {mentor_name}"
+        subject = f"Centro de Carreiras - Solicitação enviada para {mentor_name}"
 
         html = f"""
 <!DOCTYPE html>
@@ -202,10 +202,10 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {student_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {student_name}!</h2>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Sua solicitacao de mentoria foi enviada com sucesso! O mentor recebera seu email e entrara em contato em breve.
+                Sua solicitação de mentoria foi enviada com sucesso! O mentor receberá seu email e entrará em contato em breve.
             </p>
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -221,7 +221,7 @@ class EmailService:
 
             <div style="background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(155,93,229,0.1) 100%); border-radius: 12px; padding: 16px; margin: 24px 0;">
                 <p style="color: #4a4a4a; font-size: 14px; margin: 0; line-height: 1.6;">
-                    <strong>Dica:</strong> Fique atento ao seu email! O mentor respondera diretamente para <strong>{student_email}</strong>.
+                    <strong>Dica:</strong> Fique atento ao seu email! O mentor responderá diretamente para <strong>{student_email}</strong>.
                 </p>
             </div>
         </div>
@@ -278,10 +278,10 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {user_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {user_name}!</h2>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Obrigado por se cadastrar no Centro de Carreiras. Para ativar sua conta, clique no botao abaixo para verificar seu email.
+                Obrigado por se cadastrar no Centro de Carreiras. Para ativar sua conta, clique no botão abaixo para verificar seu email.
             </p>
 
             <div style="text-align: center; margin: 32px 0;">
@@ -291,7 +291,7 @@ class EmailService:
             </div>
 
             <p style="color: #6a6a6a; line-height: 1.6; margin: 24px 0 0 0; font-size: 14px;">
-                Se voce nao conseguir clicar no botao, copie e cole o link abaixo no seu navegador:
+                Se você não conseguir clicar no botão, copie e cole o link abaixo no seu navegador:
             </p>
             <p style="color: #9B5DE5; line-height: 1.6; margin: 8px 0 0 0; font-size: 13px; word-break: break-all;">
                 {verification_url}
@@ -299,7 +299,7 @@ class EmailService:
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
                 <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
-                    <strong>Importante:</strong> Este link expira em 24 horas. Se voce nao solicitou esta verificacao, pode ignorar este email com seguranca.
+                    <strong>Importante:</strong> Este link expira em 24 horas. Se você não solicitou esta verificação, pode ignorar este email com segurança.
                 </p>
             </div>
         </div>
@@ -356,14 +356,14 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {student_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {student_name}!</h2>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Ha alguns dias voce solicitou uma mentoria com <strong>{mentor_name}</strong>. Gostaríamos de saber como foi sua experiencia!
+                Há alguns dias você solicitou uma mentoria com <strong>{mentor_name}</strong>. Gostaríamos de saber como foi sua experiência!
             </p>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 24px 0;">
-                Seu feedback e muito importante para melhorarmos o programa de mentorias do Centro de Carreiras.
+                Seu feedback é muito importante para melhorarmos o programa de mentorias do Centro de Carreiras.
             </p>
 
             <div style="text-align: center; margin: 32px 0;">
@@ -374,7 +374,7 @@ class EmailService:
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
                 <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
-                    O formulario leva menos de 1 minuto para responder e suas respostas sao confidenciais - apenas a equipe Patronos tera acesso.
+                    O formulário leva menos de 1 minuto para responder e suas respostas são confidenciais - apenas a equipe Patronos terá acesso.
                 </p>
             </div>
         </div>
@@ -433,14 +433,14 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {user_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {user_name}!</h2>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                O <strong>Centro de Carreiras</strong> foi atualizado! Estamos com uma nova plataforma, mais moderna e com novos recursos para conectar voce a mentores incriveis.
+                O <strong>Centro de Carreiras</strong> foi atualizado! Estamos com uma nova plataforma, mais moderna e com novos recursos para conectar você a mentores incríveis.
             </p>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Sua conta foi migrada automaticamente. Para acessar a nova plataforma, voce precisa configurar uma nova senha clicando no botao abaixo:
+                Sua conta foi migrada automaticamente. Para acessar a nova plataforma, você precisa configurar uma nova senha clicando no botão abaixo:
             </p>
 
             <div style="text-align: center; margin: 32px 0;">
@@ -450,17 +450,17 @@ class EmailService:
             </div>
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 24px 0;">
-                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0;">O que ha de novo?</p>
+                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0;">O que há de novo?</p>
                 <ul style="color: #4a4a4a; line-height: 1.8; margin: 0; padding-left: 20px;">
                     <li>Interface completamente redesenhada</li>
                     <li>Novos perfis de mentores</li>
                     <li>Sistema de agendamento simplificado</li>
-                    <li>Melhor experiencia em dispositivos moveis</li>
+                    <li>Melhor experiência em dispositivos móveis</li>
                 </ul>
             </div>
 
             <p style="color: #6a6a6a; line-height: 1.6; margin: 24px 0 0 0; font-size: 14px;">
-                Se voce nao conseguir clicar no botao, copie e cole o link abaixo no seu navegador:
+                Se você não conseguir clicar no botão, copie e cole o link abaixo no seu navegador:
             </p>
             <p style="color: #9B5DE5; line-height: 1.6; margin: 8px 0 0 0; font-size: 13px; word-break: break-all;">
                 {password_reset_url}
@@ -521,14 +521,14 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {mentor_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {mentor_name}!</h2>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Ha alguns dias voce recebeu uma solicitacao de mentoria de <strong>{student_name}</strong>. Gostaríamos de saber como foi!
+                Há alguns dias você recebeu uma solicitação de mentoria de <strong>{student_name}</strong>. Gostaríamos de saber como foi!
             </p>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 24px 0;">
-                Seu feedback e muito importante para acompanharmos o progresso do programa e apoiar nossos estudantes.
+                Seu feedback é muito importante para acompanharmos o progresso do programa e apoiar nossos estudantes.
             </p>
 
             <div style="text-align: center; margin: 32px 0;">
@@ -539,7 +539,7 @@ class EmailService:
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
                 <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
-                    O formulario leva menos de 1 minuto para responder e suas respostas sao confidenciais - apenas a equipe Patronos tera acesso.
+                    O formulário leva menos de 1 minuto para responder e suas respostas são confidenciais - apenas a equipe Patronos terá acesso.
                 </p>
             </div>
         </div>
@@ -594,10 +594,10 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {user_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {user_name}!</h2>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Voce solicitou a redefinicao de senha da sua conta no Centro de Carreiras. Clique no botao abaixo para criar uma nova senha:
+                Você solicitou a redefinição de senha da sua conta no Centro de Carreiras. Clique no botão abaixo para criar uma nova senha:
             </p>
 
             <div style="text-align: center; margin: 32px 0;">
@@ -608,12 +608,12 @@ class EmailService:
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0;">
                 <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
-                    <strong>Importante:</strong> Este link expira em 1 hora. Se voce nao solicitou esta redefinicao, pode ignorar este email com seguranca - sua senha permanecera inalterada.
+                    <strong>Importante:</strong> Este link expira em 1 hora. Se você não solicitou esta redefinição, pode ignorar este email com segurança - sua senha permanecerá inalterada.
                 </p>
             </div>
 
             <p style="color: #6a6a6a; line-height: 1.6; margin: 24px 0 0 0; font-size: 14px;">
-                Se voce nao conseguir clicar no botao, copie e cole o link abaixo no seu navegador:
+                Se você não conseguir clicar no botão, copie e cole o link abaixo no seu navegador:
             </p>
             <p style="color: #9B5DE5; line-height: 1.6; margin: 8px 0 0 0; font-size: 13px; word-break: break-all;">
                 {reset_url}
@@ -659,25 +659,25 @@ class EmailService:
 
         # Role-specific content
         if role == "estudante":
-            role_message = "Como estudante, voce agora pode explorar mentores, agendar sessoes de mentoria e acessar recursos de carreira exclusivos."
+            role_message = "Como estudante, você agora pode explorar mentores, agendar sessões de mentoria e acessar recursos de carreira exclusivos."
             features = [
                 "Explorar perfis de mentores experientes",
-                "Solicitar sessoes de mentoria",
+                "Solicitar sessões de mentoria",
                 "Acessar recursos de desenvolvimento de carreira",
             ]
             extra_message = ""
         else:  # mentor
-            role_message = "Como mentor, voce agora pode gerenciar seu perfil e receber solicitacoes de mentoria de estudantes da Unicamp."
+            role_message = "Como mentor, você agora pode gerenciar seu perfil e receber solicitações de mentoria de estudantes da Unicamp."
             features = [
                 "Completar seu perfil de mentor",
-                "Receber solicitacoes de mentoria de estudantes",
+                "Receber solicitações de mentoria de estudantes",
                 "Contribuir para o desenvolvimento de futuros profissionais",
             ]
             extra_message = """
             <div style="background: #FFF3E0; border-left: 4px solid #FF6B35; border-radius: 8px; padding: 16px; margin: 24px 0;">
-                <p style="color: #1a1a1a; font-weight: 600; margin: 0 0 8px 0;">Proximo passo importante</p>
+                <p style="color: #1a1a1a; font-weight: 600; margin: 0 0 8px 0;">Próximo passo importante</p>
                 <p style="color: #4a4a4a; font-size: 14px; margin: 0; line-height: 1.6;">
-                    Para aparecer na lista de mentores e receber solicitacoes de estudantes, complete seu perfil com sua biografia, areas de expertise e foto. Acesse "Meu Perfil" no menu lateral apos fazer login.
+                    Para aparecer na lista de mentores e receber solicitações de estudantes, complete seu perfil com sua biografia, áreas de expertise e foto. Acesse "Meu Perfil" no menu lateral após fazer login.
                 </p>
             </div>
             """
@@ -702,11 +702,11 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {user_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {user_name}!</h2>
 
             <div style="background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(155,93,229,0.1) 100%); border-radius: 12px; padding: 20px; margin: 0 0 24px 0; text-align: center;">
                 <p style="color: #1a1a1a; font-size: 18px; font-weight: 600; margin: 0;">
-                    🎉 Parabens! Sua conta foi aprovada
+                    🎉 Parabéns! Sua conta foi aprovada
                 </p>
             </div>
 
@@ -715,7 +715,7 @@ class EmailService:
             </p>
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 24px 0;">
-                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0;">O que voce pode fazer agora</p>
+                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0;">O que você pode fazer agora</p>
                 <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
                     {features_html}
                 </ul>
@@ -730,7 +730,7 @@ class EmailService:
             </div>
 
             <p style="color: #6a6a6a; line-height: 1.6; margin: 24px 0 0 0; font-size: 14px;">
-                Se voce nao conseguir clicar no botao, copie e cole o link abaixo no seu navegador:
+                Se você não conseguir clicar no botão, copie e cole o link abaixo no seu navegador:
             </p>
             <p style="color: #9B5DE5; line-height: 1.6; margin: 8px 0 0 0; font-size: 13px; word-break: break-all;">
                 {login_url}
@@ -774,7 +774,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = f"Centro de Carreiras - {mentor_name} marcou a sessao como concluida"
+        subject = f"Centro de Carreiras - {mentor_name} marcou a sessão como concluída"
 
         html = f"""
 <!DOCTYPE html>
@@ -791,27 +791,27 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {student_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {student_name}!</h2>
 
             <div style="background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(155,93,229,0.1) 100%); border-radius: 12px; padding: 20px; margin: 0 0 24px 0; text-align: center;">
                 <p style="color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0;">
-                    ✅ <strong>{mentor_name}</strong> marcou a sessao de mentoria como concluida
+                    ✅ <strong>{mentor_name}</strong> marcou a sessão de mentoria como concluída
                 </p>
             </div>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Por favor, avalie sua experiencia com a sessao de mentoria. Seu feedback e muito importante para melhorarmos o programa!
+                Por favor, avalie sua experiência com a sessão de mentoria. Seu feedback é muito importante para melhorarmos o programa!
             </p>
 
             <div style="text-align: center; margin: 32px 0;">
                 <a href="{feedback_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                    Avaliar Sessao
+                    Avaliar Sessão
                 </a>
             </div>
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
                 <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
-                    O formulario leva menos de 1 minuto para responder. Acesse sua conta no Centro de Carreiras para avaliar a sessao.
+                    O formulário leva menos de 1 minuto para responder. Acesse sua conta no Centro de Carreiras para avaliar a sessão.
                 </p>
             </div>
         </div>
@@ -851,7 +851,7 @@ class EmailService:
         Returns:
             dict with 'success' and 'id' or 'error'
         """
-        subject = f"Centro de Carreiras - {student_name} marcou a sessao como concluida"
+        subject = f"Centro de Carreiras - {student_name} marcou a sessão como concluída"
 
         html = f"""
 <!DOCTYPE html>
@@ -868,27 +868,27 @@ class EmailService:
         </div>
 
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Ola, {mentor_name}!</h2>
+            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 20px;">Olá, {mentor_name}!</h2>
 
             <div style="background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(155,93,229,0.1) 100%); border-radius: 12px; padding: 20px; margin: 0 0 24px 0; text-align: center;">
                 <p style="color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0;">
-                    ✅ O estudante <strong>{student_name}</strong> marcou a sessao de mentoria como concluida
+                    ✅ O estudante <strong>{student_name}</strong> marcou a sessão de mentoria como concluída
                 </p>
             </div>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Por favor, avalie sua experiencia com a sessao de mentoria. Seu feedback e muito importante para acompanharmos o progresso do programa!
+                Por favor, avalie sua experiência com a sessão de mentoria. Seu feedback é muito importante para acompanharmos o progresso do programa!
             </p>
 
             <div style="text-align: center; margin: 32px 0;">
                 <a href="{feedback_url}" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #9B5DE5 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                    Avaliar Sessao
+                    Avaliar Sessão
                 </a>
             </div>
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 16px; margin: 24px 0 0 0;">
                 <p style="color: #6a6a6a; font-size: 13px; margin: 0; line-height: 1.6;">
-                    O formulario leva menos de 1 minuto para responder. Acesse sua conta no Centro de Carreiras para avaliar a sessao.
+                    O formulário leva menos de 1 minuto para responder. Acesse sua conta no Centro de Carreiras para avaliar a sessão.
                 </p>
             </div>
         </div>
@@ -934,14 +934,14 @@ class EmailService:
             dict with 'success' and 'id' or 'error'
         """
         role_display = "Estudante" if role == "estudante" else "Mentor"
-        subject = f"Centro de Carreiras - Novo {role_display.lower()} aguardando aprovacao"
+        subject = f"Centro de Carreiras - Novo {role_display.lower()} aguardando aprovação"
 
         # Build mentor info section if applicable
         mentor_info = ""
         if role == "mentor" and (company or title):
             mentor_info = f"""
             <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 16px 0;">
-                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0;">Informacoes Profissionais</p>
+                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0;">Informações Profissionais</p>
                 <p style="color: #1a1a1a; margin: 0;">
                     {f'<strong>Cargo:</strong> {title}<br/>' if title else ''}
                     {f'<strong>Empresa:</strong> {company}' if company else ''}
@@ -966,16 +966,16 @@ class EmailService:
         <div style="background: white; padding: 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
             <div style="background: #FFF3E0; border-left: 4px solid #FF6B35; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
                 <p style="color: #1a1a1a; font-weight: 600; margin: 0;">
-                    🔔 Novo cadastro aguardando aprovacao
+                    🔔 Novo cadastro aguardando aprovação
                 </p>
             </div>
 
             <p style="color: #4a4a4a; line-height: 1.6; margin: 0 0 20px 0;">
-                Um novo usuario se cadastrou no Centro de Carreiras e precisa de aprovacao manual.
+                Um novo usuário se cadastrou no Centro de Carreiras e precisa de aprovação manual.
             </p>
 
             <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin: 16px 0;">
-                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0;">Novo Usuario</p>
+                <p style="color: #6a6a6a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0;">Novo Usuário</p>
                 <p style="color: #1a1a1a; font-weight: 600; margin: 0 0 4px 0; font-size: 16px;">{user_name}</p>
                 <p style="color: #4a4a4a; margin: 0 0 8px 0;">
                     <a href="mailto:{user_email}" style="color: #9B5DE5; text-decoration: none;">{user_email}</a>

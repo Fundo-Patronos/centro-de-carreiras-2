@@ -85,7 +85,7 @@ async def request_password_reset(request: PasswordResetRequest):
         except firebase_auth.UserNotFoundError:
             # Don't reveal if email exists or not for security
             logger.info(f"Password reset requested for non-existent email: {email}")
-            return {"message": "Se o email estiver cadastrado, voce recebera um link para redefinir sua senha."}
+            return {"message": "Se o email estiver cadastrado, você receberá um link para redefinir sua senha."}
 
         # Get user profile from Firestore for display name
         user_ref = db.collection("users").document(user.uid)
@@ -122,11 +122,11 @@ async def request_password_reset(request: PasswordResetRequest):
             logger.error(f"Failed to send password reset email to {email}: {result.get('error')}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Erro ao enviar email de redefinicao de senha",
+                detail="Erro ao enviar email de redefinição de senha",
             )
 
         logger.info(f"Password reset email sent to {email}")
-        return {"message": "Se o email estiver cadastrado, voce recebera um link para redefinir sua senha."}
+        return {"message": "Se o email estiver cadastrado, você receberá um link para redefinir sua senha."}
 
     except HTTPException:
         raise
@@ -134,7 +134,7 @@ async def request_password_reset(request: PasswordResetRequest):
         logger.error(f"Error processing password reset request: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erro ao processar solicitacao",
+            detail="Erro ao processar solicitação",
         )
 
 
@@ -296,7 +296,7 @@ async def notify_admin_pending_user(request: NotifyAdminRequest):
         if not result.get("success"):
             logger.error(f"Failed to send admin notification for {request.email}: {result.get('error')}")
             # Don't fail the signup - just log the error
-            return {"success": False, "message": "Erro ao enviar notificacao"}
+            return {"success": False, "message": "Erro ao enviar notificação"}
 
         logger.info(f"Admin notification sent for pending user: {request.email}")
 
@@ -310,9 +310,9 @@ async def notify_admin_pending_user(request: NotifyAdminRequest):
             },
         )
 
-        return {"success": True, "message": "Notificacao enviada aos administradores"}
+        return {"success": True, "message": "Notificação enviada aos administradores"}
 
     except Exception as e:
         logger.error(f"Error sending admin notification: {e}")
         # Don't fail the signup - just return error
-        return {"success": False, "message": "Erro ao enviar notificacao"}
+        return {"success": False, "message": "Erro ao enviar notificação"}

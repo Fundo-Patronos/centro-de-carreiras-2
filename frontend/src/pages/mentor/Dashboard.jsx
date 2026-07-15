@@ -121,7 +121,7 @@ export default function MentorDashboard() {
           </div>
           <h4 className="font-semibold text-gray-900">Meu Perfil</h4>
           <p className="mt-1 text-sm text-gray-500">
-            Atualize suas informacoes e expertise
+            Atualize suas informações e expertise
           </p>
         </Link>
       </div>

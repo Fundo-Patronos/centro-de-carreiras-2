@@ -62,7 +62,7 @@ export default function MentorManagement() {
 
       showToast(
         newIsActive
-          ? `${mentor.displayName} agora esta visivel`
+          ? `${mentor.displayName} agora está visível`
           : `${mentor.displayName} foi ocultado`
       );
 
@@ -106,7 +106,7 @@ export default function MentorManagement() {
     try {
       setExportLoading(true);
       await adminService.exportMentorsCSV();
-      showToast('Exportacao concluida com sucesso');
+      showToast('Exportação concluída com sucesso');
       analytics.track('Admin: Mentors Export Clicked');
     } catch (err) {
       showToast('Erro ao exportar mentores', 'error');
@@ -155,7 +155,7 @@ export default function MentorManagement() {
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-1.5">
               <EyeIcon className="h-4 w-4 text-green-600" />
-              <span className="text-gray-600">{visibleCount} visiveis</span>
+              <span className="text-gray-600">{visibleCount} visíveis</span>
             </div>
             <div className="flex items-center gap-1.5">
               <EyeSlashIcon className="h-4 w-4 text-gray-400" />
@@ -186,7 +186,7 @@ export default function MentorManagement() {
           className="rounded-lg border-gray-300 text-sm focus:border-patronos-accent focus:ring-patronos-accent"
         >
           <option value="all">Todos ({mentors.length})</option>
-          <option value="visible">Visiveis ({visibleCount})</option>
+          <option value="visible">Visíveis ({visibleCount})</option>
           <option value="hidden">Ocultos ({hiddenCount})</option>
         </select>
       </div>
@@ -270,7 +270,7 @@ export default function MentorManagement() {
                         : 'bg-gray-100 text-gray-600'
                     }`}
                   >
-                    {mentor.isActive ? 'Visivel' : 'Oculto'}
+                    {mentor.isActive ? 'Visível' : 'Oculto'}
                   </span>
                   {mentor.isProfileComplete && (
                     <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-xs font-medium">

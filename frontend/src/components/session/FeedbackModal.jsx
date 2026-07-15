@@ -59,7 +59,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
     e.preventDefault();
 
     if (rating === 0) {
-      setError('Por favor, selecione uma avaliacao.');
+      setError('Por favor, selecione uma avaliação.');
       return;
     }
 
@@ -151,7 +151,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
             <div className="border-b border-gray-200 px-6 py-4">
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-lg font-semibold text-gray-900">
-                  {mode === 'complete' ? 'Marcar Sessao como Concluida' : 'Avaliar Sessao'}
+                  {mode === 'complete' ? 'Marcar Sessão como Concluída' : 'Avaliar Sessão'}
                 </DialogTitle>
                 <button
                   type="button"
@@ -172,16 +172,16 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                   <CheckCircleIcon className="h-10 w-10 text-green-600" />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-gray-900">
-                  {mode === 'complete' ? 'Sessao concluida!' : 'Feedback enviado!'}
+                  {mode === 'complete' ? 'Sessão concluída!' : 'Feedback enviado!'}
                 </h3>
                 <p className="mt-2 text-sm text-gray-600">
                   {mode === 'complete' ? (
                     <>
-                      Sessao marcada como concluida! Um email foi enviado para <strong>{otherPersonName}</strong> solicitando a avaliacao.
+                      Sessão marcada como concluída! Um email foi enviado para <strong>{otherPersonName}</strong> solicitando a avaliação.
                     </>
                   ) : (
                     <>
-                      Obrigado por avaliar sua sessao com <strong>{otherPersonName}</strong>.
+                      Obrigado por avaliar sua sessão com <strong>{otherPersonName}</strong>.
                       Seu feedback nos ajuda a melhorar o programa.
                     </>
                   )}
@@ -217,7 +217,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                   {mode === 'complete' && (
                     <div className="mb-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
                       <p>
-                        Ao marcar como concluida, sua avaliacao sera enviada e <strong>{otherPersonName}</strong> recebera um email para tambem avaliar a sessao.
+                        Ao marcar como concluída, sua avaliação será enviada e <strong>{otherPersonName}</strong> receberá um email para também avaliar a sessão.
                       </p>
                     </div>
                   )}
@@ -233,7 +233,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                   {/* Rating field */}
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Como foi sua experiencia?
+                      Como foi sua experiência?
                     </label>
                     <div className="flex justify-center">
                       <StarRating
@@ -255,7 +255,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                   {/* Comments field */}
                   <div>
                     <label htmlFor="feedback-comments" className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Comentarios (opcional)
+                      Comentários (opcional)
                     </label>
                     <textarea
                       id="feedback-comments"
@@ -264,7 +264,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                       onChange={(e) => setComments(e.target.value)}
                       disabled={isSubmitting}
                       className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-patronos-accent focus:ring-patronos-accent text-sm resize-none disabled:bg-gray-50 disabled:text-gray-500"
-                      placeholder="Conte-nos mais sobre sua experiencia..."
+                      placeholder="Conte-nos mais sobre sua experiência..."
                     />
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                         {mode === 'complete' ? 'Concluindo...' : 'Enviando...'}
                       </>
                     ) : (
-                      mode === 'complete' ? 'Concluir Sessao' : 'Enviar Feedback'
+                      mode === 'complete' ? 'Concluir Sessão' : 'Enviar Feedback'
                     )}
                   </button>
                 </div>

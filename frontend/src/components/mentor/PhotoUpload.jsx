@@ -26,10 +26,10 @@ export default function PhotoUpload({
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
-      return 'Formato invalido. Use JPG, PNG ou WebP.';
+      return 'Formato inválido. Use JPG, PNG ou WebP.';
     }
     if (file.size > maxSize) {
-      return 'Arquivo muito grande. Maximo 5MB.';
+      return 'Arquivo muito grande. Máximo 5MB.';
     }
     return null;
   };

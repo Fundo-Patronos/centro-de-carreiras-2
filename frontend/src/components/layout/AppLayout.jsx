@@ -45,18 +45,18 @@ export default function AppLayout() {
 
   const navigation = isEstudante
     ? [
-        { name: 'Minhas Sessoes', href: '/estudante/sessoes', icon: CalendarDaysIcon },
+        { name: 'Minhas Sessões', href: '/estudante/sessoes', icon: CalendarDaysIcon },
         { name: 'Mentores', href: '/estudante/mentores', icon: UserGroupIcon },
         { name: 'Vagas', href: '/estudante/vagas', icon: BriefcaseIcon },
       ]
     : [
-        { name: 'Minhas Sessoes', href: '/mentor/sessoes', icon: CalendarDaysIcon },
+        { name: 'Minhas Sessões', href: '/mentor/sessoes', icon: CalendarDaysIcon },
         { name: 'Disponibilidade', href: '/mentor/disponibilidade', icon: Cog6ToothIcon },
         { name: 'Meu Perfil', href: '/mentor/perfil', icon: UserCircleIcon },
       ];
 
   const adminNavigation = [
-    { name: 'Aprovacoes', href: '/admin/approvals', icon: ShieldCheckIcon },
+    { name: 'Aprovações', href: '/admin/approvals', icon: ShieldCheckIcon },
     { name: 'Mentores', href: '/admin/mentors', icon: UserGroupIcon },
     { name: 'Feedback', href: '/admin/feedback', icon: ChatBubbleLeftRightIcon },
   ];
@@ -151,7 +151,7 @@ export default function AppLayout() {
           {isAdmin && (
             <li>
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Administracao
+                Administração
               </div>
               <ul role="list" className="mt-2 -mx-2 space-y-1">
                 {adminNavigation.map((item) => (
@@ -312,7 +312,7 @@ export default function AppLayout() {
               {isAdmin && (
                 <li>
                   <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Administracao
+                    Administração
                   </div>
                   <ul role="list" className="mt-2 -mx-2 space-y-1">
                     {adminNavigation.map((item) => (
@@ -391,7 +391,7 @@ export default function AppLayout() {
               {/* Profile dropdown */}
               <Menu as="div" className="relative">
                 <MenuButton className="relative flex items-center -m-1.5 p-1.5">
-                  <span className="sr-only">Abrir menu do usuario</span>
+                  <span className="sr-only">Abrir menu do usuário</span>
                   {userProfile?.photoURL ? (
                     <img
                       alt=""

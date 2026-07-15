@@ -19,7 +19,7 @@ const statusConfig = {
     icon: ClockIcon,
   },
   completed: {
-    label: 'Concluida',
+    label: 'Concluída',
     color: 'bg-green-100 text-green-700',
     icon: CheckCircleIcon,
   },
@@ -180,7 +180,7 @@ export default function SessionCard({
             className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors bg-patronos-coral text-white hover:bg-patronos-coral/90 whitespace-nowrap"
           >
             <CheckCircleIcon className="h-4 w-4 flex-shrink-0" />
-            Concluida
+            Concluída
           </button>
         ) : (
           // Completed session: Show status indicator and possibly feedback button
@@ -188,7 +188,7 @@ export default function SessionCard({
             {/* Completed status indicator */}
             <div className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-green-100 text-green-700 whitespace-nowrap">
               <CheckCircleSolidIcon className="h-4 w-4 flex-shrink-0" />
-              Concluida
+              Concluída
             </div>
 
             {/* Show feedback button if user hasn't submitted feedback yet */}

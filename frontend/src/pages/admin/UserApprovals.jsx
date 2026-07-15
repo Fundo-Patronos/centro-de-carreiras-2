@@ -39,7 +39,7 @@ export default function UserApprovals() {
       const data = await adminService.getPendingUsers();
       setUsers(data.users);
     } catch (err) {
-      setError('Erro ao carregar usuarios pendentes');
+      setError('Erro ao carregar usuários pendentes');
       console.error(err);
     } finally {
       setLoading(false);
@@ -58,14 +58,14 @@ export default function UserApprovals() {
       await adminService.approveUser(uid);
       setUsers(users.filter((u) => u.uid !== uid));
       setSelectedUser(null); // Close drawer after approval
-      showToast(`Usuario ${email} aprovado com sucesso`);
+      showToast(`Usuário ${email} aprovado com sucesso`);
       analytics.track(EVENTS.USER_APPROVED, {
         approved_user_uid: uid,
         approved_user_email: email,
         approved_user_role: user?.role,
       });
     } catch (err) {
-      showToast('Erro ao aprovar usuario', 'error');
+      showToast('Erro ao aprovar usuário', 'error');
       console.error(err);
       analytics.track(EVENTS.ADMIN_ACTION_ERROR, {
         action: 'approve',
@@ -88,14 +88,14 @@ export default function UserApprovals() {
       await adminService.rejectUser(uid);
       setUsers(users.filter((u) => u.uid !== uid));
       setSelectedUser(null); // Close drawer after rejection
-      showToast(`Usuario ${email} rejeitado`);
+      showToast(`Usuário ${email} rejeitado`);
       analytics.track(EVENTS.USER_REJECTED, {
         rejected_user_uid: uid,
         rejected_user_email: email,
         rejected_user_role: user?.role,
       });
     } catch (err) {
-      showToast('Erro ao rejeitar usuario', 'error');
+      showToast('Erro ao rejeitar usuário', 'error');
       console.error(err);
       analytics.track(EVENTS.ADMIN_ACTION_ERROR, {
         action: 'reject',
@@ -111,13 +111,13 @@ export default function UserApprovals() {
     try {
       setActionLoading(uid);
       await adminService.resendVerificationEmail(uid);
-      showToast(`Email de verificacao reenviado para ${email}`);
+      showToast(`Email de verificação reenviado para ${email}`);
       analytics.track(EVENTS.VERIFICATION_EMAIL_RESENT, {
         user_uid: uid,
         user_email: email,
       });
     } catch (err) {
-      showToast('Erro ao reenviar email de verificacao', 'error');
+      showToast('Erro ao reenviar email de verificação', 'error');
       console.error(err);
       analytics.track(EVENTS.ADMIN_ACTION_ERROR, {
         action: 'resend_verification',
@@ -152,10 +152,10 @@ export default function UserApprovals() {
     try {
       setExportLoading(true);
       await adminService.exportUsersCSV();
-      showToast('Exportacao concluida com sucesso');
+      showToast('Exportação concluída com sucesso');
       analytics.track('Admin: Users Export Clicked');
     } catch (err) {
-      showToast('Erro ao exportar usuarios', 'error');
+      showToast('Erro ao exportar usuários', 'error');
       console.error(err);
     } finally {
       setExportLoading(false);
@@ -194,9 +194,9 @@ export default function UserApprovals() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Aprovacoes</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Aprovações</h1>
           <p className="mt-1 text-gray-600">
-            Gerencie usuarios aguardando aprovacao
+            Gerencie usuários aguardando aprovação
           </p>
         </div>
 
@@ -213,7 +213,7 @@ export default function UserApprovals() {
             ) : (
               <ArrowDownTrayIcon className="h-4 w-4" />
             )}
-            Exportar Usuarios
+            Exportar Usuários
           </button>
 
           {/* Filter */}
@@ -227,8 +227,8 @@ export default function UserApprovals() {
               <option value="all">Todos</option>
               <option value="estudante">Estudantes</option>
               <option value="mentor">Mentores</option>
-              <option value="pending">Aguardando aprovacao</option>
-              <option value="pending_verification">Aguardando verificacao</option>
+              <option value="pending">Aguardando aprovação</option>
+              <option value="pending_verification">Aguardando verificação</option>
             </select>
           </div>
         </div>
@@ -252,12 +252,12 @@ export default function UserApprovals() {
         <div className="mt-12 text-center">
           <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-4 text-lg font-medium text-gray-900">
-            Nenhum usuario pendente
+            Nenhum usuário pendente
           </h3>
           <p className="mt-2 text-gray-600">
             {filter === 'all'
-              ? 'Todos os usuarios foram aprovados ou rejeitados.'
-              : `Nenhum ${filter} aguardando aprovacao.`}
+              ? 'Todos os usuários foram aprovados ou rejeitados.'
+              : `Nenhum ${filter} aguardando aprovação.`}
           </p>
         </div>
       )}
@@ -269,7 +269,7 @@ export default function UserApprovals() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Usuario
+                  Usuário
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Perfil
@@ -278,7 +278,7 @@ export default function UserApprovals() {
                   Data de Cadastro
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acoes
+                  Ações
                 </th>
               </tr>
             </thead>
@@ -355,8 +355,8 @@ export default function UserApprovals() {
                         }`}
                       >
                         {user.status === 'pending_verification'
-                          ? 'Verificacao pendente'
-                          : 'Aprovacao pendente'}
+                          ? 'Verificação pendente'
+                          : 'Aprovação pendente'}
                       </span>
                     </div>
                   </td>
@@ -376,7 +376,7 @@ export default function UserApprovals() {
                           className="inline-flex items-center gap-1 px-3 py-1.5 bg-patronos-accent text-white rounded-lg hover:bg-patronos-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                           <EnvelopeIcon className="h-4 w-4" />
-                          Reenviar Verificacao
+                          Reenviar Verificação
                         </button>
                       ) : (
                         /* Pending approval - show approve/reject buttons */

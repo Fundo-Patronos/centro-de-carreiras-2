@@ -298,7 +298,7 @@ export default function MentorList() {
                   !selectedTag ? 'text-patronos-accent font-medium' : 'text-gray-700'
                 }`}
               >
-                Todas as areas
+                Todas as áreas
               </button>
               <div className="border-t border-gray-100" />
               {availableTags.map((tag) => (

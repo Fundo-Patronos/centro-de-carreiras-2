@@ -141,7 +141,7 @@ export default function ResendEmailModal({ session, isOpen, onClose, onSuccess }
                   <div className="mb-4 flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
                     <EnvelopeIcon className="h-5 w-5 flex-shrink-0" />
                     <span>
-                      Voce pode editar a mensagem antes de reenviar. O mentor recebera um novo email com esta mensagem.
+                      Você pode editar a mensagem antes de reenviar. O mentor receberá um novo email com esta mensagem.
                     </span>
                   </div>
 

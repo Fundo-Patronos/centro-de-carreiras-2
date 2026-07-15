@@ -31,7 +31,7 @@ export default function SignupForm() {
 
   const validateStep1 = () => {
     if (!formData.role) {
-      setErrors({ role: 'Selecione se voce e estudante ou mentor' });
+      setErrors({ role: 'Selecione se você é estudante ou mentor' });
       return false;
     }
     setErrors({});
@@ -42,30 +42,30 @@ export default function SignupForm() {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Nome e obrigatorio';
+      newErrors.name = 'Nome é obrigatório';
     }
 
     if (!formData.curso.trim()) {
-      newErrors.curso = 'Curso e obrigatorio';
+      newErrors.curso = 'Curso é obrigatório';
     }
 
     // Student-specific validation
     if (formData.role === 'estudante') {
       if (!formData.ra.trim()) {
-        newErrors.ra = 'RA e obrigatorio';
+        newErrors.ra = 'RA é obrigatório';
       }
 
       // Email alternativo is optional, but validate format if provided
       if (formData.emailAlternativo.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAlternativo)) {
-        newErrors.emailAlternativo = 'Email alternativo invalido';
+        newErrors.emailAlternativo = 'Email alternativo inválido';
       }
 
       if (!formData.whatsapp.trim()) {
-        newErrors.whatsapp = 'WhatsApp e obrigatorio';
+        newErrors.whatsapp = 'WhatsApp é obrigatório';
       } else {
         const cleanedPhone = formData.whatsapp.replace(/[\s()+-]/g, '');
         if (!/^\d{10,13}$/.test(cleanedPhone)) {
-          newErrors.whatsapp = 'WhatsApp invalido (use formato brasileiro)';
+          newErrors.whatsapp = 'WhatsApp inválido (use formato brasileiro)';
         }
       }
     }
@@ -73,27 +73,27 @@ export default function SignupForm() {
     // Mentor-specific validation
     if (formData.role === 'mentor') {
       if (!formData.company.trim()) {
-        newErrors.company = 'Empresa e obrigatoria';
+        newErrors.company = 'Empresa é obrigatória';
       }
       if (!formData.title.trim()) {
-        newErrors.title = 'Cargo e obrigatorio';
+        newErrors.title = 'Cargo é obrigatório';
       }
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email e obrigatorio';
+      newErrors.email = 'Email é obrigatório';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email invalido';
+      newErrors.email = 'Email inválido';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Senha e obrigatoria';
+      newErrors.password = 'Senha é obrigatória';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'As senhas nao coincidem';
+      newErrors.confirmPassword = 'As senhas não coincidem';
     }
 
     setErrors(newErrors);
@@ -178,9 +178,9 @@ export default function SignupForm() {
 
       // Handle Firebase errors in Portuguese
       if (err.code === 'auth/email-already-in-use') {
-        setErrors({ email: 'Este email ja esta cadastrado' });
+        setErrors({ email: 'Este email já está cadastrado' });
       } else if (err.code === 'auth/invalid-email') {
-        setErrors({ email: 'Email invalido' });
+        setErrors({ email: 'Email inválido' });
       } else if (err.code === 'auth/weak-password') {
         setErrors({ password: 'Senha muito fraca' });
       } else {
@@ -204,7 +204,7 @@ export default function SignupForm() {
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900">Como voce quer usar o Centro de Carreiras?</h3>
+          <h3 className="text-lg font-medium text-gray-900">Como você quer usar o Centro de Carreiras?</h3>
           <p className="mt-1 text-sm text-gray-500">Selecione seu perfil para continuar</p>
         </div>
 
@@ -307,7 +307,7 @@ export default function SignupForm() {
             focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
             ${errors.curso ? 'border-red-300' : 'border-gray-300'}
           `}
-          placeholder="Ex: Engenharia de Computacao"
+          placeholder="Ex: Engenharia de Computação"
         />
         {errors.curso && (
           <p className="mt-1 text-sm text-red-600">{errors.curso}</p>
@@ -319,7 +319,7 @@ export default function SignupForm() {
         <>
           <div>
             <label htmlFor="ra" className="block text-sm font-medium text-gray-700">
-              RA (Registro Academico) <span className="text-red-500">*</span>
+              RA (Registro Acadêmico) <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -378,7 +378,7 @@ export default function SignupForm() {
                 focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
                 ${errors.company ? 'border-red-300' : 'border-gray-300'}
               `}
-              placeholder="Ex: Google, McKinsey, Itau"
+              placeholder="Ex: Google, McKinsey, Itaú"
             />
             {errors.company && (
               <p className="mt-1 text-sm text-red-600">{errors.company}</p>
@@ -490,7 +490,7 @@ export default function SignupForm() {
             focus:outline-none focus:ring-2 focus:ring-patronos-accent focus:border-transparent
             ${errors.password ? 'border-red-300' : 'border-gray-300'}
           `}
-          placeholder="Minimo 6 caracteres"
+          placeholder="Mínimo 6 caracteres"
         />
         {errors.password && (
           <p className="mt-1 text-sm text-red-600">{errors.password}</p>

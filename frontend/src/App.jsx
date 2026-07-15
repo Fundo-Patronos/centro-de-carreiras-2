@@ -164,7 +164,7 @@ function SuspendedPage() {
           </div>
           <h2 className="mt-6 text-xl font-semibold text-gray-900">Conta Suspensa</h2>
           <p className="mt-4 text-gray-600">
-            Sua conta foi suspensa. Entre em contato com o suporte para mais informacoes.
+            Sua conta foi suspensa. Entre em contato com o suporte para mais informações.
           </p>
           <p className="mt-6 text-center text-xs text-gray-500">
             Fundo Patronos da Unicamp

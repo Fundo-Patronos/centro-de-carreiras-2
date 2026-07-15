@@ -488,7 +488,7 @@ async def list_sessions_with_feedback(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao buscar sessoes com feedback: {str(e)}",
+            detail=f"Erro ao buscar sessões com feedback: {str(e)}",
         )
 
 
@@ -507,7 +507,7 @@ async def get_session_feedback(
         if not session_doc.exists:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sessao nao encontrada",
+                detail="Sessão não encontrada",
             )
 
         session_data = session_doc.to_dict()
@@ -577,7 +577,7 @@ async def get_session_feedback(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao buscar feedback da sessao: {str(e)}",
+            detail=f"Erro ao buscar feedback da sessão: {str(e)}",
         )
 
 
@@ -670,7 +670,7 @@ async def update_mentor_visibility(
         if not user_doc.exists:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Mentor nao encontrado",
+                detail="Mentor não encontrado",
             )
 
         user_data = user_doc.to_dict()
@@ -678,7 +678,7 @@ async def update_mentor_visibility(
         if user_data.get("role") != "mentor":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Usuario nao e um mentor",
+                detail="Usuário não é um mentor",
             )
 
         # Update mentor profile isActive field
@@ -832,7 +832,7 @@ async def export_users_csv(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao exportar usuarios: {str(e)}",
+            detail=f"Erro ao exportar usuários: {str(e)}",
         )
 
 
