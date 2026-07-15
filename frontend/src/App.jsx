@@ -29,6 +29,7 @@ import MySessions from './pages/estudante/MySessions';
 // Mentor pages
 import MentorDashboard from './pages/mentor/Dashboard';
 import MeuPerfil from './pages/mentor/MeuPerfil';
+import Disponibilidade from './pages/mentor/Disponibilidade';
 
 // Settings pages
 import ChangePassword from './pages/settings/ChangePassword';
@@ -112,7 +113,7 @@ function AuthenticatedRoutes() {
           <Route index element={<Navigate to="sessoes" replace />} />
           <Route path="dashboard" element={<MentorDashboard />} />
           <Route path="sessoes" element={<MentorSessions />} />
-          <Route path="disponibilidade" element={<PlaceholderPage title="Disponibilidade" />} />
+          <Route path="disponibilidade" element={<Disponibilidade />} />
           <Route path="perfil" element={<MeuPerfil />} />
         </Route>
 
