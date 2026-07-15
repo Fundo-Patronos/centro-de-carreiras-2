@@ -111,7 +111,7 @@ export default function Disponibilidade() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Disponibilidade</h1>
         <p className="mt-1 text-gray-600">
-          Defina como os estudantes podem agendar mentorias com voce.
+          Defina como os estudantes podem agendar mentorias com você.
         </p>
       </div>
 
@@ -142,8 +142,8 @@ export default function Disponibilidade() {
           <p className="text-sm text-gray-600 mb-4">
             Adicione um link de agendamento (Google Agenda ou Microsoft Bookings)
             para que os estudantes marquem a mentoria diretamente na sua agenda,
-            sem troca de emails. Se voce nao adicionar um link, os estudantes
-            continuarao enviando solicitacoes por email normalmente.
+            sem troca de emails. Se você não adicionar um link, os estudantes
+            enviarão solicitações por email para coordenar um horário.
           </p>
 
           <div className="space-y-6">
@@ -160,7 +160,7 @@ export default function Disponibilidade() {
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-patronos-accent focus:ring-1 focus:ring-patronos-accent"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Cole o link publico do seu horario de agendamento. Deve comecar com https://
+                Cole o link público do seu horário de agendamento. Deve começar com https://
               </p>
             </div>
 
@@ -174,7 +174,7 @@ export default function Disponibilidade() {
               </summary>
               <div className="mt-3 space-y-3 text-sm text-gray-700">
                 <p>
-                  Escolha a ferramenta que voce ja usa e siga o passo a passo oficial:
+                  Escolha a ferramenta que você já usa e siga o passo a passo oficial:
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <a
@@ -186,7 +186,7 @@ export default function Disponibilidade() {
                   >
                     <span className="font-semibold text-gray-900">Google Agenda</span>
                     <span className="text-xs text-gray-500 mt-0.5">
-                      Criar um horario de agendamento &rarr;
+                      Criar um horário de agendamento &rarr;
                     </span>
                   </a>
                   <a
@@ -198,12 +198,12 @@ export default function Disponibilidade() {
                   >
                     <span className="font-semibold text-gray-900">Microsoft Bookings (Outlook)</span>
                     <span className="text-xs text-gray-500 mt-0.5">
-                      Visao geral do Bookings &rarr;
+                      Visão geral do Bookings &rarr;
                     </span>
                   </a>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Depois de criar, copie o link publico gerado e cole no campo acima.
+                  Depois de criar, copie o link público gerado e cole no campo acima.
                 </p>
               </div>
             </details>
@@ -214,10 +214,10 @@ export default function Disponibilidade() {
               <div className="text-sm text-amber-800">
                 <p className="font-medium">Dica: controle o volume de mentorias</p>
                 <p className="mt-1">
-                  A procura dos estudantes pode ser alta. Nas configuracoes do seu
-                  link de agendamento, limite o numero de reunioes por semana ou por
-                  mes e defina os horarios disponiveis, para manter um ritmo
-                  sustentavel para voce.
+                  A procura dos estudantes pode ser alta. Nas configurações do seu
+                  link de agendamento, limite o número de reuniões por semana ou por
+                  mês e defina os horários disponíveis, para manter um ritmo
+                  sustentável para você.
                 </p>
               </div>
             </div>
@@ -238,7 +238,7 @@ export default function Disponibilidade() {
               ${isSaving ? 'opacity-50 cursor-wait' : ''}
             `}
           >
-            {isSaving ? 'Salvando...' : 'Salvar Alteracoes'}
+            {isSaving ? 'Salvando...' : 'Salvar Alterações'}
           </button>
         </div>
       </div>
