@@ -127,6 +127,9 @@ jobs:
           GOOGLE_GENAI_USE_VERTEXAI: "true"
           GOOGLE_CLOUD_PROJECT: patronos-internal-tools
           GOOGLE_CLOUD_LOCATION: us-central1
+          # Without this the CLI silently overrides --approval-mode to
+          # "default" ("folder is not trusted") and refuses every write.
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
         run: |
           set -euo pipefail
           gemini --model gemini-2.5-pro --approval-mode yolo \
@@ -153,6 +156,9 @@ jobs:
           GOOGLE_GENAI_USE_VERTEXAI: "true"
           GOOGLE_CLOUD_PROJECT: patronos-internal-tools
           GOOGLE_CLOUD_LOCATION: us-central1
+          # Without this the CLI silently overrides --approval-mode to
+          # "default" ("folder is not trusted") and refuses every write.
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
         run: |
           set -euo pipefail
           gemini --model gemini-2.5-pro --approval-mode yolo --prompt \
@@ -191,6 +197,11 @@ jobs:
           mkdir -p "$out/files"
           touch "$RUNNER_TEMP/pd/verify.log"
 
+          # google-github-actions/auth writes gha-creds-*.json into the
+          # workspace, and it embeds a short-lived OIDC bearer token. Hide it
+          # from git entirely — repo-local, so nothing is committed to do it.
+          printf 'gha-creds-*.json\n' >> .git/info/exclude
+
           # Naming a gitignored path inside an exclude pathspec makes `git add`
           # error out ("paths are ignored by one of your .gitignore files") and
           # exit 1, which would fail every single run. Stage everything, then
@@ -198,6 +209,16 @@ jobs:
           git add -A
           git reset -q -- node_modules .next dist build out coverage .venv \
                           __pycache__ 2>/dev/null || true
+
+          # Last line of defence: never let anything credential-shaped leave
+          # the runner, whatever the agent did or a future edit breaks.
+          if git diff --cached --name-only \
+               | grep -vE '\.(example|sample|template)$' \
+               | grep -qE '(^|/)(gha-creds-[^/]*\.json|[^/]*\.pem|[^/]*\.p12|[^/]*\.pfx|id_rsa[^/]*|\.env|\.env\.[^/]*|credentials\.json|[^/]*service-account[^/]*\.json)$'; then
+            echo "::error::Arquivo com aparência de credencial foi gerado — recusado."
+            git diff --cached --name-only | sed 's/^/  /'
+            exit 1
+          fi
           if ! git diff --cached --quiet -- .github; then
             echo "::error::O agente alterou arquivos em .github/ — recusado."
             exit 1
