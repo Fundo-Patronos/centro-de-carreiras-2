@@ -32,6 +32,11 @@ on:
         description: "Member email"
         required: true
         type: string
+      base_ref:
+        description: "Follow-up only: the task's own branch (patronos-dev/<task_id>) to build on"
+        required: false
+        type: string
+        default: ""
 
 # No `workflows` key: GitHub then refuses any push touching .github/workflows/**.
 permissions:
@@ -48,8 +53,30 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      # A follow-up on an open pull request starts from the task's own branch,
+      # so the agent builds on the previous run and the artifact holds only the
+      # incremental diff. The only branch ever accepted is this task's own —
+      # internal-tools derives it server-side, and this re-checks the shape so
+      # a hand-crafted dispatch cannot point the run at an arbitrary ref.
+      - name: Validate base ref
+        env:
+          BASE_REF: ${{ inputs.base_ref }}
+          TASK_ID: ${{ inputs.task_id }}
+        run: |
+          set -euo pipefail
+          if [ -n "$BASE_REF" ] && [ "$BASE_REF" != "patronos-dev/$TASK_ID" ]; then
+            echo "::error::base_ref must be empty or exactly patronos-dev/<task_id>."
+            exit 1
+          fi
+          if ! printf '%s' "$TASK_ID" | grep -qE '^[A-Za-z0-9]{6,64}$'; then
+            echo "::error::task_id has an unexpected shape."
+            exit 1
+          fi
+
       - uses: actions/checkout@v5
         with:
+          # Empty means the ref the workflow was dispatched on (the default branch).
+          ref: ${{ inputs.base_ref }}
           # Belt and braces: the agent must not find a credential in .git/config.
           persist-credentials: false
 
