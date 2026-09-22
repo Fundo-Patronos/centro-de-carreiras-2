@@ -37,6 +37,11 @@ on:
         required: false
         type: string
         default: ""
+      attachments:
+        description: "JSON array of Storage object paths under patronos-dev/attachments/<task_id>/ (never URLs or tokens)"
+        required: false
+        type: string
+        default: "[]"
 
 # No `workflows` key: GitHub then refuses any push touching .github/workflows/**.
 permissions:
@@ -82,9 +87,10 @@ jobs:
 
       # Scratch space for the brief, prompts and logs, excluded from git
       # immediately so it can never reach a commit. Note the agent cannot READ
-      # from here either: the Gemini CLI refuses git-ignored paths (and paths
-      # outside the workspace, which rules out $RUNNER_TEMP). That is why the
-      # brief is inlined into the prompt instead of being handed over as a file.
+      # from here either: coding-agent CLIs refuse git-ignored paths (the Gemini
+      # CLI did, and OpenCode's behaviour is undocumented) and paths outside the
+      # workspace, which rules out $RUNNER_TEMP. That is why the brief is
+      # inlined into the prompt instead of being handed over as a file.
       - name: Prepare workspace
         run: |
           set -euo pipefail
@@ -190,22 +196,96 @@ jobs:
         with:
           workload_identity_provider: ${{ vars.PATRONOS_DEV_WIF_PROVIDER }}
           service_account: ${{ vars.PATRONOS_DEV_VERTEX_SA }}
+          # Also mint a short-lived access token: the attachments step reads
+          # Storage with it. The credentials FILE is still what OpenCode uses.
+          token_format: access_token
 
-      - name: Install Gemini CLI
-        run: npm i -g @google/gemini-cli@0.60.0
+      # Attachments the member added in the chat. Paths are re-validated here
+      # against this task's own prefix — same posture as base_ref — so a
+      # hand-crafted dispatch cannot point the runner at any other object.
+      # Fetched as the runner's own identity; nothing secret is in the input.
+      - name: Fetch attachments
+        env:
+          ATTACHMENTS: ${{ inputs.attachments }}
+          TASK_ID: ${{ inputs.task_id }}
+          GCS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          BUCKET: patronos-internal-tools-attachments
+        run: |
+          set -euo pipefail
+          mkdir -p .patronos-dev/attachments
+          echo '[]' > .patronos-dev/attachments.json
+          count=$(printf '%s' "$ATTACHMENTS" | jq 'length')
+          [ "$count" -gt 0 ] || { echo "no attachments"; exit 0; }
+          [ "$count" -le 12 ] || { echo "::error::too many attachments"; exit 1; }
+          i=0
+          printf '%s' "$ATTACHMENTS" | jq -r '.[]' | while IFS= read -r path; do
+            i=$((i+1))
+            if ! printf '%s' "$path" | grep -qE "^patronos-dev/attachments/${TASK_ID}/[A-Za-z0-9._-]+$"; then
+              echo "::error::attachment path outside this task's prefix — refused."
+              exit 1
+            fi
+            name="${path##*/}"; name="${name#*-}"
+            ext="${name##*.}"; [ "$ext" != "$name" ] || ext="bin"
+            out=$(printf '.patronos-dev/attachments/att-%02d.%s' "$i" "$ext")
+            enc=$(printf '%s' "$path" | jq -sRr @uri)
+            curl -sSf -H "Authorization: Bearer $GCS_TOKEN" \
+              "https://storage.googleapis.com/storage/v1/b/${BUCKET}/o/${enc}?alt=media" -o "$out"
+            jq -c --arg f "$out" --arg n "$name" '. + [{file:$f, name:$n}]' \
+              .patronos-dev/attachments.json > .patronos-dev/attachments.tmp
+            mv .patronos-dev/attachments.tmp .patronos-dev/attachments.json
+          done
+          echo "fetched $(jq length .patronos-dev/attachments.json) attachment(s)"
+          # Compose prompt already ran; name the attachments at the end of it.
+          {
+            printf '\n===== ANEXOS =====\n'
+            printf 'O membro anexou os arquivos abaixo (estao anexados a esta mensagem). O pedido diz o que fazer com cada um: uma captura de tela e referencia; um logo ou documento pode ser para colocar no repositorio.\n'
+            jq -r '.[] | "- \(.name)"' .patronos-dev/attachments.json
+            printf '===== FIM DOS ANEXOS =====\n'
+          } >> .patronos-dev/prompt.md
+
+      - name: Install OpenCode
+        run: npm i -g opencode-ai@1.18.32
+
+      # The `deny` rules are defence in depth, not the boundary — the boundary
+      # is still `contents: read` above. `--auto` approves anything not
+      # explicitly denied, so the denies are the only part that bites.
+      - name: Write OpenCode config
+        run: |
+          set -euo pipefail
+          cat > .patronos-dev/opencode.json <<'JSON'
+          {
+            "$schema": "https://opencode.ai/config.json",
+            "model": "google-vertex/gemini-2.5-pro",
+            "small_model": "google-vertex/gemini-2.5-flash",
+            "instructions": ["AGENTS.md", "CLAUDE.md"],
+            "permission": {
+              "edit": "allow",
+              "webfetch": "deny",
+              "websearch": "deny",
+              "bash": {
+                "*": "allow",
+                "git push*": "deny",
+                "git commit*": "deny",
+                "gh *": "deny",
+                "curl *": "deny",
+                "wget *": "deny"
+              }
+            }
+          }
+          JSON
 
       - name: Coding agent
         env:
-          GOOGLE_GENAI_USE_VERTEXAI: "true"
+          OPENCODE_CONFIG: .patronos-dev/opencode.json
           GOOGLE_CLOUD_PROJECT: patronos-internal-tools
-          GOOGLE_CLOUD_LOCATION: us-central1
-          # Without this the CLI silently overrides --approval-mode to
-          # "default" ("folder is not trusted") and refuses every write.
-          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          VERTEX_LOCATION: us-central1
+          # GOOGLE_APPLICATION_CREDENTIALS is exported by google-github-actions/auth.
         run: |
           set -euo pipefail
-          gemini --model gemini-2.5-pro --approval-mode yolo \
-                 --prompt "$(cat .patronos-dev/prompt.md)"
+          files=()
+          for f in .patronos-dev/attachments/att-*; do [ -e "$f" ] && files+=(--file "$f"); done
+          opencode run --auto --format json --print-logs --log-level WARN \
+            "$(cat .patronos-dev/prompt.md)" "${files[@]}" | tee .patronos-dev/agent.log
 
       - name: Verify
         id: verify1
@@ -222,10 +302,9 @@ jobs:
       - name: Coding agent (retry after failed verification)
         if: steps.baseline.outcome == 'success' && steps.verify1.outcome == 'failure'
         env:
-          GOOGLE_GENAI_USE_VERTEXAI: "true"
+          OPENCODE_CONFIG: .patronos-dev/opencode.json
           GOOGLE_CLOUD_PROJECT: patronos-internal-tools
-          GOOGLE_CLOUD_LOCATION: us-central1
-          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          VERTEX_LOCATION: us-central1
         run: |
           set -euo pipefail
           {
@@ -242,8 +321,8 @@ jobs:
             printf '\n===== FIM DO LOG DA VERIFICACAO (ultimas linhas) =====\n'
             tail -n 120 .patronos-dev/verify.log
           } > .patronos-dev/retry-prompt.md
-          gemini --model gemini-2.5-pro --approval-mode yolo \
-                 --prompt "$(cat .patronos-dev/retry-prompt.md)"
+          opencode run --auto --format json --print-logs --log-level WARN \
+            "$(cat .patronos-dev/retry-prompt.md)" | tee .patronos-dev/agent-retry.log
 
       - name: Verify (retry)
         id: verify2
