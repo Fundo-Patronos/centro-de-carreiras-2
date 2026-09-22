@@ -186,18 +186,17 @@ jobs:
             printf '\n===== FIM DO PEDIDO =====\n'
           } >> .patronos-dev/prompt.md
 
-      # --- Model access ------------------------------------------------------
+      # --- Attachments -------------------------------------------------------
       # Workload Identity Federation: no service-account key in GitHub. The SA
-      # behind this provider holds roles/aiplatform.user and nothing else — it
-      # is NOT the FIREBASE_SERVICE_ACCOUNT_JSON identity, which carries
-      # domain-wide Drive delegation and must never be federated here.
+      # behind this provider can read the attachments bucket and nothing else
+      # — it is NOT the FIREBASE_SERVICE_ACCOUNT_JSON identity, which carries
+      # domain-wide Drive delegation and must never be federated here. The
+      # model itself is reached through OpenRouter (below), not through GCP.
       - id: gcp
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ vars.PATRONOS_DEV_WIF_PROVIDER }}
           service_account: ${{ vars.PATRONOS_DEV_VERTEX_SA }}
-          # Also mint a short-lived access token: the attachments step reads
-          # Storage with it. The credentials FILE is still what OpenCode uses.
           token_format: access_token
 
       # Attachments the member added in the chat. Paths are re-validated here
@@ -246,17 +245,26 @@ jobs:
       - name: Install OpenCode
         run: npm i -g opencode-ai@1.18.32
 
-      # The `deny` rules are defence in depth, not the boundary — the boundary
-      # is still `contents: read` above. `--auto` approves anything not
-      # explicitly denied, so the denies are the only part that bites.
+      # --- Model access ------------------------------------------------------
+      # OpenRouter, via an API key held as a repository secret. The model is an
+      # Actions variable so it can be changed without touching four workflows;
+      # the default is the one proven in the smoke test. The `deny` rules are
+      # defence in depth, not the boundary — the boundary is still
+      # `contents: read` above. `--auto` approves anything not explicitly
+      # denied, so the denies are the only part that bites.
       - name: Write OpenCode config
+        env:
+          MODEL: ${{ vars.PATRONOS_DEV_MODEL || 'anthropic/claude-opus-5.5' }}
         run: |
           set -euo pipefail
-          cat > .patronos-dev/opencode.json <<'JSON'
-          {
+          if ! printf '%s' "$MODEL" | grep -qE '^[a-z0-9-]+/[A-Za-z0-9._:-]+$'; then
+            echo "::error::PATRONOS_DEV_MODEL has an unexpected shape."
+            exit 1
+          fi
+          jq -n --arg m "openrouter/$MODEL" '{
             "$schema": "https://opencode.ai/config.json",
-            "model": "google-vertex/gemini-2.5-pro",
-            "small_model": "google-vertex/gemini-2.5-flash",
+            "model": $m,
+            "small_model": $m,
             "instructions": ["AGENTS.md", "CLAUDE.md"],
             "permission": {
               "edit": "allow",
@@ -271,15 +279,16 @@ jobs:
                 "wget *": "deny"
               }
             }
-          }
-          JSON
+          }' > .patronos-dev/opencode.json
 
+      # The key is in the agent's environment, so an agent that runs
+      # `env` can read it — that is the exposure the spend limit on the key
+      # exists for. What it must never do is LEAVE the runner: the packaging
+      # step below fails the job if the key's value appears in any staged file.
       - name: Coding agent
         env:
           OPENCODE_CONFIG: .patronos-dev/opencode.json
-          GOOGLE_CLOUD_PROJECT: patronos-internal-tools
-          VERTEX_LOCATION: us-central1
-          # GOOGLE_APPLICATION_CREDENTIALS is exported by google-github-actions/auth.
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           set -euo pipefail
           files=()
@@ -303,8 +312,7 @@ jobs:
         if: steps.baseline.outcome == 'success' && steps.verify1.outcome == 'failure'
         env:
           OPENCODE_CONFIG: .patronos-dev/opencode.json
-          GOOGLE_CLOUD_PROJECT: patronos-internal-tools
-          VERTEX_LOCATION: us-central1
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           set -euo pipefail
           {
@@ -344,11 +352,21 @@ jobs:
           BASELINE: ${{ steps.baseline.outcome }}
           VERIFY_1: ${{ steps.verify1.outcome }}
           VERIFY_2: ${{ steps.verify2.outcome }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/pd-out"
           mkdir -p "$out/files"
           touch .patronos-dev/verify.log
+
+          # The API key must never reach the artifact (three repos are public).
+          # Compare by value, in the working tree, before anything is staged.
+          if [ -n "${OPENROUTER_API_KEY:-}" ] && \
+             git grep -qF --untracked -- "$OPENROUTER_API_KEY" 2>/dev/null; then
+            echo "::error::A chave da API apareceu em um arquivo do repositório — recusado."
+            exit 1
+          fi
+
 
           # .patronos-dev/ and gha-creds-*.json are already in
           # .git/info/exclude, so `git add -A` cannot see them. Stage
