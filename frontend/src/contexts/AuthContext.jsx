@@ -157,6 +157,9 @@ export function AuthProvider({ children }) {
  * Hook to access auth context
  * @returns {Object} Auth context value
  */
+// The provider and its hook live together on purpose; splitting them would
+// rewrite every import for a fast-refresh nicety.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

@@ -63,9 +63,6 @@ export default function SessionCard({
     ? session.student_feedback_submitted
     : session.mentor_feedback_submitted;
 
-  // Feedback is only available for completed sessions
-  const isSessionCompleted = session.status === 'completed';
-  const canSubmitFeedback = isSessionCompleted && !hasFeedbackSubmitted;
 
   const handleCompleteClick = () => {
     // Open FeedbackModal in 'complete' mode

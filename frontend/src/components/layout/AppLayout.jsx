@@ -78,133 +78,6 @@ export default function AppLayout() {
     setSidebarOpen(false);
   };
 
-  const SidebarContent = () => (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
-      {/* Logo */}
-      <div className="flex h-16 shrink-0 items-center gap-x-3">
-        <img
-          alt="Patronos"
-          src="/patronos-logo.svg"
-          className="h-8 w-auto"
-        />
-        <span className="text-lg font-semibold text-gray-900">
-          Centro de Carreiras
-        </span>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex flex-1 flex-col">
-        <ul role="list" className="flex flex-1 flex-col gap-y-7">
-          {/* Main navigation */}
-          <li>
-            <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item) => (
-                <li key={item.name}>
-                  <NavLink
-                    to={item.href}
-                    onClick={() => handleNavClick(item.name, item.href)}
-                    className={({ isActive }) =>
-                      classNames(
-                        isActive
-                          ? 'bg-gray-50 text-patronos-accent'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-patronos-accent',
-                        'group flex gap-x-3 rounded-md p-2 text-sm font-semibold transition-colors'
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <item.icon
-                          aria-hidden="true"
-                          className={classNames(
-                            isActive ? 'text-patronos-accent' : 'text-gray-400 group-hover:text-patronos-accent',
-                            'h-6 w-6 shrink-0'
-                          )}
-                        />
-                        {item.name}
-                      </>
-                    )}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </li>
-
-          {/* Role badge */}
-          <li>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              Sua conta
-            </div>
-            <div className="mt-2 px-2 py-1.5">
-              <span
-                className={classNames(
-                  isEstudante ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700',
-                  'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium'
-                )}
-              >
-                {isEstudante ? 'Estudante' : 'Mentor'}
-              </span>
-            </div>
-          </li>
-
-          {/* Admin section */}
-          {isAdmin && (
-            <li>
-              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Administração
-              </div>
-              <ul role="list" className="mt-2 -mx-2 space-y-1">
-                {adminNavigation.map((item) => (
-                  <li key={item.name}>
-                    <NavLink
-                      to={item.href}
-                      onClick={() => handleNavClick(item.name, item.href)}
-                      className={({ isActive }) =>
-                        classNames(
-                          isActive
-                            ? 'bg-gray-50 text-patronos-accent'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-patronos-accent',
-                          'group flex gap-x-3 rounded-md p-2 text-sm font-semibold transition-colors'
-                        )
-                      }
-                    >
-                      {({ isActive }) => (
-                        <>
-                          <item.icon
-                            aria-hidden="true"
-                            className={classNames(
-                              isActive ? 'text-patronos-accent' : 'text-gray-400 group-hover:text-patronos-accent',
-                              'h-6 w-6 shrink-0'
-                            )}
-                          />
-                          {item.name}
-                        </>
-                      )}
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          )}
-
-          {/* Logout at bottom */}
-          <li className="mt-auto">
-            <button
-              onClick={handleLogout}
-              className="group -mx-2 flex w-full gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-patronos-accent transition-colors"
-            >
-              <ArrowRightOnRectangleIcon
-                aria-hidden="true"
-                className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-patronos-accent"
-              />
-              Sair
-            </button>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  );
-
   return (
     <div>
       {/* Beta banner - full width at very top */}
@@ -230,7 +103,130 @@ export default function AppLayout() {
                 </button>
               </div>
             </TransitionChild>
-            <SidebarContent />
+            <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
+              {/* Logo */}
+              <div className="flex h-16 shrink-0 items-center gap-x-3">
+                <img
+                  alt="Patronos"
+                  src="/patronos-logo.svg"
+                  className="h-8 w-auto"
+                />
+                <span className="text-lg font-semibold text-gray-900">
+                  Centro de Carreiras
+                </span>
+              </div>
+
+              {/* Navigation */}
+              <nav className="flex flex-1 flex-col">
+                <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                  {/* Main navigation */}
+                  <li>
+                    <ul role="list" className="-mx-2 space-y-1">
+                      {navigation.map((item) => (
+                        <li key={item.name}>
+                          <NavLink
+                            to={item.href}
+                            onClick={() => handleNavClick(item.name, item.href)}
+                            className={({ isActive }) =>
+                              classNames(
+                                isActive
+                                  ? 'bg-gray-50 text-patronos-accent'
+                                  : 'text-gray-700 hover:bg-gray-50 hover:text-patronos-accent',
+                                'group flex gap-x-3 rounded-md p-2 text-sm font-semibold transition-colors'
+                              )
+                            }
+                          >
+                            {({ isActive }) => (
+                              <>
+                                <item.icon
+                                  aria-hidden="true"
+                                  className={classNames(
+                                    isActive ? 'text-patronos-accent' : 'text-gray-400 group-hover:text-patronos-accent',
+                                    'h-6 w-6 shrink-0'
+                                  )}
+                                />
+                                {item.name}
+                              </>
+                            )}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+
+                  {/* Role badge */}
+                  <li>
+                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Sua conta
+                    </div>
+                    <div className="mt-2 px-2 py-1.5">
+                      <span
+                        className={classNames(
+                          isEstudante ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700',
+                          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium'
+                        )}
+                      >
+                        {isEstudante ? 'Estudante' : 'Mentor'}
+                      </span>
+                    </div>
+                  </li>
+
+                  {/* Admin section */}
+                  {isAdmin && (
+                    <li>
+                      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Administração
+                      </div>
+                      <ul role="list" className="mt-2 -mx-2 space-y-1">
+                        {adminNavigation.map((item) => (
+                          <li key={item.name}>
+                            <NavLink
+                              to={item.href}
+                              onClick={() => handleNavClick(item.name, item.href)}
+                              className={({ isActive }) =>
+                                classNames(
+                                  isActive
+                                    ? 'bg-gray-50 text-patronos-accent'
+                                    : 'text-gray-700 hover:bg-gray-50 hover:text-patronos-accent',
+                                  'group flex gap-x-3 rounded-md p-2 text-sm font-semibold transition-colors'
+                                )
+                              }
+                            >
+                              {({ isActive }) => (
+                                <>
+                                  <item.icon
+                                    aria-hidden="true"
+                                    className={classNames(
+                                      isActive ? 'text-patronos-accent' : 'text-gray-400 group-hover:text-patronos-accent',
+                                      'h-6 w-6 shrink-0'
+                                    )}
+                                  />
+                                  {item.name}
+                                </>
+                              )}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  )}
+
+                  {/* Logout at bottom */}
+                  <li className="mt-auto">
+                    <button
+                      onClick={handleLogout}
+                      className="group -mx-2 flex w-full gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-patronos-accent transition-colors"
+                    >
+                      <ArrowRightOnRectangleIcon
+                        aria-hidden="true"
+                        className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-patronos-accent"
+                      />
+                      Sair
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
           </DialogPanel>
         </div>
       </Dialog>

@@ -12,33 +12,6 @@ export default function VerifyEmail() {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    analytics.track(EVENTS.VERIFY_EMAIL_VIEWED);
-    verifyMagicLink();
-  }, []);
-
-  const verifyMagicLink = async () => {
-    const url = window.location.href;
-
-    // Check if this is a valid magic link
-    if (!authService.isEmailLink(url)) {
-      setStatus('error');
-      setError('Link inválido ou expirado.');
-      return;
-    }
-
-    // Get stored email
-    const storedEmail = authService.getStoredEmail();
-
-    if (!storedEmail) {
-      // Email not in storage - need to ask user
-      setStatus('need-email');
-      return;
-    }
-
-    await completeSignIn(storedEmail, url);
-  };
-
   const completeSignIn = async (emailToUse, url) => {
     setStatus('verifying');
 
@@ -90,6 +63,37 @@ export default function VerifyEmail() {
       }
     }
   };
+
+  const verifyMagicLink = async () => {
+    const url = window.location.href;
+
+    // Check if this is a valid magic link
+    if (!authService.isEmailLink(url)) {
+      setStatus('error');
+      setError('Link inválido ou expirado.');
+      return;
+    }
+
+    // Get stored email
+    const storedEmail = authService.getStoredEmail();
+
+    if (!storedEmail) {
+      // Email not in storage - need to ask user
+      setStatus('need-email');
+      return;
+    }
+
+    await completeSignIn(storedEmail, url);
+  };
+
+  useEffect(() => {
+    analytics.track(EVENTS.VERIFY_EMAIL_VIEWED);
+    // Runs once on mount to reflect an invalid link in the UI. Reworking this
+    // into render-time state means reshaping the whole magic-link flow, which needs
+    // someone who can exercise it end to end.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    verifyMagicLink();
+  }, []);
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();

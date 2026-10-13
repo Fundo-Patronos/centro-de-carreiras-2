@@ -23,7 +23,6 @@ export default function Sidebar() {
 
   // Navigation items based on role
   const isEstudante = userProfile?.role === 'estudante';
-  const isMentor = userProfile?.role === 'mentor';
   const isAdmin = userProfile?.isAdmin === true;
 
   const navigation = isEstudante
