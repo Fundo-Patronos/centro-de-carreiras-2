@@ -102,12 +102,18 @@ For mentors who provide an external scheduling link (Google Agenda / Microsoft B
 | Event Name | Trigger | Properties |
 |------------|---------|------------|
 | `Scheduling Link Clicked` | Student opens the mentor's scheduling link | `mentor_id`, `mentor_name` |
-| `Session Scheduled Via Link` | Session record created after link booking | `mentor_id`, `mentor_name` |
+| `Session Scheduled Via Link` | Session record created after the student confirms in the popup | `mentor_id`, `mentor_name` |
+| `External Booking Confirmation Opened` | Confirmation popup appears after the agenda opens | `mentor_id`, `mentor_name` |
+| `External Booking Confirmation Confirmed` | Student clicks "Sim, já agendei" | `mentor_id`, `mentor_name` |
+| `External Booking Confirmation Dismissed` | Student closes the popup without confirming | `mentor_id`, `mentor_name` |
+| `External Booking Confirmation Error` | Recording the session fails | `mentor_id`, `mentor_name`, `error` |
 | `Scheduling Tutorial Toggled` | Mentor expands/collapses the "how to create a link" tutorial | `open` |
 | `Scheduling Doc Clicked` | Mentor opens a Google/Outlook support doc | `provider` (`google` \| `outlook`) |
 | `API: Session Scheduling Link Booked` | *(backend)* Session recorded for a scheduling-link booking; no email sent | `session_id`, `mentor_id`, `mentor_name`, `mentor_company` |
 
 Note: `Book Session Clicked` and `API: Session Created` now also carry a `booking_method` property (`email` \| `scheduling_link`).
+
+Note: for scheduling-link bookings the session is only recorded after the student confirms in the popup ("Sim, já agendei"). The external agenda opening alone never creates a session, avoiding "ghost" mentorship records.
 
 ---
 

@@ -103,6 +103,10 @@ export const EVENTS = {
   SESSION_SCHEDULED_VIA_LINK: 'Session Scheduled Via Link',
   SCHEDULING_TUTORIAL_TOGGLED: 'Scheduling Tutorial Toggled',
   SCHEDULING_DOC_CLICKED: 'Scheduling Doc Clicked',
+  EXTERNAL_BOOKING_CONFIRMATION_OPENED: 'External Booking Confirmation Opened',
+  EXTERNAL_BOOKING_CONFIRMATION_CONFIRMED: 'External Booking Confirmation Confirmed',
+  EXTERNAL_BOOKING_CONFIRMATION_DISMISSED: 'External Booking Confirmation Dismissed',
+  EXTERNAL_BOOKING_CONFIRMATION_ERROR: 'External Booking Confirmation Error',
 
   // ============================================
   // ADMIN EVENTS
