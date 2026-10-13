@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon, CalendarDaysIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import analytics, { EVENTS } from '../../services/analytics';
-import sessionService from '../../services/sessionService';
 import BookingModal from '../session/BookingModal';
+import ConfirmExternalBookingModal from '../session/ConfirmExternalBookingModal';
 
 function getTagColor(tag) {
   const tagColors = {
@@ -20,6 +20,7 @@ function getTagColor(tag) {
 
 export default function MentorDrawer({ mentor, isOpen, onClose }) {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   // Track which mentor was just scheduled, so the confirmation only shows for
   // the current mentor (avoids leaking across mentors in this reused drawer).
   const [scheduledMentorId, setScheduledMentorId] = useState(null);
@@ -45,7 +46,7 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
     setIsBookingModalOpen(true);
   };
 
-  // Scheduling-link flow: open the mentor's external agenda and record the session
+  // Scheduling-link flow: open the mentor's external agenda, then confirm before recording
   const handleExternalSchedule = () => {
     analytics.track(EVENTS.BOOK_SESSION_CLICKED, {
       mentor_id: mentor?.id,
@@ -61,25 +62,12 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
       mentor_name: mentor?.name,
     });
 
-    // Record the session so it shows in both dashboards (no email is sent)
-    sessionService
-      .createSession({
-        mentor_id: mentor.id,
-        mentor_name: mentor.name,
-        mentor_email: mentor.email,
-        mentor_company: mentor.company,
-        booking_method: 'scheduling_link',
-      })
-      .then(() => {
-        setScheduledMentorId(mentor.id);
-        analytics.track(EVENTS.SESSION_SCHEDULED_VIA_LINK, {
-          mentor_id: mentor?.id,
-          mentor_name: mentor?.name,
-        });
-      })
-      .catch((err) => {
-        console.error('Failed to record scheduling-link session:', err);
-      });
+    analytics.track(EVENTS.EXTERNAL_BOOKING_CONFIRMATION_OPENED, {
+      mentor_id: mentor?.id,
+      mentor_name: mentor?.name,
+    });
+
+    setIsConfirmModalOpen(true);
   };
 
   if (!mentor) return null;
@@ -190,7 +178,7 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
                           {externalScheduled && (
                             <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-green-700">
                               <CheckCircleIcon className="h-4 w-4" />
-                              Sessão registrada em Minhas Sessões. Conclua a marcação na aba que abrimos.
+                              Sessão registrada em Minhas Sessões.
                             </p>
                           )}
                         </div>
@@ -275,6 +263,14 @@ export default function MentorDrawer({ mentor, isOpen, onClose }) {
         mentor={mentor}
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
+      />
+
+      {/* Scheduling-link confirmation Modal */}
+      <ConfirmExternalBookingModal
+        mentor={mentor}
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirmed={() => setScheduledMentorId(mentor.id)}
       />
     </Dialog>
   );
