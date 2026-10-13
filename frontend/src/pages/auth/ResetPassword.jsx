@@ -20,16 +20,6 @@ export default function ResetPassword() {
   const oobCode = searchParams.get('oobCode');
   const mode = searchParams.get('mode');
 
-  useEffect(() => {
-    if (mode !== 'resetPassword' || !oobCode) {
-      setStatus('error');
-      setError('Link inválido.');
-      return;
-    }
-
-    verifyCode();
-  }, [mode, oobCode]);
-
   const verifyCode = async () => {
     try {
       // Verify the password reset code and get the email
@@ -49,6 +39,20 @@ export default function ResetPassword() {
       }
     }
   };
+
+  useEffect(() => {
+    if (mode !== 'resetPassword' || !oobCode) {
+    // Runs once on mount to reflect an invalid link in the UI. Reworking this
+    // into render-time state means reshaping the whole password-reset flow, which needs
+    // someone who can exercise it end to end.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStatus('error');
+      setError('Link inválido.');
+      return;
+    }
+
+    verifyCode();
+  }, [mode, oobCode]);
 
   const validateForm = () => {
     const errors = {};

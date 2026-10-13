@@ -59,7 +59,7 @@ export default function FirebaseActionHandler() {
               navigate(url.pathname + url.search, { replace: true });
               return;
             }
-          } catch (e) {
+          } catch {
             // Invalid URL, fall through to default
           }
         }

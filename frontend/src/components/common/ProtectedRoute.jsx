@@ -11,7 +11,7 @@ import LoadingSpinner from './LoadingSpinner';
  * @param {string[]} props.allowedRoles - Optional array of allowed roles ['estudante', 'mentor']
  */
 export default function ProtectedRoute({ children, allowedRoles = [] }) {
-  const { isAuthenticated, userProfile, loading, needsRoleSelection, firebaseUser } = useAuth();
+  const { userProfile, loading, needsRoleSelection, firebaseUser } = useAuth();
   const location = useLocation();
 
   // Still checking auth state

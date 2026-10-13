@@ -42,7 +42,7 @@ function MeetingStatusBadge({ status }) {
   );
 }
 
-function FeedbackCard({ feedback, type }) {
+function FeedbackCard({ feedback }) {
   if (!feedback) {
     return (
       <div className="text-sm text-gray-500 italic">
