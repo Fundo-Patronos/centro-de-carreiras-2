@@ -1,0 +1,45 @@
+# Patronos Dev — "the run finished" callback.
+#
+# Tells internal-tools that a Patronos Dev run completed, so its pull request
+# opens right away instead of whenever a member next opens the tool. Same file
+# in every allowlisted repo (no per-repo part).
+#
+# It must be a SEPARATE workflow: a step inside the coding run cannot report
+# the run as finished, because the run is still in progress while its own
+# steps execute. `workflow_run: completed` fires after it really is.
+#
+# SECURITY: no secrets, no checkout, no repository access. It holds only an
+# OIDC token minted for internal-tools' URL, which the app verifies (issuer,
+# audience, this repo, this workflow file) before doing anything — and even
+# then all it does is re-read the run from GitHub. See
+# src/lib/patronosDev/notify.ts in internal-tools.
+
+name: Patronos Dev · aviso
+
+on:
+  workflow_run:
+    workflows: ["Patronos Dev"]
+    types: [completed]
+
+permissions:
+  id-token: write
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Notify internal-tools
+        env:
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          APP_URL: ${{ vars.PATRONOS_DEV_APP_URL || 'https://internal.patronos.org' }}
+        run: |
+          set -euo pipefail
+          aud=$(jq -rn --arg a "$APP_URL" '$a|@uri')
+          token=$(curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$aud" | jq -r .value)
+          # Best effort: if this fails, the next visit to Patronos Dev still
+          # reconciles the task, exactly as before this workflow existed.
+          curl -sS --max-time 150 -X POST "$APP_URL/api/patronos-dev/runs" \
+            -H "Authorization: Bearer $token" -H "Content-Type: application/json" \
+            -d "{\"run_id\": $RUN_ID}" -w '\nHTTP %{http_code}\n' || true
