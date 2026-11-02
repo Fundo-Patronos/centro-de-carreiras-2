@@ -85,12 +85,16 @@ class SessionResendEmail(BaseModel):
 class SessionFeedback(BaseModel):
     """Data for submitting session feedback."""
 
-    rating: int  # 1-5 stars
+    meeting_status: Literal["happened", "scheduled", "not_happened"] = "happened"
+    no_meeting_reason: Optional[str] = None
+    rating: Optional[int] = Field(None, ge=1, le=5)
     comments: str = ""
 
 
 class SessionCompleteWithFeedback(BaseModel):
     """Data for completing a session with feedback in one operation."""
 
-    rating: int = Field(..., ge=1, le=5)  # Required 1-5 stars
+    meeting_status: Literal["happened", "scheduled", "not_happened"] = "happened"
+    no_meeting_reason: Optional[str] = None
+    rating: Optional[int] = Field(None, ge=1, le=5)
     comments: str = ""
