@@ -5,6 +5,12 @@ import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import sessionService from '../../services/sessionService';
 import analytics, { EVENTS } from '../../services/analytics';
 
+const MEETING_STATUS_OPTIONS = [
+  { value: 'happened', label: 'Aconteceu' },
+  { value: 'scheduled', label: 'Marcado' },
+  { value: 'not_happened', label: 'Não aconteceu' },
+];
+
 function StarRating({ rating, onRatingChange, disabled }) {
   const [hoverRating, setHoverRating] = useState(0);
 
@@ -35,6 +41,8 @@ function StarRating({ rating, onRatingChange, disabled }) {
 }
 
 export default function FeedbackModal({ session, viewerRole, isOpen, onClose, onSuccess, mode = 'feedback' }) {
+  const [meetingStatus, setMeetingStatus] = useState('');
+  const [noMeetingReason, setNoMeetingReason] = useState('');
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +52,8 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
+      setMeetingStatus('');
+      setNoMeetingReason('');
       setRating(0);
       setComments('');
       setSubmitState('idle');
@@ -58,26 +68,41 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (rating === 0) {
+    if (!meetingStatus) {
+      setError('Por favor, selecione o que aconteceu com esta sessão.');
+      return;
+    }
+
+    if (meetingStatus === 'happened' && rating === 0) {
       setError('Por favor, selecione uma avaliação.');
+      return;
+    }
+
+    if (meetingStatus === 'not_happened' && !noMeetingReason.trim()) {
+      setError('Por favor, explique por que o encontro não aconteceu.');
       return;
     }
 
     setIsSubmitting(true);
     setError('');
 
+    const payload = {
+      meeting_status: meetingStatus,
+      rating: meetingStatus === 'happened' ? rating : null,
+      no_meeting_reason: meetingStatus === 'not_happened' ? noMeetingReason.trim() : null,
+      comments: comments.trim(),
+    };
+
     try {
       let result;
 
       if (mode === 'complete') {
         // Complete mode: mark session as completed + submit feedback
-        result = await sessionService.completeSessionWithFeedback(session.id, {
-          rating,
-          comments: comments.trim(),
-        });
+        result = await sessionService.completeSessionWithFeedback(session.id, payload);
 
         analytics.track(EVENTS.SESSION_COMPLETED_WITH_FEEDBACK, {
           session_id: session.id,
+          meeting_status: meetingStatus,
           rating,
           has_comments: Boolean(comments.trim()),
           user_role: viewerRole,
@@ -90,13 +115,11 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
         }
       } else {
         // Feedback mode: just submit feedback (session already completed)
-        result = await sessionService.submitFeedback(session.id, {
-          rating,
-          comments: comments.trim(),
-        });
+        result = await sessionService.submitFeedback(session.id, payload);
 
         analytics.track(EVENTS.SESSION_FEEDBACK_SUBMITTED, {
           session_id: session.id,
+          meeting_status: meetingStatus,
           rating,
           has_comments: Boolean(comments.trim()),
           user_role: viewerRole,
@@ -127,6 +150,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
       analytics.track(EVENTS.FEEDBACK_MODAL_CLOSED, {
         session_id: session?.id,
         submit_state: submitState,
+        meeting_status: meetingStatus,
         user_role: viewerRole,
       });
       setSubmitState('idle');
@@ -135,6 +159,12 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
   };
 
   if (!session) return null;
+
+  const isCompleteHappened = mode === 'complete' && meetingStatus === 'happened';
+  const isFormValid =
+    Boolean(meetingStatus) &&
+    (meetingStatus !== 'happened' || rating > 0) &&
+    (meetingStatus !== 'not_happened' || Boolean(noMeetingReason.trim()));
 
   return (
     <Dialog open={isOpen} onClose={handleClose} className="relative z-[60]">
@@ -151,7 +181,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
             <div className="border-b border-gray-200 px-6 py-4">
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-lg font-semibold text-gray-900">
-                  {mode === 'complete' ? 'Marcar Sessão como Concluída' : 'Avaliar Sessão'}
+                  {mode === 'complete' ? 'O que aconteceu nesta sessão?' : 'Avaliar Sessão'}
                 </DialogTitle>
                 <button
                   type="button"
@@ -172,10 +202,18 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                   <CheckCircleIcon className="h-10 w-10 text-green-600" />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-gray-900">
-                  {mode === 'complete' ? 'Sessão concluída!' : 'Feedback enviado!'}
+                  {meetingStatus === 'scheduled' || meetingStatus === 'not_happened'
+                    ? 'Resposta registrada!'
+                    : mode === 'complete'
+                      ? 'Sessão concluída!'
+                      : 'Feedback enviado!'}
                 </h3>
                 <p className="mt-2 text-sm text-gray-600">
-                  {mode === 'complete' ? (
+                  {meetingStatus === 'scheduled' ? (
+                    <>Sessão marcada como agendada. Quando o encontro acontecer, você pode registrar de novo por aqui.</>
+                  ) : meetingStatus === 'not_happened' ? (
+                    <>Obrigado por avisar que o encontro não aconteceu. A equipe Patronos vai acompanhar este caso.</>
+                  ) : mode === 'complete' ? (
                     <>
                       Sessão marcada como concluída! Um email foi enviado para <strong>{otherPersonName}</strong> solicitando a avaliação.
                     </>
@@ -217,7 +255,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                   {mode === 'complete' && (
                     <div className="mb-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
                       <p>
-                        Ao marcar como concluída, sua avaliação será enviada e <strong>{otherPersonName}</strong> receberá um email para também avaliar a sessão.
+                        Se o encontro aconteceu, a sessão será marcada como concluída e <strong>{otherPersonName}</strong> receberá um e-mail para avaliar. Nas outras opções, apenas a sua resposta é registrada.
                       </p>
                     </div>
                   )}
@@ -230,43 +268,95 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                     </div>
                   )}
 
-                  {/* Rating field */}
+                  {/* Meeting status field */}
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Como foi sua experiência?
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      O que aconteceu com esta sessão?
                     </label>
-                    <div className="flex justify-center">
-                      <StarRating
-                        rating={rating}
-                        onRatingChange={setRating}
-                        disabled={isSubmitting}
-                      />
+                    <div className="space-y-2">
+                      {MEETING_STATUS_OPTIONS.map((option) => (
+                        <label
+                          key={option.value}
+                          className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                            meetingStatus === option.value
+                              ? 'border-patronos-accent bg-patronos-accent/5'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="meetingStatus"
+                            value={option.value}
+                            checked={meetingStatus === option.value}
+                            onChange={(e) => setMeetingStatus(e.target.value)}
+                            disabled={isSubmitting}
+                            className="h-4 w-4 text-patronos-accent focus:ring-patronos-accent"
+                          />
+                          <span className="ml-3 text-sm text-gray-700">{option.label}</span>
+                        </label>
+                      ))}
                     </div>
-                    <p className="mt-2 text-center text-sm text-gray-500">
-                      {rating === 0 && 'Selecione uma nota de 1 a 5 estrelas'}
-                      {rating === 1 && 'Muito ruim'}
-                      {rating === 2 && 'Ruim'}
-                      {rating === 3 && 'Regular'}
-                      {rating === 4 && 'Bom'}
-                      {rating === 5 && 'Excelente'}
-                    </p>
                   </div>
 
+                  {/* Rating field (only if the meeting happened) */}
+                  {meetingStatus === 'happened' && (
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Como foi sua experiência?
+                      </label>
+                      <div className="flex justify-center">
+                        <StarRating
+                          rating={rating}
+                          onRatingChange={setRating}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <p className="mt-2 text-center text-sm text-gray-500">
+                        {rating === 0 && 'Selecione uma nota de 1 a 5 estrelas'}
+                        {rating === 1 && 'Muito ruim'}
+                        {rating === 2 && 'Ruim'}
+                        {rating === 3 && 'Regular'}
+                        {rating === 4 && 'Bom'}
+                        {rating === 5 && 'Excelente'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Reason field (only if the meeting did not happen) */}
+                  {meetingStatus === 'not_happened' && (
+                    <div className="mb-6">
+                      <label htmlFor="feedback-no-meeting-reason" className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Por que o encontro não aconteceu? *
+                      </label>
+                      <textarea
+                        id="feedback-no-meeting-reason"
+                        rows={3}
+                        value={noMeetingReason}
+                        onChange={(e) => setNoMeetingReason(e.target.value)}
+                        disabled={isSubmitting}
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-patronos-accent focus:ring-patronos-accent text-sm resize-none disabled:bg-gray-50 disabled:text-gray-500"
+                        placeholder="Explique brevemente..."
+                      />
+                    </div>
+                  )}
+
                   {/* Comments field */}
-                  <div>
-                    <label htmlFor="feedback-comments" className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Comentários (opcional)
-                    </label>
-                    <textarea
-                      id="feedback-comments"
-                      rows={4}
-                      value={comments}
-                      onChange={(e) => setComments(e.target.value)}
-                      disabled={isSubmitting}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-patronos-accent focus:ring-patronos-accent text-sm resize-none disabled:bg-gray-50 disabled:text-gray-500"
-                      placeholder="Conte-nos mais sobre sua experiência..."
-                    />
-                  </div>
+                  {meetingStatus && (
+                    <div>
+                      <label htmlFor="feedback-comments" className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Comentários (opcional)
+                      </label>
+                      <textarea
+                        id="feedback-comments"
+                        rows={4}
+                        value={comments}
+                        onChange={(e) => setComments(e.target.value)}
+                        disabled={isSubmitting}
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-patronos-accent focus:ring-patronos-accent text-sm resize-none disabled:bg-gray-50 disabled:text-gray-500"
+                        placeholder="Conte-nos mais sobre sua experiência..."
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Footer */}
@@ -281,7 +371,7 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting || rating === 0}
+                    disabled={isSubmitting || !isFormValid}
                     className="inline-flex items-center justify-center rounded-lg bg-patronos-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-patronos-orange/90 disabled:opacity-50"
                   >
                     {isSubmitting ? (
@@ -290,10 +380,10 @@ export default function FeedbackModal({ session, viewerRole, isOpen, onClose, on
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
-                        {mode === 'complete' ? 'Concluindo...' : 'Enviando...'}
+                        {isCompleteHappened ? 'Concluindo...' : 'Enviando...'}
                       </>
                     ) : (
-                      mode === 'complete' ? 'Concluir Sessão' : 'Enviar Feedback'
+                      isCompleteHappened ? 'Concluir Sessão' : 'Enviar Feedback'
                     )}
                   </button>
                 </div>
