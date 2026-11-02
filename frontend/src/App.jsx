@@ -63,6 +63,7 @@ function AuthenticatedRoutes() {
         {/* Public routes */}
         <Route path="/" element={<Navigate to="/auth" replace />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth/mentor" element={<AuthPage initialMode="signup" initialRole="mentor" />} />
         <Route path="/auth/verify" element={<VerifyEmail />} />
         <Route path="/auth/verify-email" element={<VerifyEmailToken />} />
         <Route path="/auth/action" element={<ResetPassword />} />
