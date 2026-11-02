@@ -64,7 +64,9 @@ export const sessionService = {
    * Submit feedback for a session
    * @param {string} sessionId - Session ID
    * @param {Object} feedback - Feedback data
-   * @param {number} feedback.rating - Rating 1-5
+   * @param {'happened'|'scheduled'|'not_happened'} feedback.meeting_status - What happened with the meeting
+   * @param {number|null} feedback.rating - Rating 1-5, only when the meeting happened
+   * @param {string|null} feedback.no_meeting_reason - Reason the meeting did not happen
    * @param {string} [feedback.comments] - Optional comments
    * @returns {Promise<Object>} Result with success flag
    */
@@ -79,7 +81,9 @@ export const sessionService = {
    * Also sends email notification to the other party.
    * @param {string} sessionId - Session ID
    * @param {Object} data - Completion data
-   * @param {number} data.rating - Rating 1-5
+   * @param {'happened'|'scheduled'|'not_happened'} data.meeting_status - What happened with the meeting
+   * @param {number|null} data.rating - Rating 1-5, only when the meeting happened
+   * @param {string|null} data.no_meeting_reason - Reason the meeting did not happen
    * @param {string} [data.comments] - Optional comments
    * @returns {Promise<Object>} Updated session
    */

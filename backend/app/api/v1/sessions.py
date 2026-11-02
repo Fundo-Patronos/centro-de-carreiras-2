@@ -32,6 +32,30 @@ def generate_session_id() -> str:
     return secrets.token_hex(4)
 
 
+def build_session_feedback_doc(
+    session_id: str, is_student: bool, user: UserInDB, data
+) -> tuple[str, dict]:
+    """Build the canonical session_feedback document.
+
+    Mirrors the document shape written by the public email feedback form
+    (``backend/app/api/v1/feedback.py``) so the admin panel can read it.
+    """
+    feedback_id = f"{session_id}_{'student' if is_student else 'mentor'}"
+    return feedback_id, {
+        "id": feedback_id,
+        "session_id": session_id,
+        "feedback_request_id": feedback_id,
+        "respondent_type": "student" if is_student else "mentor",
+        "respondent_email": user.email,
+        "respondent_name": user.displayName,
+        "meeting_status": data.meeting_status,
+        "no_meeting_reason": data.no_meeting_reason if data.meeting_status == "not_happened" else None,
+        "rating": data.rating if data.meeting_status == "happened" else None,
+        "additional_feedback": data.comments,
+        "submitted_at": datetime.utcnow(),
+    }
+
+
 @router.post("", response_model=SessionResponse)
 async def create_session(
     session_data: SessionCreate,
@@ -542,27 +566,27 @@ async def submit_session_feedback(
                 detail="Access denied",
             )
 
-        # Validate rating
-        if feedback.rating < 1 or feedback.rating > 5:
-            raise HTTPException(
-                status_code=400,
-                detail="Rating must be between 1 and 5",
-            )
+        # Validate required fields based on meeting_status
+        if feedback.meeting_status == "happened":
+            if feedback.rating is None or feedback.rating < 1 or feedback.rating > 5:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Avaliação é obrigatória quando o encontro aconteceu",
+                )
+        elif feedback.meeting_status == "not_happened":
+            if not feedback.no_meeting_reason or not feedback.no_meeting_reason.strip():
+                raise HTTPException(
+                    status_code=400,
+                    detail="Motivo é obrigatório quando o encontro não aconteceu",
+                )
 
-        # Store feedback in session_feedback collection
+        # Store feedback in session_feedback collection (canonical document)
         now = datetime.utcnow()
-        feedback_doc = {
-            "session_id": session_id,
-            "user_uid": current_user.uid,
-            "user_email": current_user.email,
-            "user_role": current_user.role,
-            "rating": feedback.rating,
-            "comments": feedback.comments,
-            "created_at": now,
-        }
+        feedback_id, feedback_doc = build_session_feedback_doc(
+            session_id, is_student, current_user, feedback
+        )
 
-        feedback_ref = db.collection("session_feedback")
-        feedback_ref.add(feedback_doc)
+        db.collection("session_feedback").document(feedback_id).set(feedback_doc, merge=True)
 
         # Update feedback submitted flag in session document
         feedback_field = "student_feedback_submitted" if is_student else "mentor_feedback_submitted"
@@ -577,6 +601,7 @@ async def submit_session_feedback(
             event_name=Events.SESSION_FEEDBACK_SUBMITTED,
             properties={
                 "session_id": session_id,
+                "meeting_status": feedback.meeting_status,
                 "rating": feedback.rating,
                 "user_role": current_user.role,
                 "is_student": is_student,
@@ -634,30 +659,62 @@ async def complete_session_with_feedback(
                 detail="Access denied",
             )
 
-        # Validate session is pending (can only complete pending sessions)
-        if session_data["status"] != "pending":
-            raise HTTPException(
-                status_code=400,
-                detail="Apenas sessões pendentes podem ser marcadas como concluídas",
-            )
-
-        # Store feedback in session_feedback collection
-        now = datetime.utcnow()
-        feedback_doc = {
-            "session_id": session_id,
-            "user_uid": current_user.uid,
-            "user_email": current_user.email,
-            "user_role": current_user.role,
-            "rating": data.rating,
-            "comments": data.comments,
-            "created_at": now,
-        }
-
-        feedback_ref = db.collection("session_feedback")
-        feedback_ref.add(feedback_doc)
+        # Validate required fields based on meeting_status
+        if data.meeting_status == "happened":
+            if data.rating is None or data.rating < 1 or data.rating > 5:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Avaliação é obrigatória quando o encontro aconteceu",
+                )
+        elif data.meeting_status == "not_happened":
+            if not data.no_meeting_reason or not data.no_meeting_reason.strip():
+                raise HTTPException(
+                    status_code=400,
+                    detail="Motivo é obrigatório quando o encontro não aconteceu",
+                )
 
         # Determine which feedback flag to set
         feedback_field = "student_feedback_submitted" if is_student else "mentor_feedback_submitted"
+
+        # Only a "happened" meeting completes the session, and only pending
+        # sessions can be completed. Other statuses just record/update the
+        # response so the user can revise it later.
+        if data.meeting_status == "happened":
+            if session_data["status"] != "pending":
+                raise HTTPException(
+                    status_code=400,
+                    detail="Apenas sessões pendentes podem ser marcadas como concluídas",
+                )
+
+        # Store feedback in session_feedback collection (canonical document)
+        now = datetime.utcnow()
+        feedback_id, feedback_doc = build_session_feedback_doc(
+            session_id, is_student, current_user, data
+        )
+        db.collection("session_feedback").document(feedback_id).set(feedback_doc, merge=True)
+
+        if data.meeting_status != "happened":
+            # "scheduled" / "not_happened": keep the session as is.
+            doc_ref.update({"updated_at": now})
+            session_data["updated_at"] = now
+
+            return SessionResponse(
+                id=session_data["id"],
+                student_uid=session_data["student_uid"],
+                student_name=session_data["student_name"],
+                student_email=session_data["student_email"],
+                mentor_id=session_data["mentor_id"],
+                mentor_name=session_data["mentor_name"],
+                mentor_email=session_data["mentor_email"],
+                mentor_company=session_data["mentor_company"],
+                message=session_data["message"],
+                status=session_data["status"],
+                booking_method=session_data.get("booking_method", "email"),
+                created_at=session_data.get("created_at"),
+                updated_at=session_data.get("updated_at"),
+                student_feedback_submitted=session_data.get("student_feedback_submitted", False),
+                mentor_feedback_submitted=session_data.get("mentor_feedback_submitted", False),
+            )
 
         # Update session document: status to completed + feedback flag
         update_data = {
