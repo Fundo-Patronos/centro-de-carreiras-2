@@ -7,7 +7,7 @@ import { verificationService } from '../../services/verificationService';
 import RoleSelector from './RoleSelector';
 import analytics, { EVENTS } from '../../services/analytics';
 
-export default function SignupForm() {
+export default function SignupForm({ initialRole = '' }) {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -15,7 +15,7 @@ export default function SignupForm() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: '',
+    role: initialRole,
     curso: '',
     // Student-specific fields
     ra: '',

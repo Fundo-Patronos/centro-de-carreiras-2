@@ -9,8 +9,8 @@ import RoleModal from '../../components/auth/RoleModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import analytics, { EVENTS } from '../../services/analytics';
 
-export default function AuthPage() {
-  const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'magic'
+export default function AuthPage({ initialMode = 'login', initialRole = '' }) {
+  const [mode, setMode] = useState(initialMode); // 'login' | 'signup' | 'magic'
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
 
@@ -93,7 +93,7 @@ export default function AuthPage() {
           {/* Mode-specific forms */}
           <div className="mt-6">
             {mode === 'login' && <LoginForm />}
-            {mode === 'signup' && <SignupForm />}
+            {mode === 'signup' && <SignupForm initialRole={initialRole} />}
             {mode === 'magic' && <MagicLinkForm />}
           </div>
 
