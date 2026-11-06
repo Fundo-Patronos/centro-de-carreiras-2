@@ -105,13 +105,15 @@ export default function AppLayout() {
             </TransitionChild>
             <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
               {/* Logo */}
-              <div className="flex h-16 shrink-0 items-center gap-x-3">
+              <div className="flex h-24 shrink-0 flex-col items-start justify-center gap-y-1">
                 <img
-                  alt="Patronos"
-                  src="/patronos-logo.svg"
-                  className="h-8 w-auto"
+                  alt="Fundo Patronos"
+                  src="/logo-patronos.svg"
+                  width={403}
+                  height={152}
+                  className="h-12 w-auto"
                 />
-                <span className="text-lg font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-gray-900">
                   Centro de Carreiras
                 </span>
               </div>
@@ -238,13 +240,15 @@ export default function AppLayout() {
       )}>
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
           {/* Logo */}
-          <div className="flex h-16 shrink-0 items-center gap-x-3">
+          <div className="flex h-24 shrink-0 flex-col items-start justify-center gap-y-1">
             <img
-              alt="Patronos"
-              src="/patronos-logo.svg"
-              className="h-8 w-auto"
+              alt="Fundo Patronos"
+              src="/logo-patronos.svg"
+              width={403}
+              height={152}
+              className="h-12 w-auto"
             />
-            <span className="text-lg font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-gray-900">
               Centro de Carreiras
             </span>
           </div>

@@ -61,6 +61,13 @@ export default function AuthPage({ initialMode = 'login', initialRole = '' }) {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       {/* Logo and title */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <img
+          src="/logo-patronos.svg"
+          alt="Fundo Patronos"
+          width={403}
+          height={152}
+          className="mx-auto mb-6 h-20 w-auto"
+        />
         <h1 className="text-center text-3xl font-bold">
           <span className="text-gradient">Centro de Carreiras</span>
         </h1>
