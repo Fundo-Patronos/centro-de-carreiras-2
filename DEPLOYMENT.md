@@ -128,6 +128,29 @@ cp frontend/.env.production.example frontend/.env.production
      --memory 256Mi
    ```
 
+## Firestore Rules and Indexes
+
+`firestore.rules` and `firestore.indexes.json` are **not** deployed by
+`deploy.sh`, Cloud Build, or anything else in this repo. They ship only when
+someone runs the Firebase CLI by hand, so merging a change to either file
+leaves production untouched until this runs:
+
+```bash
+npm i -g firebase-tools          # once
+firebase login                   # once
+firebase deploy --only firestore:rules      # rules
+firebase deploy --only firestore:indexes    # indexes
+```
+
+The project is `centro-carreiras-fire`, set as the default in `.firebaserc`,
+so `--project` is not needed from inside the repo.
+
+**Why this matters.** The rules are the only thing standing between a
+signed-in user and fields the backend trusts — `isAdmin` on a user document
+grants every endpoint behind `get_current_admin`. A rules change that is
+merged but not deployed looks finished and is not. Deploy it in the same
+sitting as the merge.
+
 ## Environment Variables Reference
 
 ### Backend
