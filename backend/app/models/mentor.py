@@ -1,6 +1,6 @@
 """Mentor profile Pydantic models."""
 
-from pydantic import BaseModel, ConfigDict, HttpUrl
+from pydantic import BaseModel, ConfigDict, HttpUrl, field_validator
 from typing import Optional
 
 
@@ -62,6 +62,22 @@ class MentorPublicResponse(BaseModel):
     linkedin: str = ""
     course: str = ""
     schedulingLink: str = ""
+
+    @field_validator(
+        "name", "email", "title", "company", "bio",
+        "linkedin", "course", "schedulingLink",
+        mode="before",
+    )
+    @classmethod
+    def _none_to_empty_str(cls, value):
+        """Treat null values stored in Firestore as empty strings."""
+        return "" if value is None else value
+
+    @field_validator("tags", "expertise", mode="before")
+    @classmethod
+    def _none_to_empty_list(cls, value):
+        """Treat null lists stored in Firestore as empty lists."""
+        return [] if value is None else value
 
 
 class MentorListResponse(BaseModel):
