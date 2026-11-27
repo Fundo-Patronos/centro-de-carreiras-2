@@ -33,13 +33,17 @@ python -m scripts.set_admin            # Scripts import from `app.*`, so cwd mat
 ```
 
 ### Deployment
-```bash
-./deploy.sh all       # Deploy both services
-./deploy.sh backend   # Deploy backend only
-./deploy.sh frontend  # Deploy frontend only
-```
 
-CI/CD: GitHub repository connected to Cloud Run via Developer Connect. Pushes to `main` auto-deploy.
+Merging to `main` deploys: Cloud Build triggers `deploy-backend` and
+`deploy-frontend` (project `centro-de-carreiras-v2`) rebuild whichever half
+the merge touched. There is no manual deploy step. See `DEPLOYMENT.md`.
+
+**Every pull request gets a preview** — its own copy of the app at
+`https://pr-<number>---preview-web-mp4p4cay4a-rj.a.run.app`, in the separate
+project `centro-carreiras-staging` with fictional data and its own Firebase
+Auth. See `previews/README.md`. Never point a preview at
+`centro-carreiras-fire` or give it a production secret: it runs code nobody
+has reviewed yet.
 
 ## Architecture
 
@@ -48,10 +52,10 @@ Users → Cloud Run (Frontend: nginx + React SPA)
              ↓
         Cloud Run (Backend: FastAPI)
              ↓
-     ┌───────┼───────┐
-     ↓       ↓       ↓
-Firebase  Airtable  Resend
-Auth +    (legacy)  (Email)
+     ┌───────┴───────┐
+     ↓               ↓
+Firebase          Resend
+Auth +            (Email)
 Firestore
 ```
 
@@ -61,8 +65,6 @@ Firestore
 - **Database**: Firestore (user profiles, sessions, feedback)
 - **Analytics**: Mixpanel (frontend + backend)
 - **Email**: Resend
-
-**Airtable status**: mentor data was migrated to Firestore via `scripts/migrate_mentors.py` and Airtable is now read-only/legacy reference. Do not introduce new Airtable writes.
 
 ### User Roles
 - `estudante` - Unicamp students seeking mentorship
@@ -112,7 +114,6 @@ backend/
 │   └── models/                     # Pydantic models
 └── scripts/
     ├── import_users.py             # Batch user import from CSV
-    ├── migrate_mentors.py          # Airtable → Firestore migration
     └── set_admin.py                # Grant admin privileges
 ```
 
@@ -171,9 +172,9 @@ The canonical event lexicon lives in `docs/MIXPANEL_EVENTS.md`. Reuse existing e
 
 Backend secrets are stored in Google Cloud Secret Manager and mounted at deploy time. Local development uses `.env` files (see `.env.production.example`).
 
-Key backend vars: `FRONTEND_URL`, `FIREBASE_PROJECT_ID`, `AIRTABLE_*`, `RESEND_API_KEY`, `MIXPANEL_TOKEN`
+Key backend vars: `FRONTEND_URL`, `FIREBASE_PROJECT_ID`, `RESEND_API_KEY`, `MIXPANEL_TOKEN`
 
-Key frontend vars: `VITE_API_URL`, `VITE_FIREBASE_*`, `VITE_MIXPANEL_TOKEN`
+Key frontend vars: `VITE_API_URL`, `VITE_FIREBASE_*`, `VITE_MIXPANEL_TOKEN`, `VITE_PREVIEW` (previews only)
 
 ## Auto-Approval Rules
 

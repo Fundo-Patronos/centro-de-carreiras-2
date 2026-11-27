@@ -4,7 +4,7 @@ export const sessionService = {
   /**
    * Create a new session request
    * @param {Object} data - Session data
-   * @param {string} data.mentor_id - Airtable record ID
+   * @param {string} data.mentor_id - The mentor's Firestore user ID
    * @param {string} data.mentor_name - Mentor's name
    * @param {string} data.mentor_email - Mentor's email
    * @param {string} data.mentor_company - Mentor's company

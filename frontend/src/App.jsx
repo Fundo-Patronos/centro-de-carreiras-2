@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
+import PreviewBadge from './components/layout/PreviewBadge';
 
 // Auth pages
 import AuthPage from './pages/auth/AuthPage';
@@ -51,6 +52,7 @@ export default function App() {
           {/* Routes that need AuthProvider */}
           <Route path="/*" element={<AuthenticatedRoutes />} />
         </Routes>
+        <PreviewBadge />
       </BrowserRouter>
     </ErrorBoundary>
   );
