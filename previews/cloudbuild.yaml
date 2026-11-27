@@ -1,0 +1,150 @@
+# Pull-request previews of Centro de Carreiras.
+#
+# NOT read from this file at build time. The Cloud Build trigger `preview`
+# (project centro-de-carreiras-v2) carries an INLINE copy of it, so a pull
+# request cannot change how its own preview is built. Editing this file
+# changes nothing until someone re-applies it — see previews/README.md.
+#
+# Every pull request to main gets both services built from its head commit
+# and deployed, with no traffic, as tag `pr-<number>` of the services in the
+# separate project `centro-carreiras-staging`:
+#
+#   https://pr-<number>---preview-web-mp4p4cay4a-rj.a.run.app   (the app)
+#   https://pr-<number>---preview-api-mp4p4cay4a-rj.a.run.app   (its API)
+#
+# That project holds fictional data only and its own Firebase Auth. The
+# preview runs code nobody has reviewed yet, so it gets no production
+# credential: no Firebase service account for centro-carreiras-fire, no
+# Resend key (it sends no email), no Mixpanel token.
+
+substitutions:
+  _STAGING: centro-carreiras-staging
+  _REGION: southamerica-east1
+  _HASH: mp4p4cay4a-rj
+  _REPO: https://github.com/Fundo-Patronos/centro-de-carreiras-2
+  _IMAGES: southamerica-east1-docker.pkg.dev/centro-carreiras-staging/previews
+  _KEEP_TAGS: '30'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  substitutionOption: ALLOW_LOOSE
+
+timeout: 1500s
+
+steps:
+  # A pull request from a fork must never reach the staging project: the repo
+  # is public, and the trigger builds without waiting for a comment.
+  - id: guard
+    name: bash
+    script: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      head="${HEAD_REPO_URL%.git}"
+      if [ "$head" != "$EXPECTED_REPO" ]; then
+        echo "Refusing to build a preview for '$head': only branches of $EXPECTED_REPO get one."
+        exit 1
+      fi
+      case "$PR_NUMBER" in ''|*[!0-9]*) echo "Not a pull request number: '$PR_NUMBER'"; exit 1;; esac
+    env:
+      - HEAD_REPO_URL=$_HEAD_REPO_URL
+      - EXPECTED_REPO=$_REPO
+      - PR_NUMBER=$_PR_NUMBER
+
+  - id: build-api
+    name: gcr.io/cloud-builders/docker
+    waitFor: [guard]
+    args: [build, -t, '$_IMAGES/api:$COMMIT_SHA', backend]
+
+  - id: push-api
+    name: gcr.io/cloud-builders/docker
+    waitFor: [build-api]
+    args: [push, '$_IMAGES/api:$COMMIT_SHA']
+
+  - id: deploy-api
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    waitFor: [push-api]
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - preview-api
+      - --project=$_STAGING
+      - --region=$_REGION
+      - --image=$_IMAGES/api:$COMMIT_SHA
+      - --service-account=preview-api@$_STAGING.iam.gserviceaccount.com
+      - --no-traffic
+      - --tag=pr-$_PR_NUMBER
+      - --max-instances=2
+      - --memory=512Mi
+      # `^@^` switches the list separator so FRONTEND_URL could hold commas.
+      - >-
+        --set-env-vars=^@^FRONTEND_URL=https://pr-$_PR_NUMBER---preview-web-$_HASH.a.run.app@FIREBASE_PROJECT_ID=$_STAGING@EMAIL_ADMIN_CC=@EMAIL_ADMIN_BCC=@APP_NAME=Centro de Carreiras API (prévia)
+      - --clear-secrets
+      - --quiet
+
+  - id: build-web
+    name: gcr.io/cloud-builders/docker
+    waitFor: [guard]
+    args:
+      - build
+      - -t
+      - '$_IMAGES/web:$COMMIT_SHA'
+      - --build-arg=VITE_API_URL=https://pr-$_PR_NUMBER---preview-api-$_HASH.a.run.app/api/v1
+      # Public client identifiers of the staging Firebase project.
+      - --build-arg=VITE_FIREBASE_API_KEY=AIzaSyAGHYkLlH6tXE005bpDL_fsH7PsiCHTv8g
+      - --build-arg=VITE_FIREBASE_AUTH_DOMAIN=$_STAGING.firebaseapp.com
+      - --build-arg=VITE_FIREBASE_PROJECT_ID=$_STAGING
+      - --build-arg=VITE_FIREBASE_STORAGE_BUCKET=$_STAGING.firebasestorage.app
+      - --build-arg=VITE_FIREBASE_MESSAGING_SENDER_ID=221430524539
+      - --build-arg=VITE_FIREBASE_APP_ID=1:221430524539:web:9d87c14130fae263d290de
+      - --build-arg=VITE_MIXPANEL_TOKEN=
+      - --build-arg=VITE_PREVIEW=1
+      - frontend
+
+  - id: push-web
+    name: gcr.io/cloud-builders/docker
+    waitFor: [build-web]
+    args: [push, '$_IMAGES/web:$COMMIT_SHA']
+
+  - id: deploy-web
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    waitFor: [push-web, deploy-api]
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - preview-web
+      - --project=$_STAGING
+      - --region=$_REGION
+      - --image=$_IMAGES/web:$COMMIT_SHA
+      - --service-account=preview-web@$_STAGING.iam.gserviceaccount.com
+      - --no-traffic
+      - --tag=pr-$_PR_NUMBER
+      - --max-instances=2
+      - --memory=256Mi
+      - --quiet
+
+  # Each pull request leaves a tag behind. Keep the newest few so the service
+  # never grows without bound; a closed PR's preview simply stops resolving.
+  # allowFailure: housekeeping must never turn a working preview red.
+  - id: prune-tags
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    waitFor: [deploy-web]
+    allowFailure: true
+    script: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      for svc in preview-api preview-web; do
+        old=$(gcloud run services describe "$svc" --project="$STAGING" --region="$REGION" \
+                --format='value(status.traffic[].tag)' \
+              | tr ';' '\n' | grep -E '^pr-[0-9]+$' | sort -t- -k2,2 -n -r \
+              | tail -n +"$((KEEP + 1))" | paste -sd, - || true)
+        if [ -n "$old" ]; then
+          echo "$svc: removing $old"
+          gcloud run services update-traffic "$svc" --project="$STAGING" --region="$REGION" --remove-tags="$old" --quiet
+        fi
+      done
+    env:
+      - STAGING=$_STAGING
+      - REGION=$_REGION
+      - KEEP=$_KEEP_TAGS
