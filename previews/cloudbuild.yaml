@@ -126,22 +126,21 @@ steps:
 
   # Each pull request leaves a tag behind. Keep the newest few so the service
   # never grows without bound; a closed PR's preview simply stops resolving.
+  # allowFailure: housekeeping must never turn a working preview red.
   - id: prune-tags
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     waitFor: [deploy-web]
+    allowFailure: true
     script: |
       #!/usr/bin/env bash
       set -euo pipefail
       for svc in preview-api preview-web; do
-        old=$(gcloud run services describe "$svc" --project="$STAGING" --region="$REGION" --format=json \
-          | python3 -c '
-      import json, sys
-      keep = int(sys.argv[1])
-      tags = [t for t in json.load(sys.stdin)["status"].get("traffic", []) if t.get("tag", "").startswith("pr-")]
-      tags.sort(key=lambda t: int(t["tag"][3:]), reverse=True)
-      print(",".join(t["tag"] for t in tags[keep:]))
-      ' "$KEEP")
+        old=$(gcloud run services describe "$svc" --project="$STAGING" --region="$REGION" \
+                --format='value(status.traffic[].tag)' \
+              | tr ';' '\n' | grep -E '^pr-[0-9]+$' | sort -t- -k2,2 -n -r \
+              | tail -n +"$((KEEP + 1))" | paste -sd, - || true)
         if [ -n "$old" ]; then
+          echo "$svc: removing $old"
           gcloud run services update-traffic "$svc" --project="$STAGING" --region="$REGION" --remove-tags="$old" --quiet
         fi
       done

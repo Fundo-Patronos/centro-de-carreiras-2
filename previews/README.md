@@ -52,13 +52,14 @@ build that runs it. It also refuses PRs from forks: the repo is public, and
 the trigger builds without waiting for a comment.
 
 **Changing the build therefore takes two steps.** Merge the change to this
-file, then re-apply it:
+file, then re-apply it from `main`:
 
 ```bash
-gcloud builds triggers update github preview \
-  --project centro-de-carreiras-v2 \
-  --inline-config previews/cloudbuild.yaml
+./previews/apply-trigger.sh
 ```
+
+The script deletes the trigger and creates it again under the same name,
+because `gcloud builds triggers update` rejects an inline config.
 
 Each PR leaves a tag (`pr-<number>`) on both services. The build keeps the
 newest 30 and removes the rest, and images are deleted after 14 days.
